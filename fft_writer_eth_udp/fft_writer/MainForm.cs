@@ -191,9 +191,9 @@ namespace fft_writer
 
         void MSG_collector()
         {
-
-           if (RCV[3] == 1) Array.Copy(RCV, BUFFER_1, BUF_N*4);//копируем массив отсчётов в форму обработки 
-           if (RCV[3] == 2) Array.Copy(RCV, BUFFER_2, BUF_N*4);//
+        //    Debug.WriteLine("RCV[0]="+ RCV[0]);
+           if (RCV[0] == 1) Array.Copy(RCV, BUFFER_1, BUF_N*4);//копируем массив отсчётов в форму обработки 
+           if (RCV[0] == 2) Array.Copy(RCV, BUFFER_2, BUF_N*4);//
 
             if (Convert.ToByte(channal_box.Text) == 1) { BUF_convert(BUFFER_1, BUF_N*4); }
             if (Convert.ToByte(channal_box.Text) == 2) { BUF_convert(BUFFER_2, BUF_N*4); }
@@ -863,17 +863,20 @@ namespace fft_writer
             int l = 0;
 
             for (i = 4; i < col; i++)//
-            {             
-                    if (k == 0) data_0_q[l] = Convert.ToInt32(m[i])<<8;
-                    if (k == 1) data_0_q[l] = data_0_q[l] + Convert.ToInt32(m[i]);
+            {  
+                    
+                    if (k == 0) data_0_q[l] = Convert.ToInt32(m[i]);
+                    if (k == 1) data_0_q[l] = data_0_q[l] + (Convert.ToInt32(m[i])<<8);
          
-                    if (k == 2) data_0_i[l] = Convert.ToInt32(m[i]) << 8;
-                    if (k == 3) data_0_i[l] = data_0_i[l] + Convert.ToInt32(m[i]);
+                    if (k == 2) data_0_i[l] = Convert.ToInt32(m[i]);
+                    if (k == 3) data_0_i[l] = data_0_i[l] + (Convert.ToInt32(m[i])<<8);
 
                 if (k != 3) k = k + 1;
                 else
                 {
-                  k = 0;
+               //     Debug.WriteLine("data_0_q={0:X}", data_0_q[l]);
+               //     Debug.WriteLine("data_0_i={0:X}", data_0_i[l]);
+                    k = 0;
                   l = l + 1;
                 }
             }

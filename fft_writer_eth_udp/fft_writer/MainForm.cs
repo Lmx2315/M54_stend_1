@@ -159,7 +159,7 @@ namespace fft_writer
         int FLAG_UDP_RCV = 0;
 
         string COMMAND_FOR_SERVER="HOMEWORLD!!!\n";
-
+        int DATA_size = 0;
         private void Listening()
         {
             byte[] data;
@@ -170,8 +170,8 @@ namespace fft_writer
                 data = _server.Receive(ref _client);
                 if(FLAG_UDP_RCV==0)
                 {
-                    //  receivedMsg = Encoding.ASCII.GetString(data, 0, data.Length);
-                    Array.Copy(data, RCV, data.Length);//копируем массив отсчётов в форму обработки                    
+                      Array.Copy(data, RCV, data.Length);//копируем массив отсчётов в форму обработки 
+                      DATA_size = data.Length;
                       FLAG_UDP_RCV = 1;
                 }
                 sch_packet++;
@@ -191,12 +191,14 @@ namespace fft_writer
 
         void MSG_collector()
         {
-        //    Debug.WriteLine("RCV[0]="+ RCV[0]);
-           if (RCV[0] == 1) Array.Copy(RCV, BUFFER_1, BUF_N*4);//копируем массив отсчётов в форму обработки 
-           if (RCV[0] == 2) Array.Copy(RCV, BUFFER_2, BUF_N*4);//
+     //      Debug.WriteLine("-------------");
+     //      if (RCV[0] == 1) Array.Copy(RCV, BUFFER_1, BUF_N*4);//копируем массив отсчётов в форму обработки 
+     //      if (RCV[0] == 2) Array.Copy(RCV, BUFFER_2, BUF_N*4);//
 
-            if (Convert.ToByte(channal_box.Text) == 1) { BUF_convert(BUFFER_1, BUF_N*4); }
-            if (Convert.ToByte(channal_box.Text) == 2) { BUF_convert(BUFFER_2, BUF_N*4); }
+            Array.Copy(RCV, BUFFER_2, DATA_size);
+
+            if (Convert.ToByte(channal_box.Text) == 1) { BUF_convert(BUFFER_1, DATA_size); }
+            if (Convert.ToByte(channal_box.Text) == 2) { BUF_convert(BUFFER_2, DATA_size); }
 
             work1();
 
@@ -861,10 +863,17 @@ namespace fft_writer
             int i = 0;
             int k = 0;
             int l = 0;
+            int z = 0;
+
+            z= (Convert.ToInt32(m[3])<<24)+ (Convert.ToInt32(m[2]) << 16)+ (Convert.ToInt32(m[1]) << 8)+ (Convert.ToInt32(m[0]) << 0);
+
+            Array.Clear(data_0_i, 0, BUF_N);
+            Array.Clear(data_0_q, 0, BUF_N);
+
+       //     Debug.WriteLine("M[0]={0:X}",z);
 
             for (i = 4; i < col; i++)//
-            {  
-                    
+            {                      
                     if (k == 0) data_0_q[l] = Convert.ToInt32(m[i]);
                     if (k == 1) data_0_q[l] = data_0_q[l] + (Convert.ToInt32(m[i])<<8);
          
@@ -874,8 +883,8 @@ namespace fft_writer
                 if (k != 3) k = k + 1;
                 else
                 {
-               //     Debug.WriteLine("data_0_q={0:X}", data_0_q[l]);
-               //     Debug.WriteLine("data_0_i={0:X}", data_0_i[l]);
+         //           Debug.WriteLine("data_0_q={0:X}", data_0_q[l]);
+         //           Debug.WriteLine("data_0_i={0:X}", data_0_i[l]);
                     k = 0;
                   l = l + 1;
                 }

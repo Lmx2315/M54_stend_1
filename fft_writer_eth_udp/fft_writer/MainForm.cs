@@ -874,11 +874,11 @@ namespace fft_writer
 
             for (i = 4; i < col; i++)//
             {                      
-                    if (k == 0) data_0_q[l] = Convert.ToInt32(m[i]);
-                    if (k == 1) data_0_q[l] = data_0_q[l] + (Convert.ToInt32(m[i])<<8);
+                    if (k == 0) data_0_i[l] = Convert.ToInt32(m[i]);
+                    if (k == 1) data_0_i[l] = data_0_i[l] + (Convert.ToInt32(m[i])<<8);
          
-                    if (k == 2) data_0_i[l] = Convert.ToInt32(m[i]);
-                    if (k == 3) data_0_i[l] = data_0_i[l] + (Convert.ToInt32(m[i])<<8);
+                    if (k == 2) data_0_q[l] = Convert.ToInt32(m[i]);
+                    if (k == 3) data_0_q[l] = data_0_q[l] + (Convert.ToInt32(m[i])<<8);
 
                 if (k != 3) k = k + 1;
                 else

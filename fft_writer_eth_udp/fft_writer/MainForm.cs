@@ -192,10 +192,10 @@ namespace fft_writer
         void MSG_collector()
         {
      //      Debug.WriteLine("-------------");
-     //      if (RCV[0] == 1) Array.Copy(RCV, BUFFER_1, BUF_N*4);//копируем массив отсчётов в форму обработки 
-     //      if (RCV[0] == 2) Array.Copy(RCV, BUFFER_2, BUF_N*4);//
+           if (RCV[0] == 1) Array.Copy(RCV, BUFFER_1, BUF_N*4);//копируем массив отсчётов в форму обработки 
+           if (RCV[0] == 2) Array.Copy(RCV, BUFFER_2, BUF_N*4);//
 
-            Array.Copy(RCV, BUFFER_2, DATA_size);
+       //     Array.Copy(RCV, BUFFER_2, DATA_size);
 
             if (Convert.ToByte(channal_box.Text) == 1) { BUF_convert(BUFFER_1, DATA_size); }
             if (Convert.ToByte(channal_box.Text) == 2) { BUF_convert(BUFFER_2, DATA_size); }

@@ -50,9 +50,10 @@ namespace fft_writer
 
 		}
         //----------ETH------------
-        UdpClient _server = null;
-        IPEndPoint _client = null;
+        UdpClient _server    = null;
+        IPEndPoint _client   = null;
         Thread _listenThread = null;
+        Thread _copyThread   = null;
         private bool _isServerStarted = false;
 
         Class1 rcv_func=new Class1();
@@ -126,8 +127,13 @@ namespace fft_writer
             //_client = new IPEndPoint(IPAddress.Any, 0);
            
             //Start listening.
-            Thread listenThread = new Thread(new ThreadStart(Listening));
-            listenThread.Start();
+            Thread _listenThread = new Thread(new ThreadStart(Listening));//тред приёма данных по UDP
+                   _listenThread.Start();
+
+            //Start copy-ing.
+            Thread _copyThread = new Thread(new ThreadStart(DATA_COPY));//тред копирования данных в буфер обработки
+                   _copyThread.Start();
+            
             //Change state to indicate the server starts.
             _isServerStarted = true;
 
@@ -146,64 +152,95 @@ namespace fft_writer
             try
             {
                 //Stop listening.
-                _listenThread.Join();
-                Debug.WriteLine("Server stops.");
+                _listenThread.Abort();
+               Debug.WriteLine("Server stops.");
                 _server.Close();
                 //Changet state to indicate the server stops.
                 _isServerStarted = false;
+                _copyThread.Abort();
             }
             catch (Exception excp)
-            { }
+            { 
+                Console.WriteLine(excp.Message);               
+            }
         }
 
         int FLAG_UDP_RCV = 0;
-
         string COMMAND_FOR_SERVER="HOMEWORLD!!!\n";
         int DATA_size = 0;
+        byte[] DATA_SW0;//буфер0 приёма данных с шины SW
+        byte[] DATA_SW1;//буфер1 приёма данных с шины SW
+        UInt16 FLAG_BUF_SW = 0;
         private void Listening()
-        {
-            byte[] data;
+        {           
             //Listening loop.
             while (true)
             {
                 //receieve a message form a client.
-                data = _server.Receive(ref _client);
-                if(FLAG_UDP_RCV==0)
+                if (FLAG_BUF_SW == 1)  //тут висим пока не приходят данные
                 {
-                      Array.Copy(data, RCV, data.Length);//копируем массив отсчётов в форму обработки 
-                      DATA_size = data.Length;
-                      FLAG_UDP_RCV = 1;
+                    DATA_SW0    = _server.Receive(ref _client);
+                    FLAG_BUF_SW = 0;
+                } else
+                {
+                    DATA_SW1    = _server.Receive(ref _client);
+                    FLAG_BUF_SW = 1;
                 }
+                FLAG_UDP_RCV = 1;//принят пакет
                 sch_packet++;
 
                 UdpClient client = new UdpClient();
                 client.Connect("127.0.0.1", 666);
 
-                string msg = COMMAND_FOR_SERVER;
-                data = Encoding.UTF8.GetBytes(msg);
+                byte[] data;
+                string       msg = COMMAND_FOR_SERVER;
+                            data = Encoding.UTF8.GetBytes(msg);
                 int number_bytes = client.Send(data, data.Length);
                 client.Close();
             }
         }
-         
-        byte [] BUFFER_1 = new byte[64000];
-        byte [] BUFFER_2 = new byte[64000];
+
+        string FLAG_DATA_NEW;//флаг показывает в каком массиве текущие данные
+        void DATA_COPY ()
+        {
+            while (true)
+            {
+                if (FLAG_UDP_RCV == 1)
+                {
+                 //   
+                    if (FLAG_BUF_SW == 0)
+                    {
+                        Array.Copy(DATA_SW0, RCV, DATA_SW0.Length);//копируем массив отсчётов в форму обработки 
+                        FLAG_DATA_NEW = "0";
+                        DATA_size = DATA_SW0.Length;
+                    }
+                    if (FLAG_BUF_SW == 1)
+                    {
+                        Array.Copy(DATA_SW1, RCV, DATA_SW1.Length);//копируем массив отсчётов в форму обработки
+                        FLAG_DATA_NEW = "1";
+                        DATA_size = DATA_SW1.Length;
+                    }
+                    FLAG_UDP_RCV = 0;
+                }
+            }
+        }
+
+        byte[] BUFFER_1 = new byte[64000];
+        byte[] BUFFER_2 = new byte[64000];
 
         void MSG_collector()
         {
-     //      Debug.WriteLine("-------------");
            if (RCV[0] == 1) Array.Copy(RCV, BUFFER_1, BUF_N*4);//копируем массив отсчётов в форму обработки 
            if (RCV[0] == 2) Array.Copy(RCV, BUFFER_2, BUF_N*4);//
 
-       //     Array.Copy(RCV, BUFFER_2, DATA_size);
-
-            if (Convert.ToByte(channal_box.Text) == 1) { BUF_convert(BUFFER_1, DATA_size); }
-            if (Convert.ToByte(channal_box.Text) == 2) { BUF_convert(BUFFER_2, DATA_size); }
+           if (Convert.ToByte(channal_box.Text) == 1) { BUF_convert(BUFFER_1, DATA_size); }
+           if (Convert.ToByte(channal_box.Text) == 2) { BUF_convert(BUFFER_2, DATA_size); }
 
             work1();
 
             if (flag_NEW_FFT == 1)
             {
+
                 fft_out();
                 flag_NEW_FFT = 0;
             }
@@ -265,14 +302,14 @@ namespace fft_writer
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (FLAG_UDP_RCV==1)
+            if ((FLAG_DATA_NEW =="0")|| (FLAG_DATA_NEW == "1"))
             {
+   //           Debug.WriteLine(FLAG_DATA_NEW);
                 MSG_collector();
-                FLAG_UDP_RCV = 0;
+                FLAG_DATA_NEW = "";
             }            
 
             textBox_sch.Text = Convert.ToString(sch_packet);
-
             sch_packet = 0;
             filtr = 12000 / BUF_N * B_win;
             label8.Text = "полоса фильтра:" + Convert.ToString(filtr) + "кГц";

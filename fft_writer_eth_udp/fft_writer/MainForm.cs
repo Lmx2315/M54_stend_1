@@ -1400,8 +1400,12 @@ namespace fft_writer
            
         }
 
+        private void label7_Click(object sender, EventArgs e)
+        {
 
-        void  Kih_load ()
+        }
+
+        void Kih_load ()
         {
             int i = 0;
             int j = 0;

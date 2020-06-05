@@ -39,8 +39,7 @@ namespace fft_writer
 		
 		void Form1Load(object sender, EventArgs e)
 		{
-			int x, y;
-			
+			int x, y;			
 			
 			Pen pen = new Pen(Color.Black, 3);
 			

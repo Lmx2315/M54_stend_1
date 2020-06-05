@@ -71,3 +71,4 @@ C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\PlotWrap
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\fft_writer.csproj.GenerateResource.cache
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\fft_writer.exe
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\fft_writer.pdb
+C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\fft_writer.csproj.CoreCompileInputs.cache

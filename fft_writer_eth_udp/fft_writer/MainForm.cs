@@ -88,6 +88,7 @@ namespace fft_writer
 	     Plot fig2 = new Plot(100,"Q Input", "Sample", "Вольт","","","","","");
 		 Plot fig3 = new Plot(85,"FFT (dBV)", "кГц", "Mag (dBV)","","","","","");
         
+		
 
         private void MainForm_FormClosing(Object sender, FormClosingEventArgs e)
         {
@@ -256,8 +257,8 @@ namespace fft_writer
            if (Convert.ToByte(channal_box.Text) == 1) { BUF_convert(BUFFER_1, DATA_size); }
            if (Convert.ToByte(channal_box.Text) == 2) { BUF_convert(BUFFER_2, DATA_size); }
 
-            Array.Copy(data_0_i, packet_data_i, BUF_N);//копируем массив отсчётов в форму обработки	
-            Array.Copy(data_0_q, packet_data_q, BUF_N);//копируем массив отсчётов в форму обработки	
+            Array.Copy(data_0_i, packet_data_q, BUF_N);//копируем массив отсчётов в форму обработки	
+            Array.Copy(data_0_q, packet_data_i, BUF_N);//копируем массив отсчётов в форму обработки	
 
             flag_NEW_FFT = 1;//сообщаем форме что пришёл новый массив fft
           //  fft_out();

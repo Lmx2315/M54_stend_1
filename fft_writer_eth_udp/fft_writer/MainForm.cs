@@ -86,8 +86,7 @@ namespace fft_writer
 
          Plot fig1 = new Plot(100,"I Input", "Sample", "Вольт","","","","","");
 	     Plot fig2 = new Plot(100,"Q Input", "Sample", "Вольт","","","","","");
-		 Plot fig3 = new Plot(85,"FFT (dBV)", "кГц", "Mag (dBV)","","","","","");
-        
+		 Plot fig3 = new Plot(100,"FFT (dBV)", "кГц", "Mag (dBV)","","","","","");        
 		
 
         private void MainForm_FormClosing(Object sender, FormClosingEventArgs e)
@@ -107,7 +106,10 @@ namespace fft_writer
                 e.Cancel = true;
             }
 
-          if (_isServerStarted)   _server.Close();
+            if (_listenThread!=null) _listenThread.Abort();
+            if (_copyThread!=null) _copyThread.Abort();
+            if (_fftThread!=null) _fftThread.Abort();
+            if (_isServerStarted)   _server.Close();
             //Changet state to indicate the server stops.
             _isServerStarted = false;
         }

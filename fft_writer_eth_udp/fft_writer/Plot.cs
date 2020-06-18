@@ -59,8 +59,7 @@ namespace PlotWrapper
         }
 
         private void Plot_Load(object sender, EventArgs e)
-        {
-            
+        {            
             // Add the titles
             chart1.Titles["Title"].Text = mTitle;
             this.Text = mTitle;
@@ -69,6 +68,8 @@ namespace PlotWrapper
             chart1.ChartAreas["ChartArea1"].AxisX.Minimum = -3125;
             chart1.ChartAreas["ChartArea1"].AxisX.Maximum =  3125;
             chart1.ChartAreas["ChartArea1"].AxisY.Maximum = mMax;
+            chart1.ChartAreas[0].AxisY.Interval = 10;
+            chart1.ChartAreas[0].AxisX.Interval = 250;
 
             chart1.Titles["DB0"].Text = mDB0;
             chart1.Titles["DB1"].Text = mDB1;
@@ -79,8 +80,7 @@ namespace PlotWrapper
             // Enable zooming
             chart1.ChartAreas[0].CursorX.IsUserSelectionEnabled = true;
             chart1.ChartAreas[0].CursorY.IsUserSelectionEnabled = true;
-
-         
+           
         }
 
         // Line chart

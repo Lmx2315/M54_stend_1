@@ -64,7 +64,6 @@ C:\Work\Project_M54\CSHARP_stend\fft_writer_eth_udp\fft_writer\obj\Debug\fft_wri
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\bin\Debug\fft_writer.exe.config
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\bin\Debug\fft_writer.exe
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\bin\Debug\fft_writer.pdb
-C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\fft_writer.csprojAssemblyReference.cache
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\fft_writer.Form1.resources
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\fft_writer.MainForm.resources
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\PlotWrapper.Plot.resources
@@ -72,3 +71,4 @@ C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\fft_writ
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\fft_writer.exe
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\fft_writer.pdb
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\fft_writer.csproj.CoreCompileInputs.cache
+C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\fft_writer.csprojAssemblyReference.cache

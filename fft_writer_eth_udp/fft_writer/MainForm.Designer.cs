@@ -134,6 +134,13 @@ namespace fft_writer
             this.button_send_freq_com2 = new System.Windows.Forms.Button();
             this.label37 = new System.Windows.Forms.Label();
             this.textBox_com2 = new System.Windows.Forms.TextBox();
+            this.timer4 = new System.Windows.Forms.Timer(this.components);
+            this.textBox_Level_in = new System.Windows.Forms.TextBox();
+            this.label33 = new System.Windows.Forms.Label();
+            this.label34 = new System.Windows.Forms.Label();
+            this.textBox_Ku = new System.Windows.Forms.TextBox();
+            this.label38 = new System.Windows.Forms.Label();
+            this.label39 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // my_port_box
@@ -537,8 +544,9 @@ namespace fft_writer
             this.textBox_com_port.Name = "textBox_com_port";
             this.textBox_com_port.Size = new System.Drawing.Size(99, 22);
             this.textBox_com_port.TabIndex = 39;
-            this.textBox_com_port.Text = "COM3";
+            this.textBox_com_port.Text = "COM5";
             this.textBox_com_port.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.textBox_com_port.TextChanged += new System.EventHandler(this.textBox_com_port_TextChanged);
             // 
             // btn_com_open
             // 
@@ -619,10 +627,10 @@ namespace fft_writer
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(748, 341);
+            this.richTextBox1.Location = new System.Drawing.Point(706, 222);
             this.richTextBox1.Margin = new System.Windows.Forms.Padding(4);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(159, 136);
+            this.richTextBox1.Size = new System.Drawing.Size(198, 293);
             this.richTextBox1.TabIndex = 48;
             this.richTextBox1.Text = "";
             this.richTextBox1.TextChanged += new System.EventHandler(this.richTextBox1_TextChanged);
@@ -850,14 +858,15 @@ namespace fft_writer
             // label_test
             // 
             this.label_test.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label_test.Location = new System.Drawing.Point(172, 319);
+            this.label_test.Location = new System.Drawing.Point(139, 209);
             this.label_test.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_test.Name = "label_test";
-            this.label_test.Size = new System.Drawing.Size(339, 92);
+            this.label_test.Size = new System.Drawing.Size(249, 57);
             this.label_test.TabIndex = 70;
             this.label_test.Text = "режим ТЕСТ";
             this.label_test.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.label_test.Visible = false;
+            this.label_test.Click += new System.EventHandler(this.label_test_Click);
             // 
             // textBox_error_ach
             // 
@@ -908,6 +917,7 @@ namespace fft_writer
             this.label35.Size = new System.Drawing.Size(23, 16);
             this.label35.TabIndex = 81;
             this.label35.Text = "Гц";
+            this.label35.Visible = false;
             // 
             // label36
             // 
@@ -918,6 +928,7 @@ namespace fft_writer
             this.label36.Size = new System.Drawing.Size(36, 16);
             this.label36.TabIndex = 80;
             this.label36.Text = "Freq";
+            this.label36.Visible = false;
             // 
             // textBox_freq_com2
             // 
@@ -928,6 +939,7 @@ namespace fft_writer
             this.textBox_freq_com2.TabIndex = 79;
             this.textBox_freq_com2.Text = "435000000";
             this.textBox_freq_com2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.textBox_freq_com2.Visible = false;
             // 
             // button_send_freq_com2
             // 
@@ -938,6 +950,7 @@ namespace fft_writer
             this.button_send_freq_com2.TabIndex = 78;
             this.button_send_freq_com2.Text = "send";
             this.button_send_freq_com2.UseVisualStyleBackColor = true;
+            this.button_send_freq_com2.Visible = false;
             // 
             // label37
             // 
@@ -948,6 +961,7 @@ namespace fft_writer
             this.label37.Size = new System.Drawing.Size(63, 16);
             this.label37.TabIndex = 77;
             this.label37.Text = "com port:";
+            this.label37.Visible = false;
             // 
             // textBox_com2
             // 
@@ -958,12 +972,80 @@ namespace fft_writer
             this.textBox_com2.TabIndex = 76;
             this.textBox_com2.Text = "COM4";
             this.textBox_com2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.textBox_com2.Visible = false;
+            // 
+            // textBox_Level_in
+            // 
+            this.textBox_Level_in.Location = new System.Drawing.Point(511, 313);
+            this.textBox_Level_in.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_Level_in.Name = "textBox_Level_in";
+            this.textBox_Level_in.Size = new System.Drawing.Size(132, 22);
+            this.textBox_Level_in.TabIndex = 82;
+            this.textBox_Level_in.Text = "-12";
+            this.textBox_Level_in.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.textBox_Level_in.TextChanged += new System.EventHandler(this.textBox_Level_in_TextChanged);
+            // 
+            // label33
+            // 
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(485, 293);
+            this.label33.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(183, 16);
+            this.label33.TabIndex = 83;
+            this.label33.Text = "Уровень входного сигнала";
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(651, 316);
+            this.label34.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(34, 16);
+            this.label34.TabIndex = 84;
+            this.label34.Text = "Дбм";
+            // 
+            // textBox_Ku
+            // 
+            this.textBox_Ku.Location = new System.Drawing.Point(511, 361);
+            this.textBox_Ku.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_Ku.Name = "textBox_Ku";
+            this.textBox_Ku.Size = new System.Drawing.Size(132, 22);
+            this.textBox_Ku.TabIndex = 85;
+            this.textBox_Ku.Text = "0";
+            this.textBox_Ku.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Location = new System.Drawing.Point(485, 341);
+            this.label38.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(189, 16);
+            this.label38.TabIndex = 86;
+            this.label38.Text = "Измереный коэф. усиления";
+            // 
+            // label39
+            // 
+            this.label39.AutoSize = true;
+            this.label39.Location = new System.Drawing.Point(651, 364);
+            this.label39.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label39.Name = "label39";
+            this.label39.Size = new System.Drawing.Size(25, 16);
+            this.label39.TabIndex = 87;
+            this.label39.Text = "Дб";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(917, 528);
+            this.Controls.Add(this.label39);
+            this.Controls.Add(this.label38);
+            this.Controls.Add(this.textBox_Ku);
+            this.Controls.Add(this.label34);
+            this.Controls.Add(this.label33);
+            this.Controls.Add(this.textBox_Level_in);
             this.Controls.Add(this.label35);
             this.Controls.Add(this.label36);
             this.Controls.Add(this.textBox_freq_com2);
@@ -1124,5 +1206,12 @@ namespace fft_writer
         private System.Windows.Forms.Button button_send_freq_com2;
         private System.Windows.Forms.Label label37;
         private System.Windows.Forms.TextBox textBox_com2;
+        private System.Windows.Forms.Timer timer4;
+        private System.Windows.Forms.TextBox textBox_Level_in;
+        private System.Windows.Forms.Label label33;
+        private System.Windows.Forms.Label label34;
+        private System.Windows.Forms.TextBox textBox_Ku;
+        private System.Windows.Forms.Label label38;
+        private System.Windows.Forms.Label label39;
     }
 }

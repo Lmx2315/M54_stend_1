@@ -81,9 +81,8 @@ namespace fft_writer
         string fileName;
         string text_from_file;
         int Flag_comport_rcv = 0;
-
         string selectedWindowName;
-
+        
          Plot fig1 = new Plot(100,"I Input", "Sample", "Вольт","","","","","");
 	     Plot fig2 = new Plot(100,"Q Input", "Sample", "Вольт","","","","","");
 		 Plot fig3 = new Plot(100,"FFT (dBV)", "кГц", "Mag (dBV)","","","","","");        
@@ -328,7 +327,7 @@ namespace fft_writer
                 MSG_collector();
                 FLAG_DATA_NEW = "";
             }
-
+            Ku_control();
             DISPLAY();
             textBox_sch.Text = Convert.ToString(sch_packet);
             sch_packet = 0;
@@ -336,7 +335,18 @@ namespace fft_writer
             label8.Text = "полоса фильтра:" + Convert.ToString(filtr) + "кГц";
         }
 
-    
+        void Ku_control ()
+        {
+            //32000 - 1Вольт
+            var Level_in = Convert.ToDouble(textBox_Level_in.Text);
+            var Level_in_mW = (0.001)*Math.Pow(10, (Level_in / 10));
+            var Level_in_V = Math.Pow((Level_in_mW * 50), 0.5);
+            var Level_out = A_out/32000*1;//выходной сигнал в вольтах
+            var Ku = Math.Round((20*Math.Log10(Level_out/ Level_in_V)),2);
+            textBox_Ku.Text = Convert.ToString(Ku);
+
+        }
+
 		void MainFormLoad(object sender, EventArgs e)
 		{
 			//fft_form.Show(this);
@@ -356,7 +366,8 @@ namespace fft_writer
 
         int post_U_i=0;
         int post_U_q=0;
-
+        int km = 0;
+        double A_out = 0;
         string FLAG_DISPAY = "";
         double  AMAX, BMAX, CMAX, M1X, M1Y, M2X, M2Y, M3X, M3Y;
         double [] TSAMPL  = new double[4096];
@@ -504,9 +515,18 @@ namespace fft_writer
                     double[] windowedTimeSeries_i = DSP.Math.Multiply(fft_array_x, wc);
                     double[] windowedTimeSeries_q = DSP.Math.Multiply(fft_array_y, wc);
 
-                    fft_z.FFT(1, k, windowedTimeSeries_i, windowedTimeSeries_q);
-
                     System.Numerics.Complex[] cpxResult = new System.Numerics.Complex[N_complex];
+                    //------------------Считаем амплитуду входного сигнала-------------------------
+                    for (i = 0; i < N_complex; i++)
+                    {
+                        cpxResult[i] = new System.Numerics.Complex(fft_array_x[i], fft_array_y[i]);
+                    }
+                    // Convert the complex result to a scalar magnitude 
+                    double[] magA = DSP.ConvertComplex.ToMagnitude(cpxResult);
+                    
+                    (km, A_out) = MAX_f(magA, BUF_N);
+                    //------------------Расчитываем БПФ----------------------------------------
+                    fft_z.FFT(1, k, windowedTimeSeries_i, windowedTimeSeries_q);                    
 
                     for (i = 0; i < N_complex; i++)
                     {
@@ -582,7 +602,7 @@ namespace fft_writer
                     H_b = m2y;
                     H_delta = m1y - m2y;
 
-                    //  magLog[0] = 80;//выравниваю шкалу
+                    // magLog[0] = 80;//выравниваю шкалу
                     // fig3.PlotData(t, magLog, A_max, B_max, C_max, m1x, m1y, m2x, m2y, m3x, m3y);
                     // fig3.Show();
 
@@ -1102,6 +1122,7 @@ namespace fft_writer
             else MessageBox.Show("Загрузите корректирующую АЧХ характеристику");
 
 
+
         }
 
         private void serialPort1_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
@@ -1249,10 +1270,16 @@ namespace fft_writer
             {
                 try
                 {
-                    if (channal_box.Text == "1") chanal = "0"; else chanal = "1";
-                    command2 = command2 + chanal + ":" + textBox_att_m54.Text + ";";
+             //       var att=
+                    var z = 63-(Convert.ToDouble(textBox_att_m54.Text) * 2);
+             //       if (z>31) { z = 31;textBox_att_m54.Text = "31"; }
+                    if (channal_box.Text == "1") chanal = "1"; else chanal = "2";
+                    command2 = command2 + chanal + ":" + Convert.ToString(z) + ";";
 
-                    serialPort1.Open();
+                    if (serialPort1.IsOpen == false)
+                    {
+                        serialPort1.Open();
+                    }
                     //       btn_com_open.Text = "trnsf";
                     btn_com_open.ForeColor = Color.Green;
                 //    serialPort1.Write(command1);
@@ -1266,6 +1293,8 @@ namespace fft_writer
                     // что-то пошло не так и упало исключение... Выведем сообщение исключения
                     Console.WriteLine(string.Format("Port:'{0}' Error:'{1}'", serialPort1.PortName, ex.Message));
                 }
+
+                serialPort1.Close();
             }
 
 
@@ -1404,6 +1433,21 @@ namespace fft_writer
         }
 
         private void label7_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox_com_port_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label_test_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox_Level_in_TextChanged(object sender, EventArgs e)
         {
 
         }

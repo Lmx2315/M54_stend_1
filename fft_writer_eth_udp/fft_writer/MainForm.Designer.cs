@@ -592,7 +592,7 @@ namespace fft_writer
             this.textBox_att_m54.Name = "textBox_att_m54";
             this.textBox_att_m54.Size = new System.Drawing.Size(99, 22);
             this.textBox_att_m54.TabIndex = 45;
-            this.textBox_att_m54.Text = "60";
+            this.textBox_att_m54.Text = "32";
             this.textBox_att_m54.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label18
@@ -752,7 +752,7 @@ namespace fft_writer
             this.textBox_freq_delay.Name = "textBox_freq_delay";
             this.textBox_freq_delay.Size = new System.Drawing.Size(99, 22);
             this.textBox_freq_delay.TabIndex = 58;
-            this.textBox_freq_delay.Text = "100";
+            this.textBox_freq_delay.Text = "300";
             this.textBox_freq_delay.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // button3
@@ -981,7 +981,7 @@ namespace fft_writer
             this.textBox_Level_in.Name = "textBox_Level_in";
             this.textBox_Level_in.Size = new System.Drawing.Size(132, 22);
             this.textBox_Level_in.TabIndex = 82;
-            this.textBox_Level_in.Text = "-12";
+            this.textBox_Level_in.Text = "-5";
             this.textBox_Level_in.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.textBox_Level_in.TextChanged += new System.EventHandler(this.textBox_Level_in_TextChanged);
             // 
@@ -1039,7 +1039,7 @@ namespace fft_writer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(917, 528);
+            this.ClientSize = new System.Drawing.Size(916, 528);
             this.Controls.Add(this.label39);
             this.Controls.Add(this.label38);
             this.Controls.Add(this.textBox_Ku);

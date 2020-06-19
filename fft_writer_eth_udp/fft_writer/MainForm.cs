@@ -1185,10 +1185,9 @@ namespace fft_writer
 #if WORK
             TelnetConnection tc = new TelnetConnection(host, port); 
 #endif
-
             string prompt = "";
             int freq_temp = Convert.ToInt32(textBox_freq_m54.Text);
-
+     
             //Debug.WriteLine("freq_setup   : " + freq_setup);
             //Debug.WriteLine("freq_last    : " + freq_last);
             //Debug.WriteLine("freq_current : " + freq_current);
@@ -1196,6 +1195,7 @@ namespace fft_writer
 
             if (freq_last>0)
             {
+                //тут происходят измерения! и сразу запись в стринг
             text = Convert.ToString(freq_last) + ";" + Convert.ToString(Math.Round(H_a, 2)) + ";" + Convert.ToString(Math.Round(H_b, 2)) + ";" + Convert.ToString(Math.Round(H_delta, 2));
             Console1.Text = Console1.Text + "\r\n" + text;
             }
@@ -1206,8 +1206,14 @@ namespace fft_writer
                 freq_temp = freq_current;
                 freq_send(freq_temp);//отсылаем текущую частоту в поделку для перестройки поделки её в центр диапазона
             }
-            else VAR_IH_data_obzor.lenght++;
+     //       else VAR_IH_data_obzor.lenght++;
 
+            if (freq_setup == 0)
+            {
+                VAR_IH_data_obzor.lenght++;
+                freq_temp = freq_current;
+                freq_send(freq_temp);//отсылаем текущую частоту в поделку для перестройки поделки её в центр диапазона
+            }
 
             textBox_freq_m54.Text = Convert.ToString(freq_temp);
             
@@ -1215,7 +1221,6 @@ namespace fft_writer
 #if WORK
             tc.WriteLine(prompt);//отсылаем частоту в генератор SMA 100A
 #endif
-
             COMMAND_FOR_SERVER = Convert.ToString(freq_current-freq_temp);//отсылаем частоту для ТЕСТ-а
 
             freq_last = freq_current;
@@ -1240,7 +1245,6 @@ namespace fft_writer
             }
 
             if (FLAG_IH_load == true) Kih_load();
-
         }
 
         private void btn_corr_spectr_Click(object sender, EventArgs e)
@@ -1312,7 +1316,7 @@ namespace fft_writer
         {
             if (_isServerStarted == true) timer3.Enabled = true;
             timer3.Interval = Convert.ToInt32(textBox_freq_delay.Text);
-            freq_start = 428500000;//Hz
+            freq_start = 428856000;//Hz 428500000
             freq_stop  = 441500000;
             freq_step  = 48828;//Hz
             freq_last  = 0;
@@ -1324,6 +1328,7 @@ namespace fft_writer
             checkBox1.Checked = false;
             freq_setup = 1;
             VAR_IH_data.lenght = 0;
+            FLAG_IH_load = false;
             //btn_corr_spectr.Text = "OFF";
         }
 
@@ -1400,9 +1405,11 @@ namespace fft_writer
                 }
 
                 if (rejim == 0)
-                {
-                    M_ach = BUF_getter(2, VAR_IH_data_obzor.z, 0, VAR_IH_data_obzor.lenght);//загружаем коэффициенты истиной АЧХ в массив
-                    F_ach = BUF_getter(1, VAR_IH_data_obzor.z, 0, VAR_IH_data_obzor.lenght);//загружаем частоты истиной АЧХ в массив
+                {//отключаем режим калибровки полосы обработки!!!
+                  M_ach = BUF_getter(2, VAR_IH_data_obzor.z, 0, VAR_IH_data_obzor.lenght);//загружаем коэффициенты истиной АЧХ в массив
+                  F_ach = BUF_getter(1, VAR_IH_data_obzor.z, 0, VAR_IH_data_obzor.lenght);//загружаем частоты истиной АЧХ в массив
+          //          M_ach = BUF_getter(2, VAR_IH_data.z, 0, VAR_IH_data.lenght);//загружаем коэффициенты истиной АЧХ в массив
+          //          F_ach = BUF_getter(1, VAR_IH_data.z, 0, VAR_IH_data.lenght);//загружаем частоты истиной АЧХ в массив
                 }
 
                 //определяем максимум в реальной АЧХ
@@ -1424,8 +1431,9 @@ namespace fft_writer
                 {
                     error = MAX_A - m[i];
                     if (error_max < error) error_max = error;
+                    //error = Math.Round(error, 2);
                 }
-
+                error_max = Math.Round(error_max, 2);
                 textBox_error_ach.Text = Convert.ToString(error_max);
             }
             else MessageBox.Show("загрузите параметры АЧХ!");
@@ -1484,7 +1492,7 @@ namespace fft_writer
             {
                 if ((i > 0) && (i < Ach_length)) temp_Ach[j] = M_ach[i];//переписываем часть массива во временный массив
                 else temp_Ach[j] = 0;
-                if ((i > N_freq_low) && (i < N_freq_high)) Etalon_ach[j] = Max_A;
+                if ((i > N_freq_low) && (i < N_freq_high)) Etalon_ach[j] = Max_A; 
                 j++;
             }
 
@@ -1509,7 +1517,15 @@ namespace fft_writer
                 temp_Ach[i] = Math.Pow(10, (temp_Ach[i] / 20));
                 Etalon_ach[i] = Math.Pow(10, (Etalon_ach[i] / 20));
                 k_ach_i[i] = Etalon_ach[i] / temp_Ach[i];//расчитываем компенсирующуюу АЧХ
+   //             if (k_ach_i[i] > 2) k_ach_i[i] = 2;
             }
+            //------------------------------------------------------------
+           /* 
+            Plot2 figX = new Plot2(85.0, "компенсирующуюу АЧХ", "N", "разы");
+            figX.PlotData(k_ach_i);
+            figX.Show();
+           */ 
+            //-------------------------------------------------------------
             Array.Clear(k_ach_q, 0, Korre_IH);//очищаем массив
                        
 
@@ -1523,8 +1539,8 @@ namespace fft_writer
             FFTLibrary.Complex fft_z = new FFTLibrary.Complex();
             fft_z.FFT(-1, k, k_ach_i, k_ach_q);//высчитываем обратное  БПФ 
 
-            k_ach_i = DSP.Math.Divide(k_ach_i, 128);//убираем усиление БПФ
-            k_ach_q = DSP.Math.Divide(k_ach_q, 128);
+            k_ach_i = DSP.Math.Divide(k_ach_i,51);//убираем усиление БПФ
+            k_ach_q = DSP.Math.Divide(k_ach_q,51);
 
             //сдвигаем результат работы БПФ по кольцу в сторону - ставим ноль в центр
             k_ach_i = sdvig(k_ach_i, 64, 128);
@@ -1581,7 +1597,8 @@ namespace fft_writer
             if (checkBox1.Checked == true)
             {
                 Plot2 fig5 = new Plot2(10, "корректирующая АЧХ", "N", "Дб");
-                fig5.PlotData(DB_ACH_Korr);
+    //          fig5.PlotData(k_ach_i);//DB_ACH_Korr
+                fig5.PlotData(DB_ACH_Korr);//
                 fig5.Show();
             }
             //MessageBox.Show("Файл сохранен");
@@ -1684,7 +1701,7 @@ namespace fft_writer
             }
             else
             {
-                MessageBox.Show("не хватает данных!");
+                Debug.WriteLine("не хватает данных!");
                 return Tuple.Create(0.0,0.0, 999999);
             }
             

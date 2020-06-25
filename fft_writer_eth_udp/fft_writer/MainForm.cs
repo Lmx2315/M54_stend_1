@@ -104,13 +104,15 @@ namespace fft_writer
             {
                 e.Cancel = true;
             }
-
             if (_listenThread!=null) _listenThread.Abort();
             if (_copyThread!=null) _copyThread.Abort();
             if (_fftThread!=null) _fftThread.Abort();
             if (_isServerStarted)   _server.Close();
             //Changet state to indicate the server stops.
             _isServerStarted = false;
+
+           // this.Dispose();
+           // Application.Exit();
         }
         //-------------------eth-------------------------
         string FLAG_THREAD="start";
@@ -136,14 +138,16 @@ namespace fft_writer
             //Start listening.
             Thread _listenThread = new Thread(new ThreadStart(Listening));//тред приёма данных по UDP
                    _listenThread.Start();
+            _listenThread.IsBackground = true;//делает поток фоновым который завершается по закрытию основного приложения
 
             //Start copy-ing.
             Thread _copyThread = new Thread(new ThreadStart(DATA_COPY));//тред копирования данных в буфер обработки
                    _copyThread.Start();
-
+            _copyThread.IsBackground = true;
             //Start fft-ing.
               Thread _fftThread = new Thread(new ThreadStart(fft_out));//тред расчёта fft
-              _fftThread.Start();           
+              _fftThread.Start();
+            _fftThread.IsBackground = true;
 
             //Change state to indicate the server starts.
             _isServerStarted = true;

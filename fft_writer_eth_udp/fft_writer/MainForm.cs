@@ -47,14 +47,14 @@ namespace fft_writer
 			InitializeComponent();
 			Debug.WriteLine("Debug Information-Product Starting ");
 			Debug.WriteLine("------------------------ ");
-
 		}
         //----------ETH------------
-        UdpClient _server    = null;
-        IPEndPoint _client   = null;
-        Thread _listenThread = null;
-        Thread _copyThread   = null;
-        Thread _fftThread    = null;
+        UdpClient _server      = null;
+        IPEndPoint _client     = null;
+        Thread _listenThread   = null;
+        Thread _copyThread     = null;
+        Thread _fftThread      = null;
+        Thread _PcontrolThread = null;
         private bool _isServerStarted = false;
 
         Class1 rcv_func=new Class1();
@@ -63,9 +63,9 @@ namespace fft_writer
 		static int  BUF_N= 64000;
 		static int Fsample=12;
 
-		Byte  [] RCV         =new byte[64000];
-		int   [] FFT_array   =new int [64000];
-	    int   [] packet_data =new int [64000];
+		Byte  [] RCV           = new byte[64000];
+		int   [] FFT_array     = new int [64000];
+	    int   [] packet_data   = new int [64000];
         int   [] packet_data_i = new int [64000];
         int   [] packet_data_q = new int [64000];
         Byte  [] rcv_BUF     =new byte[64000];
@@ -83,6 +83,8 @@ namespace fft_writer
         int Flag_comport_rcv = 0;
         string selectedWindowName;
         
+        double LVL_Pin_DBm=0;//входная измеренная мощность сигнала (для контроля коэфф. передачи и коэфф. шума)
+
          Plot fig1 = new Plot(100,"I Input", "Sample", "Вольт","","","","","");
 	     Plot fig2 = new Plot(100,"Q Input", "Sample", "Вольт","","","","","");
 		 Plot fig3 = new Plot(100,"FFT (dBV)", "кГц", "Mag (dBV)","","","","","");        
@@ -108,6 +110,7 @@ namespace fft_writer
             if (_copyThread!=null) _copyThread.Abort();
             if (_fftThread!=null) _fftThread.Abort();
             if (_isServerStarted)   _server.Close();
+            if (_PcontrolThread!=null) _PcontrolThread.Abort();
             //Changet state to indicate the server stops.
             _isServerStarted = false;
 
@@ -144,10 +147,16 @@ namespace fft_writer
             Thread _copyThread = new Thread(new ThreadStart(DATA_COPY));//тред копирования данных в буфер обработки
                    _copyThread.Start();
             _copyThread.IsBackground = true;
+
             //Start fft-ing.
               Thread _fftThread = new Thread(new ThreadStart(fft_out));//тред расчёта fft
               _fftThread.Start();
             _fftThread.IsBackground = true;
+            
+            Thread _PcontrolThread = new Thread(new ThreadStart(Pout_control));
+            _PcontrolThread.Start();
+            _PcontrolThread.IsBackground=true;
+            
 
             //Change state to indicate the server starts.
             _isServerStarted = true;
@@ -318,9 +327,7 @@ namespace fft_writer
     
                 i = i + 4;
             }
-
             return data;
-
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -333,6 +340,8 @@ namespace fft_writer
             }
             Ku_control();
             DISPLAY();
+    //        Pout_control();
+            textBox_Pin.Text = Convert.ToString(LVL_Pin_DBm); //выводим усреднённое значение входной мощности сигнала
             textBox_sch.Text = Convert.ToString(sch_packet);
             sch_packet = 0;
             filtr = 12000 / BUF_N * B_win;
@@ -348,7 +357,21 @@ namespace fft_writer
             var Level_out = A_out/32000*1;//выходной сигнал в вольтах
             var Ku = Math.Round((20*Math.Log10(Level_out/ Level_in_V)),2);
             textBox_Ku.Text = Convert.ToString(Ku);
+        }
 
+        void Pout_control ()
+        {
+          while (true)
+            {
+                double A = A_out;//распаковываем переменную
+                var Lvl_U = A / 32000 * 1;//выходной сигнал в вольтах
+                var Lvl_P = Math.Pow(Lvl_U, 2) / 50 * 1000;    //мощность в мВт
+                if (Lvl_P == 0) Lvl_P = 0.0000000001;
+                var Lvl_Pdbm = 10 * System.Math.Log10(Lvl_P); //мощность в ДБм
+                LVL_Pin_DBm = Math.Round(Convert.ToDouble(Lvl_Pdbm), 2);
+
+                Thread.Sleep(0);
+            }          
         }
 
 		void MainFormLoad(object sender, EventArgs e)
@@ -372,6 +395,7 @@ namespace fft_writer
         int post_U_q=0;
         int km = 0;
         double A_out = 0;
+
         string FLAG_DISPAY = "";
         double  AMAX, BMAX, CMAX, M1X, M1Y, M2X, M2Y, M3X, M3Y;
         double [] TSAMPL  = new double[4096];
@@ -526,9 +550,10 @@ namespace fft_writer
                         cpxResult[i] = new System.Numerics.Complex(fft_array_x[i], fft_array_y[i]);
                     }
                     // Convert the complex result to a scalar magnitude 
-                    double[] magA = DSP.ConvertComplex.ToMagnitude(cpxResult);
-                    
-                    (km, A_out) = MAX_f(magA, BUF_N);
+                    double[] magA = DSP.ConvertComplex.ToMagnitude(cpxResult);//высчитываем массив модулей (длинну векторов) комплексных отсчётов входного массива
+                    A_out=FILTR_MEDIANA(magA);
+
+                    // (km, A_out) = MAX_f(magA, BUF_N);
                     //------------------Расчитываем БПФ----------------------------------------
                     fft_z.FFT(1, k, windowedTimeSeries_i, windowedTimeSeries_q);                    
 
@@ -627,6 +652,13 @@ namespace fft_writer
                 Thread.Sleep(0);
             }
         }
+
+      double FILTR_MEDIANA (double [] M) //M - массив входных отсчётов
+      {
+        Array.Sort(M);
+        int k = (M.Length) / 2; //средний элемент массива
+        return M[k];    //возвращаем медианное значение
+      }
 
         void DISPLAY ()
         {
@@ -888,11 +920,9 @@ namespace fft_writer
                 Btn_start.Text = "StopServer";
                 timer1.Enabled = true;
             }
-
         }
 		void Port_enClick(object sender, EventArgs e)
-		{
-           
+		{       
 			
 		}
 		void Save_bottonClick(object sender, EventArgs e)

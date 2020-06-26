@@ -596,7 +596,7 @@ namespace fft_writer
             this.textBox_att_m54.Name = "textBox_att_m54";
             this.textBox_att_m54.Size = new System.Drawing.Size(99, 22);
             this.textBox_att_m54.TabIndex = 45;
-            this.textBox_att_m54.Text = "32";
+            this.textBox_att_m54.Text = "31";
             this.textBox_att_m54.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label18

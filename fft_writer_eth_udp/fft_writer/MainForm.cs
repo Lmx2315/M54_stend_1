@@ -374,7 +374,29 @@ namespace fft_writer
             }          
         }
 
-		void MainFormLoad(object sender, EventArgs e)
+//--------------------------------------------------------------
+        List<double> Y_filtr = new List<double>();
+        void filtr_usr_y(double a, int k)
+        {
+            int i = 0;
+            int j = 0;
+
+            Y_filtr.Add(a);
+
+            if (Y_filtr.Count > k)
+            {
+
+                Y_filtr.RemoveAt(0);
+
+                for (j = 0; j < k; j++)
+                {
+                  a= (a + Z_filtr[j][i]) / 2;    
+                }
+            }
+        }
+ //--------------------------------------------------------------
+
+        void MainFormLoad(object sender, EventArgs e)
 		{
 			//fft_form.Show(this);
 			BUF_N =Convert.ToInt16(text_N_fft.Text);
@@ -591,6 +613,8 @@ namespace fft_writer
                     }
 
                     if (FLAG_filtr == 1) vid_filtr(magLog);
+                    if (FLAG_filtr == 2) filtr_usr(magLog,6);
+                  /*
                     if (FLAG_filtr == 2)
                     {
                         vid_filtr(magLog);
@@ -598,7 +622,7 @@ namespace fft_writer
                         vid3_filtr(magLog);
                         vid4_filtr(magLog);
                     }
-
+                    */
                     int k_max = 0;
                     double m1x, m1y;
                     double m2x, m2y;
@@ -673,6 +697,32 @@ namespace fft_writer
             }            
         }
 
+        List<double[]> Z_filtr = new List<double[]>();
+
+        void filtr_usr(double[] a,int k)
+        {
+            int i = 0;
+            int j = 0;
+
+            double[] z = new double[a.Length];
+
+            Z_filtr.Add(a);
+
+            if (Z_filtr.Count > k)
+            {
+
+            Z_filtr.RemoveAt(0);
+
+                for (j = 0; j <k; j++)
+                {
+                    for (i = 0; i < BUF_N; i++)
+                    {
+                        a[i] = (a[i] + Z_filtr[j][i]) / 2;
+                    }
+                }             
+            }
+        }
+
         double[] Z0 = new double[BUF_N];
         double[] Z1 = new double[BUF_N];
         double[] Z2 = new double[BUF_N];
@@ -701,187 +751,12 @@ namespace fft_writer
                 Z3[i] = Z2[i];
                 Z2[i] = Z1[i];
                 Z1[i] = Z0[i];
-                Z0[i] = a[i];
+                Z0[i] =  a[i];
 
                 a[i] = (a[i] + Z0[i] + Z1[i] + Z2[i] + Z3[i] + Z4[i] + Z5[i] + Z6[i] + Z7[i] + Z8[i] + Z9[i]) / 11;
-
-            }
-        }
-        //---------------------
-        double[] x0 = new double[BUF_N];
-        double[] x1 = new double[BUF_N];
-        double[] x2 = new double[BUF_N];
-        double[] x3 = new double[BUF_N];
-        double[] x4 = new double[BUF_N];
-        double[] x5 = new double[BUF_N];
-        double[] x6 = new double[BUF_N];
-        double[] x7 = new double[BUF_N];
-        double[] x8 = new double[BUF_N];
-        double[] x9 = new double[BUF_N];
-
-        double[] x10 = new double[BUF_N];
-        double[] x11 = new double[BUF_N];
-        double[] x12 = new double[BUF_N];
-        double[] x13 = new double[BUF_N];
-        double[] x14 = new double[BUF_N];
-        double[] x15 = new double[BUF_N];
-        double[] x16 = new double[BUF_N];
-        double[] x17 = new double[BUF_N];
-        double[] x18 = new double[BUF_N];
-        double[] x19 = new double[BUF_N];
-
-        double[] x_end = new double[BUF_N];
-
-        void vid2_filtr(double[] a)
-        {
-            int i = 0;
-
-            for (i = 0; i < BUF_N; i++)
-            {
-                x19[i] = x18[i];
-                x18[i] = x17[i];
-                x17[i] = x16[i];
-                x16[i] = x15[i];
-                x15[i] = x14[i];
-                x14[i] = x13[i];
-                x13[i] = x12[i];
-                x12[i] = x11[i];
-                x11[i] = x10[i];
-                x10[i] = x9[i];
-
-                x9[i] = x8[i];
-                x8[i] = x7[i];
-                x7[i] = x6[i];
-                x6[i] = x5[i];
-                x5[i] = x4[i];
-                x4[i] = x3[i];
-                x3[i] = x2[i];
-                x2[i] = x1[i];
-                x1[i] = x0[i];
-                x0[i] = a[i];
-
-                a[i] = (a[i] + x0[i] + x1[i] + x2[i] + x3[i] + x4[i] + x5[i] + x6[i] + x7[i] + x8[i] + x9[i] + x10[i] +x11[i] + x12[i] +x13[i]+x14[i]+x15[i]+x16[i]+x17[i]+x18[i]+x19[i]) / 21;
-
             }
         }
 
-        double[] c0 = new double[BUF_N];
-        double[] c1 = new double[BUF_N];
-        double[] c2 = new double[BUF_N];
-        double[] c3 = new double[BUF_N];
-        double[] c4 = new double[BUF_N];
-        double[] c5 = new double[BUF_N];
-        double[] c6 = new double[BUF_N];
-        double[] c7 = new double[BUF_N];
-        double[] c8 = new double[BUF_N];
-        double[] c9 = new double[BUF_N];
-
-        double[] c10 = new double[BUF_N];
-        double[] c11 = new double[BUF_N];
-        double[] c12 = new double[BUF_N];
-        double[] c13 = new double[BUF_N];
-        double[] c14 = new double[BUF_N];
-        double[] c15 = new double[BUF_N];
-        double[] c16 = new double[BUF_N];
-        double[] c17 = new double[BUF_N];
-        double[] c18 = new double[BUF_N];
-        double[] c19 = new double[BUF_N];
-
-        double[] c_end = new double[BUF_N];
-
-        void vid3_filtr(double[] a)
-        {
-            int i = 0;
-
-            //if (sch_filtr!=10) sch_filtr++; else
-
-            for (i = 0; i < BUF_N; i++)
-            {
-                c19[i] = c18[i];
-                c18[i] = c17[i];
-                c17[i] = c16[i];
-                c16[i] = c15[i];
-                c15[i] = c14[i];
-                c14[i] = c13[i];
-                c13[i] = c12[i];
-                c12[i] = c11[i];
-                c11[i] = c10[i];
-                c10[i] = c9[i];
-
-                c9[i] = c8[i];
-                c8[i] = c7[i];
-                c7[i] = c6[i];
-                c6[i] = c5[i];
-                c5[i] = c4[i];
-                c4[i] = c3[i];
-                c3[i] = c2[i];
-                c2[i] = c1[i];
-                c1[i] = c0[i];
-                c0[i] = a[i];
-
-                a[i] = (a[i] + c0[i] + c1[i] + c2[i] + c3[i] + c4[i] + c5[i] + c6[i] + c7[i] + c8[i] + c9[i] + c10[i] + c11[i] + c12[i] + c13[i] + c14[i] + c15[i] + c16[i] + c17[i] + c18[i] + c19[i]) / 21;
-
-            }
-        }
-        //---------------------
-        double[] v0 = new double[BUF_N];
-        double[] v1 = new double[BUF_N];
-        double[] v2 = new double[BUF_N];
-        double[] v3 = new double[BUF_N];
-        double[] v4 = new double[BUF_N];
-        double[] v5 = new double[BUF_N];
-        double[] v6 = new double[BUF_N];
-        double[] v7 = new double[BUF_N];
-        double[] v8 = new double[BUF_N];
-        double[] v9 = new double[BUF_N];
-
-        double[] v10 = new double[BUF_N];
-        double[] v11 = new double[BUF_N];
-        double[] v12 = new double[BUF_N];
-        double[] v13 = new double[BUF_N];
-        double[] v14 = new double[BUF_N];
-        double[] v15 = new double[BUF_N];
-        double[] v16 = new double[BUF_N];
-        double[] v17 = new double[BUF_N];
-        double[] v18 = new double[BUF_N];
-        double[] v19 = new double[BUF_N];
-
-        double[] v_end = new double[BUF_N];
-
-        void vid4_filtr(double[] a)
-        {
-            int i = 0;
-
-            //if (sch_filtr!=10) sch_filtr++; else
-
-            for (i = 0; i < BUF_N; i++)
-            {
-                v19[i] = v18[i];
-                v18[i] = v17[i];
-                v17[i] = v16[i];
-                v16[i] = v15[i];
-                v15[i] = v14[i];
-                v14[i] = v13[i];
-                v13[i] = v12[i];
-                v12[i] = v11[i];
-                v11[i] = v10[i];
-                v10[i] = v9[i];
-
-                v9[i] = v8[i];
-                v8[i] = v7[i];
-                v7[i] = v6[i];
-                v6[i] = v5[i];
-                v5[i] = v4[i];
-                v4[i] = v3[i];
-                v3[i] = v2[i];
-                v2[i] = v1[i];
-                v1[i] = v0[i];
-                v0[i] = a[i];
-
-                a[i] = (a[i] + v0[i] + v1[i] + v2[i] + v3[i] + v4[i] + v5[i] + v6[i] + v7[i] + v8[i] + v9[i] + v10[i] + v11[i] + v12[i] + v13[i] + v14[i] + v15[i] + v16[i] + v17[i] + v18[i] + v19[i]) / 21;
-
-            }
-        }
 //-------------------------------------
         void SerialPort1DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
 		{
@@ -1154,9 +1029,6 @@ namespace fft_writer
          
             if (FLAG_IH_load == true) Kih_load();
             else MessageBox.Show("Загрузите корректирующую АЧХ характеристику");
-
-
-
         }
 
         private void serialPort1_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
@@ -1307,10 +1179,8 @@ namespace fft_writer
             if (btn_com_open.Text == "send")
             {
                 try
-                {
-             //       var att=
+                {     
                     var z = 63-(Convert.ToDouble(textBox_att_m54.Text) * 2);
-             //       if (z>31) { z = 31;textBox_att_m54.Text = "31"; }
                     if (channal_box.Text == "1") chanal = "1"; else chanal = "2";
                     command2 = command2 + chanal + ":" + Convert.ToString(z) + ";";
 
@@ -1331,10 +1201,8 @@ namespace fft_writer
                     // что-то пошло не так и упало исключение... Выведем сообщение исключения
                     Console.WriteLine(string.Format("Port:'{0}' Error:'{1}'", serialPort1.PortName, ex.Message));
                 }
-
                 serialPort1.Close();
             }
-
 
             /*
             else if (serialPort1.IsOpen == true)
@@ -1560,8 +1428,7 @@ namespace fft_writer
             figX.Show();
            */ 
             //-------------------------------------------------------------
-            Array.Clear(k_ach_q, 0, Korre_IH);//очищаем массив
-                       
+            Array.Clear(k_ach_q, 0, Korre_IH);//очищаем массив                       
 
             //сдвигаем  по кольцу в сторону - ставим ноль в центр
             k_ach_i = sdvig(k_ach_i, 64, 128);
@@ -1669,10 +1536,8 @@ namespace fft_writer
                 catch
                 {
 
-                }
-                
-            }
-            
+                }                
+            }            
         }
 
         int find_number (int freq,double [] m)//ищет ближайший порядковый номер в массиве частот
@@ -1796,9 +1661,7 @@ namespace fft_writer
             else
             {
 
-            }
-           
-            
+            }           
         }
 
         private void btn_ach_control_Click(object sender, EventArgs e)

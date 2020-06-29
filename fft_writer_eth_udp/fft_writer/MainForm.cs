@@ -374,28 +374,6 @@ namespace fft_writer
             }          
         }
 
-//--------------------------------------------------------------
-        List<double> Y_filtr = new List<double>();
-        void filtr_usr_y(double a, int k)
-        {
-            int i = 0;
-            int j = 0;
-
-            Y_filtr.Add(a);
-
-            if (Y_filtr.Count > k)
-            {
-
-                Y_filtr.RemoveAt(0);
-
-                for (j = 0; j < k; j++)
-                {
-                  a= (a + Z_filtr[j][i]) / 2;    
-                }
-            }
-        }
- //--------------------------------------------------------------
-
         void MainFormLoad(object sender, EventArgs e)
 		{
 			//fft_form.Show(this);
@@ -428,10 +406,18 @@ namespace fft_writer
         double H_delta = 0;
 
         double[] H_q = { -0.220477, -1.76878, -0.602164, -0.913822, -0.886835, -1.7772, 1.36022, -3.63074, -0.2505, 2.80075, -8.44291, 6.48476, -12.8247, 8.38382, -6.26534, -13.1824, 22.5553, -41.5086, 38.8532, -28.0017, -8.75528, 41.6745, -81.1482, 85.8237, -85.7525, 26.9482, 68.9365, -144.272, 144.511, -54.7266, 2.45574, 6.45885, -66.79, 81.7377, -42.6371, 17.8659, -0.196799, 28.4292, -85.838, 180.982, -165.842, 148.284, 141.946, -357.965, 644.414, -735.075, 570.723, -282.066, -589.997, 1513.71, -1982.31, 1906.68, -1144.98, -451.565, 2478.35, -4305.22, 4758.25, -3720.61, 741.302, 4073.04, -9872.3, 14931.1, -14753.3, -3525.99, 89801.4, -3505.4, -14581.2, 14669.7, -9641.46, 3953.61, 715.074, -3566.38, 4531.05, -4071.96, 2327.42, -421.002, -1059.04, 1748.65, -1801.89, 1362.35, -525.45, -248.261, 495.093, -627.854, 539.694, -293.048, 112.423, 112.575, -118.77, 115.748, -43.9126, 3.39483, -4.10936, 37.7368, -60.0501, 100.96, -76.1108, 7.10599, 2.62531, -55.8521, 144.318, -141.434, 66.439, 25.556, -80.4433, 79.3497, -74.2671, 37.5466, -7.92261, -24.8173, 33.7291, -35.8595, 19.0041, -11.2003, -5.3408, 6.60269, -10.3894, 4.80144, -6.59629, 1.74394, -0.489924, -2.62478, 0.195514, -1.19107, -1.14408, -0.808126, -0.474232, -1.83026 };
-
         double[] H_i = { -1, -1.31279, -0.308793, -1.28754, -1.18601, -0.533113, -0.735555, -3.90869, 4.33925, -7.06787, 1.31238, -2.09543, -6.03124, 9.89133, -21.2423, 25.3237, -14.0766, 2.30803, 21.7577, -45.2378, 63.857, -59.2126, 22.911, 9.38634, -78.8197, 123.07, -133.782, 56.52, 54.1236, -98.6309, 76.1462, -95.0234, 72.3418, -8.28296, -20.2758, 17.6597, 7.50105, -41.7184, 54.3167, 10.0364, -141.202, 331.982, -440.975, 368.96, -73.6581, -208.469, 735.649, -1179.37, 1336.58, -977.851, -31.3203, 1454.83, -2582.02, 3058.78, -2662.96, 1019.47, 1637.94, -4609.01, 7112.62, -7702.69, 5080.92, 2276.9, -16241.1, 36733.2, -1, -36520.6, 16049.6, -2239.01, -4964.08, 7474.9, -6863.27, 4415.95, -1561.7, -966.166, 2498.92, -2853.22, 2386.12, -1336.23, 26.5592, 878.238, -1192, 1035.65, -640.201, 176.166, 59.8692, -303.68, 348.105, -254.333, 99.1654, -8.08022, -28.9802, 5.08071, 31.9094, -39.3134, 26.3371, 7.97503, -84.7325, 101.181, -81.9315, 98.6762, -56.0505, -57.3808, 127.04, -118.889, 71.9448, -10.6119, -22.8581, 51.5818, -58.8934, 38.0207, -20.8316, -3.84671, 10.1052, -23.0406, 15.688, -9.82407, 2.99507, -0.150929, -2.73867, 3.38069, -4.63365, 0.796443, -1.13395, -1.11478, -1.23683, -0.359795, -1.91348, -0.662199 };
+
+        double[][] MeM = new double[100][];//массив памяти для сглаживания вывода спектроанализатора
+        
         void fft_out ()
         {
+            int i;
+            for (i=0;i<100;i++)
+            {
+               MeM[i] = new double[BUF_N];//формируем зубчатый массив памяти
+            }
+
            while ((true) && (FLAG_THREAD == "start"))
             {
                 if (flag_NEW_FFT == 1)
@@ -440,8 +426,6 @@ namespace fft_writer
                     UInt32 zeros = Convert.ToUInt32(0);
                     uint N_temp;
                     int N_complex;
-                    int i;
-                    int N;
                     uint z;
                     int step = 0;
                     int pstep = 0;
@@ -450,15 +434,15 @@ namespace fft_writer
                     N_temp = Convert.ToUInt32(BUF_N);
                     N_complex = Convert.ToInt32(BUF_N);
 
-                    double A_max = 0;
-                    double B_max = 0;
-                    double C_max = 0;
+                    double A_max;
+                    double B_max;
+                    double C_max;
 
-                    double[] m_sort = new double[BUF_N];
-
-                    double[] fft_array = new double[BUF_N];
+                    double[] m_sort      = new double[BUF_N];
+                    double[] fft_array   = new double[BUF_N];
                     double[] fft_array_x = new double[BUF_N];
-                    double[] fft_array_y = new double[BUF_N];
+                    double[] fft_array_y = new double[BUF_N];                  
+                    
 
                     double[] t = new double[BUF_N];
                     double[] A = new double[BUF_N];
@@ -503,7 +487,6 @@ namespace fft_writer
                     // Instantiate & Initialize the FFT class - это вещественная FFt сейчас не используем.
                     //            DSPLib.FFT fft = new DSPLib.FFT();
                     //            fft.Initialize(2 * N_temp, zeros);
-
             
 
                     int k = Convert.ToInt16(LogBase(N_temp, 2));//порядок БПФ
@@ -556,7 +539,6 @@ namespace fft_writer
                         Array.Copy(fx_i, fft_array_x, N_temp);
                         Array.Copy(fx_q, fft_array_y, N_temp);
                     }
-
 
                     // Apply window to the time series data
                     double[] wc = DSP.Window.Coefficients(windowToApply, N_temp);
@@ -613,16 +595,8 @@ namespace fft_writer
                     }
 
                     if (FLAG_filtr == 1) vid_filtr(magLog);
-                    if (FLAG_filtr == 2) filtr_usr(magLog,6);
-                  /*
-                    if (FLAG_filtr == 2)
-                    {
-                        vid_filtr(magLog);
-                        vid2_filtr(magLog);
-                        vid3_filtr(magLog);
-                        vid4_filtr(magLog);
-                    }
-                    */
+                    if (FLAG_filtr == 2) filtr_usr2(magLog,MeM);
+      
                     int k_max = 0;
                     double m1x, m1y;
                     double m2x, m2y;
@@ -697,30 +671,60 @@ namespace fft_writer
             }            
         }
 
-        List<double[]> Z_filtr = new List<double[]>();
-
-        void filtr_usr(double[] a,int k)
+       void filtr_usr(double []data,double[][] a,int k)//входные данные, входной зубчатый массив памяти (в нулевом массиве текущий массив данных )и глубина усреднения
         {
-            int i = 0;
-            int j = 0;
+            int i;
+            int j;
+            double[] o = new double[data.Length];
 
-            double[] z = new double[a.Length];
+            Array.Copy(data,a[0],data.Length);
 
-            Z_filtr.Add(a);
-
-            if (Z_filtr.Count > k)
+            for (i=0;i<k;i++)
             {
+                Array.Copy(a[k - i - 1], a[k - i], a[k - i - 1].Length); // [2]->[3] , [1]->[2] , [0]->[1]
 
-            Z_filtr.RemoveAt(0);
-
-                for (j = 0; j <k; j++)
+                for (j=0;j<a[i].Length;j++)
                 {
-                    for (i = 0; i < BUF_N; i++)
-                    {
-                        a[i] = (a[i] + Z_filtr[j][i]) / 2;
-                    }
-                }             
+                    o[j] = (o[j] + a[k - i][j]) / 2;
+                }
             }
+            Array.Copy(o,data, data.Length);
+        }
+
+
+        void filtr_usr2(double[] data, double[][] a)//входные данные, входной зубчатый массив памяти (в нулевом массиве текущий массив данных )и глубина усреднения
+        {
+            int i;
+            int j;
+            double[] o = new double[data.Length];
+
+            for (j = 0; j < data.Length; j++)
+            {
+                a[19][j] = a[18][j];
+                a[18][j] = a[17][j];
+                a[17][j] = a[16][j];
+                a[16][j] = a[15][j];
+                a[15][j] = a[14][j];
+                a[14][j] = a[13][j];
+                a[13][j] = a[12][j];
+                a[12][j] = a[11][j];
+                a[11][j] = a[10][j];
+                a[10][j] = a[ 9][j];
+                a[ 9][j] = a[ 8][j];
+                a[ 8][j] = a[ 7][j];
+                a[ 7][j] = a[ 6][j];
+                a[ 6][j] = a[ 5][j];
+                a[ 5][j] = a[ 4][j];
+                a[ 4][j] = a[ 3][j];
+                a[ 3][j] = a[ 2][j];
+                a[ 2][j] = a[ 1][j];
+                a[ 1][j] = a[ 0][j];
+                a[ 0][j] = data[j];
+                o[j] = (a[0][j] + a[1][j] + a[2][j] + a[3][j] + a[4][j] + a[5][j] + a[6][j] + a[7][j] + a[8][j] + a[9][j] +
+                        a[10][j] + a[11][j] + a[12][j] + a[13][j] + a[14][j] + a[15][j] + a[16][j] + a[17][j] + a[18][j] + a[19][j]) / 20;
+            }
+
+            Array.Copy(o, data, data.Length);
         }
 
         double[] Z0 = new double[BUF_N];
@@ -757,7 +761,7 @@ namespace fft_writer
             }
         }
 
-//-------------------------------------
+        //-------------------------------------
         void SerialPort1DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
 		{
 		

@@ -64,11 +64,8 @@ namespace fft_writer
 		static int Fsample=12;
 
 		Byte  [] RCV           = new byte[64000];
-		int   [] FFT_array     = new int [64000];
-	    int   [] packet_data   = new int [64000];
         int   [] packet_data_i = new int [64000];
         int   [] packet_data_q = new int [64000];
-        Byte  [] rcv_BUF     =new byte[64000];
         double B_win = 1;
   
 		int flag_NEW_FFT;
@@ -87,8 +84,7 @@ namespace fft_writer
 
          Plot fig1 = new Plot(100,"I Input", "Sample", "Вольт","","","","","");
 	     Plot fig2 = new Plot(100,"Q Input", "Sample", "Вольт","","","","","");
-		 Plot fig3 = new Plot(100,"FFT (dBV)", "кГц", "Mag (dBV)","","","","","");        
-		
+		 Plot fig3 = new Plot(100,"FFT (dBV)", "кГц", "Mag (dBV)","","","","","");    	
 
         private void MainForm_FormClosing(Object sender, FormClosingEventArgs e)
         {
@@ -133,7 +129,7 @@ namespace fft_writer
             // IPEndPoint serverEnd = new IPEndPoint(IPAddress.Any, 1234);
 
             _server = new UdpClient(serverEnd);
-            _server.Client.ReceiveBufferSize = 8192 * 200;//увеличиваем размер приёмного буфера!!!
+            _server.Client.ReceiveBufferSize = 8192 * 300;//увеличиваем размер приёмного буфера!!!
             Debug.WriteLine("Waiting for a client...");
             //Create the client end.
             //_client = new IPEndPoint(IPAddress.Any, 0);
@@ -332,6 +328,8 @@ namespace fft_writer
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            double[] z = new double[1];
+
             if ((FLAG_DATA_NEW =="0")|| (FLAG_DATA_NEW == "1"))
             {
                 selectedWindowName = cmbWindow.SelectedValue.ToString();//выбираем тип окна для БПФ
@@ -340,13 +338,16 @@ namespace fft_writer
             }
             Ku_control();
             DISPLAY();
-    //        Pout_control();
-            textBox_Pin.Text = Convert.ToString(LVL_Pin_DBm); //выводим усреднённое значение входной мощности сигнала
+            z[0] = LVL_Pin_DBm;
+            filtr_usr2(z,MeM2,45);
+            var x = Math.Round(z[0],2);
+            textBox_Pin.Text = Convert.ToString(x); //выводим усреднённое значение входной мощности сигнала
             textBox_sch.Text = Convert.ToString(sch_packet);
             sch_packet = 0;
             filtr = 12000 / BUF_N * B_win;
             label8.Text = "полоса фильтра:" + Convert.ToString(filtr) + "кГц";
         }
+
 
         void Ku_control ()
         {
@@ -359,17 +360,21 @@ namespace fft_writer
             textBox_Ku.Text = Convert.ToString(Ku);
         }
 
+        double[][] MeM2 = new double[50][];
         void Pout_control ()
         {
-          while (true)
+            int i;
+            for (i=0;i<50;i++) MeM2[i] = new double[1];
+
+            while (true)
             {
                 double A = A_out;//распаковываем переменную
                 var Lvl_U = A / 32000 * 1;//выходной сигнал в вольтах
                 var Lvl_P = Math.Pow(Lvl_U, 2) / 50 * 1000;    //мощность в мВт
                 if (Lvl_P == 0) Lvl_P = 0.0000000001;
                 var Lvl_Pdbm = 10 * System.Math.Log10(Lvl_P); //мощность в ДБм
-                LVL_Pin_DBm = Math.Round(Convert.ToDouble(Lvl_Pdbm), 2);
-
+                var x = Math.Round(Convert.ToDouble(Lvl_Pdbm), 2);                                
+                LVL_Pin_DBm = x;
                 Thread.Sleep(0);
             }          
         }
@@ -582,7 +587,7 @@ namespace fft_writer
                     for (j = 0; j < N_temp; j++)
                     {
                         //	 A[j] = magLog[j];
-                        if (j < (N_temp / 2)) A[j] = magLog[j + (N_temp / 2)];
+                        if (j < ( N_temp / 2)) A[j] = magLog[j + (N_temp / 2)];
                         if (j > ((N_temp / 2) - 1)) A[j] = magLog[j - (N_temp / 2)];
                         t[j] = -3121 + (6250 * j / (N_temp));//важно сначала умножить а потом поделить!!!! атоноль
                                                              // Debug.WriteLine("t[]:"+t[j]);
@@ -594,8 +599,8 @@ namespace fft_writer
                         if (magLog[j] < 0) magLog[j] = 0;
                     }
 
-                    if (FLAG_filtr == 1) vid_filtr(magLog);
-                    if (FLAG_filtr == 2) filtr_usr2(magLog,MeM);
+                    if (FLAG_filtr == 1) filtr_usr2(magLog,MeM,10);
+                    if (FLAG_filtr == 2) filtr_usr2(magLog,MeM,30);
       
                     int k_max = 0;
                     double m1x, m1y;
@@ -608,8 +613,15 @@ namespace fft_writer
                     m1x = t[k_max];
                     m1y = A_max;
 
-                    if (BUF_N > 2048) step = (BUF_N / 80) - 20; else step = (BUF_N / 80);
+                    if (BUF_N == 4096) step = 50; else
+                    if (BUF_N == 2048) step = 40; else
+                    if (BUF_N == 1024) step = 30; else
+                    if (BUF_N ==  512) step = 25; else
+                    if (BUF_N ==  256) step = 15; else
+                    if (BUF_N ==  128) step = 10;
+                    else               step = 60;
 
+                    step  = (int)(step * B_win);
                     pstep = step / 2;
 
                     if (k_max > pstep && k_max < (BUF_N - step)) for (i = 0; i < step; i++) m_sort[k_max + i - pstep] = 0;
@@ -671,28 +683,7 @@ namespace fft_writer
             }            
         }
 
-       void filtr_usr(double []data,double[][] a,int k)//входные данные, входной зубчатый массив памяти (в нулевом массиве текущий массив данных )и глубина усреднения
-        {
-            int i;
-            int j;
-            double[] o = new double[data.Length];
-
-            Array.Copy(data,a[0],data.Length);
-
-            for (i=0;i<k;i++)
-            {
-                Array.Copy(a[k - i - 1], a[k - i], a[k - i - 1].Length); // [2]->[3] , [1]->[2] , [0]->[1]
-
-                for (j=0;j<a[i].Length;j++)
-                {
-                    o[j] = (o[j] + a[k - i][j]) / 2;
-                }
-            }
-            Array.Copy(o,data, data.Length);
-        }
-
-
-        void filtr_usr2(double[] data, double[][] a)//входные данные, входной зубчатый массив памяти (в нулевом массиве текущий массив данных )и глубина усреднения
+        void filtr_usr2(double[] data, double[][] a, int k)//входные данные, входной зубчатый массив памяти (в нулевом массиве текущий массив данных )и глубина усреднения
         {
             int i;
             int j;
@@ -700,68 +691,14 @@ namespace fft_writer
 
             for (j = 0; j < data.Length; j++)
             {
-                a[19][j] = a[18][j];
-                a[18][j] = a[17][j];
-                a[17][j] = a[16][j];
-                a[16][j] = a[15][j];
-                a[15][j] = a[14][j];
-                a[14][j] = a[13][j];
-                a[13][j] = a[12][j];
-                a[12][j] = a[11][j];
-                a[11][j] = a[10][j];
-                a[10][j] = a[ 9][j];
-                a[ 9][j] = a[ 8][j];
-                a[ 8][j] = a[ 7][j];
-                a[ 7][j] = a[ 6][j];
-                a[ 6][j] = a[ 5][j];
-                a[ 5][j] = a[ 4][j];
-                a[ 4][j] = a[ 3][j];
-                a[ 3][j] = a[ 2][j];
-                a[ 2][j] = a[ 1][j];
-                a[ 1][j] = a[ 0][j];
-                a[ 0][j] = data[j];
-                o[j] = (a[0][j] + a[1][j] + a[2][j] + a[3][j] + a[4][j] + a[5][j] + a[6][j] + a[7][j] + a[8][j] + a[9][j] +
-                        a[10][j] + a[11][j] + a[12][j] + a[13][j] + a[14][j] + a[15][j] + a[16][j] + a[17][j] + a[18][j] + a[19][j]) / 20;
-            }
+                for (i = 0; i < k; i++) if (i < (k - 1)) a[k - i - 1][j] = a[k - i - 2][j]; else a[k - i - 1][j] = data[j];
 
+                for (i = 0; i < k; i++) o[j] = (o[j] + a[i][j]);
+            }
+            for (j = 0; j < data.Length; j++) o[j] = o[j] / k;
+             
             Array.Copy(o, data, data.Length);
         }
-
-        double[] Z0 = new double[BUF_N];
-        double[] Z1 = new double[BUF_N];
-        double[] Z2 = new double[BUF_N];
-        double[] Z3 = new double[BUF_N];
-        double[] Z4 = new double[BUF_N];
-        double[] Z5 = new double[BUF_N];
-        double[] Z6 = new double[BUF_N];
-        double[] Z7 = new double[BUF_N];
-        double[] Z8 = new double[BUF_N];
-        double[] Z9 = new double[BUF_N];
-
-        double[] Z_end = new double[BUF_N];
-
-        void vid_filtr(double[] a)
-        {
-            int i = 0;
-
-            for (i = 0; i < BUF_N; i++)
-            {
-                Z9[i] = Z8[i];
-                Z8[i] = Z7[i];
-                Z7[i] = Z6[i];
-                Z6[i] = Z5[i];
-                Z5[i] = Z4[i];
-                Z4[i] = Z3[i];
-                Z3[i] = Z2[i];
-                Z2[i] = Z1[i];
-                Z1[i] = Z0[i];
-                Z0[i] =  a[i];
-
-                a[i] = (a[i] + Z0[i] + Z1[i] + Z2[i] + Z3[i] + Z4[i] + Z5[i] + Z6[i] + Z7[i] + Z8[i] + Z9[i]) / 11;
-            }
-        }
-
-        //-------------------------------------
         void SerialPort1DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
 		{
 		
@@ -819,7 +756,6 @@ namespace fft_writer
 		    
 		}
 
-
 		void array_save (int [] a,int N)
 		{
 			string text="";
@@ -831,8 +767,7 @@ namespace fft_writer
 		            {
 						text=text+Convert.ToString(a[i])+"\r\n";
 		            }
-			textFile.WriteLine(text);
-	          
+			textFile.WriteLine(text);	          
 			textFile.Close();
 		}
 	

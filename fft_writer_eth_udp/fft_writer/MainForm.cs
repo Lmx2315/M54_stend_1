@@ -79,12 +79,13 @@ namespace fft_writer
         string text_from_file;
         int Flag_comport_rcv = 0;
         string selectedWindowName;
+        int FLAG_CALIBROVKA = 0;
         
         double LVL_Pin_DBm=0;//входная измеренная мощность сигнала (для контроля коэфф. передачи и коэфф. шума)
 
-         Plot fig1 = new Plot(100,"I Input", "Sample", "Вольт","","","","","");
-	     Plot fig2 = new Plot(100,"Q Input", "Sample", "Вольт","","","","","");
-		 Plot fig3 = new Plot(100,"FFT (dBV)", "кГц", "Mag (dBV)","","","","","");    	
+         Plot fig1 = new Plot(90,"I Input", "Sample", "Вольт","","","","","");
+	     Plot fig2 = new Plot(90,"Q Input", "Sample", "Вольт","","","","","");
+		 Plot fig3 = new Plot(90,"FFT (dBV)", "кГц", "Mag (dBV)","","","","","");    	
 
         private void MainForm_FormClosing(Object sender, FormClosingEventArgs e)
         {
@@ -261,6 +262,7 @@ namespace fft_writer
 
         void MSG_collector()
         {
+            int i;
            if (RCV[0] == 1) Array.Copy(RCV, BUFFER_1, BUF_N*4);//копируем массив отсчётов в форму обработки 
            if (RCV[0] == 2) Array.Copy(RCV, BUFFER_2, BUF_N*4);//
 
@@ -396,8 +398,7 @@ namespace fft_writer
             return Math.Log(number) / Math.Log(log_base);
         }
 
-        int post_U_i=0;
-        int post_U_q=0;
+
         int km = 0;
         double A_out = 0;
 
@@ -456,11 +457,11 @@ namespace fft_writer
 
                     DSPLib.DSP.Window.Type windowToApply = (DSPLib.DSP.Window.Type)Enum.Parse(typeof(DSPLib.DSP.Window.Type), selectedWindowName);
 
+                    int post_U_i = 0;
+                    int post_U_q = 0;
+
                     for (i = 0; i < N_temp; i++)
                     {
-                        //fft_array_x[i] = Convert.ToDouble(packet_data_i[i]- rcv_func.mat_oj_i); //удаляем постояннуюу составляющую высчитанную ранее
-                        //fft_array_y[i] = Convert.ToDouble(packet_data_q[i]- rcv_func.mat_oj_q);
-
                         if (packet_data_i[i] > 32767)
                         {
                             z = (uint)(packet_data_i[i]);
@@ -477,32 +478,35 @@ namespace fft_writer
                         }
                         else packet_data_q[i] = Convert.ToInt32(packet_data_q[i]);
 
-                        fft_array_x[i] = Convert.ToDouble(packet_data_i[i] - post_U_i); //
-                        fft_array_y[i] = Convert.ToDouble(packet_data_q[i] - post_U_q);
+                        post_U_i = (post_U_i + packet_data_i[i]) /2;
+                        post_U_q = (post_U_q + packet_data_q[i]) /2;
                     }
 
-                    //  Plot Time Series data
-                    //  fig1.PlotData(windowedTimeSeries_q);
-                    //  fig1.Show();
-
-                    //  Plot Time Series data
-                    //  fig2.PlotData(windowedTimeSeries_i);
-                    //  fig2.Show();
-
-                    // Instantiate & Initialize the FFT class - это вещественная FFt сейчас не используем.
-                    //            DSPLib.FFT fft = new DSPLib.FFT();
-                    //            fft.Initialize(2 * N_temp, zeros);
-            
-
+       //            Debug.WriteLine("post_U_i:" + post_U_i);
+       //            Debug.WriteLine("post_U_q:" + post_U_q);
+                    
+                        for (i = 0; i < fft_array_x.Length; i++)
+                        {
+                            if (FLAG_CALIBROVKA == 1)
+                            {
+                                fft_array_x[i] = Convert.ToDouble(packet_data_i[i] - post_U_i);
+                                fft_array_y[i] = Convert.ToDouble(packet_data_q[i] - post_U_q);
+                            }
+                            else
+                                {
+                                 fft_array_x[i] = Convert.ToDouble(packet_data_i[i]);
+                                 fft_array_y[i] = Convert.ToDouble(packet_data_q[i]);
+                                }
+                        }                 
+                    
                     int k = Convert.ToInt16(LogBase(N_temp, 2));//порядок БПФ
-
-                    // Perform a DFT
-                    // System.Numerics.Complex[] cpxResult = fft.Execute(windowedTimeSeries);
 
                     FFTLibrary.Complex fft_z = new FFTLibrary.Complex();
                     FFTLibrary.Complex fft_h = new FFTLibrary.Complex();//fft для импульсной характеристики фильтра
-                                                                        //       FFTLibrary.Complex fft_x = new FFTLibrary.Complex();//fft для водных данных
 
+                    if (btn_corr_spectr.Text == "ON") //включена коррекция АЧХ
+                {                   
+               
                     double[] fh_i = new double[N_temp * 2];
                     double[] fh_q = new double[N_temp * 2];
 
@@ -539,11 +543,10 @@ namespace fft_writer
 
                     fft_h.FFT(-1, k + 1, fx_i, fx_q);//высчитываем обратное  БПФ 
 
-                    if (btn_corr_spectr.Text == "ON") //включена коррекция АЧХ
-                    {
+                   
                         Array.Copy(fx_i, fft_array_x, N_temp);
                         Array.Copy(fx_q, fft_array_y, N_temp);
-                    }
+                  }
 
                     // Apply window to the time series data
                     double[] wc = DSP.Window.Coefficients(windowToApply, N_temp);
@@ -1299,6 +1302,11 @@ namespace fft_writer
         private void textBox_Level_in_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            if (FLAG_CALIBROVKA == 0) FLAG_CALIBROVKA = 1; else FLAG_CALIBROVKA = 0;
         }
 
         void Kih_load ()

@@ -40,7 +40,8 @@ namespace PlotWrapper
         private string mDB2;
         private string mdelta1_DB;
         private string mdelta2_DB;
-        private double mMax;     
+        private double mMax;
+        private double mMin;
 
         public Plot(double max,string mainTitle, string xAxisTitle, string yAxisTitle,string DB0,string DB1,string DB2, string delta1_DB, string delta2_DB)
         {
@@ -56,6 +57,7 @@ namespace PlotWrapper
             mdelta1_DB = delta1_DB;
             mdelta2_DB = delta2_DB;
             mMax = max;
+            mMin = 0;
         }
 
         private void Plot_Load(object sender, EventArgs e)
@@ -68,6 +70,7 @@ namespace PlotWrapper
             chart1.ChartAreas["ChartArea1"].AxisX.Minimum = -3125;
             chart1.ChartAreas["ChartArea1"].AxisX.Maximum =  3125;
             chart1.ChartAreas["ChartArea1"].AxisY.Maximum = mMax;
+            chart1.ChartAreas["ChartArea1"].AxisY.Minimum = mMin;
             chart1.ChartAreas[0].AxisY.Interval = 10;
             chart1.ChartAreas[0].AxisX.Interval = 250;
 
@@ -79,8 +82,7 @@ namespace PlotWrapper
 
             // Enable zooming
             chart1.ChartAreas[0].CursorX.IsUserSelectionEnabled = true;
-            chart1.ChartAreas[0].CursorY.IsUserSelectionEnabled = true;
-           
+            chart1.ChartAreas[0].CursorY.IsUserSelectionEnabled = true;           
         }
 
         // Line chart

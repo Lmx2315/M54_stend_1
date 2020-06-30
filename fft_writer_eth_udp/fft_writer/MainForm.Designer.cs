@@ -145,6 +145,7 @@ namespace fft_writer
             this.label41 = new System.Windows.Forms.Label();
             this.textBox_Pin = new System.Windows.Forms.TextBox();
             this.label42 = new System.Windows.Forms.Label();
+            this.button4 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // my_port_box
@@ -1080,11 +1081,23 @@ namespace fft_writer
             this.label42.TabIndex = 91;
             this.label42.Text = "(полоса = 5МГц)";
             // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(29, 352);
+            this.button4.Margin = new System.Windows.Forms.Padding(4);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(100, 28);
+            this.button4.TabIndex = 92;
+            this.button4.Text = "калибровка";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(917, 528);
+            this.Controls.Add(this.button4);
             this.Controls.Add(this.label42);
             this.Controls.Add(this.label40);
             this.Controls.Add(this.label41);
@@ -1266,5 +1279,6 @@ namespace fft_writer
         private System.Windows.Forms.Label label41;
         private System.Windows.Forms.TextBox textBox_Pin;
         private System.Windows.Forms.Label label42;
+        private System.Windows.Forms.Button button4;
     }
 }

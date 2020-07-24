@@ -28,8 +28,6 @@ using MinimalisticTelnet;
 using System.Linq;
 //using FFTLibrary;
 
-
-
 namespace fft_writer
 {
 	/// <summary>
@@ -46,8 +44,8 @@ namespace fft_writer
 			//
 			InitializeComponent();
 			Debug.WriteLine("Debug Information-Product Starting ");
-			Debug.WriteLine("------------------------ ");
-		}
+			Debug.WriteLine("------------------------ ");            
+        }
         //----------ETH------------
         UdpClient _server      = null;
         IPEndPoint _client     = null;
@@ -71,16 +69,18 @@ namespace fft_writer
 		int flag_NEW_FFT;
         byte[] buf = new byte[64];
 
-        double filtr = 0;
+        double filtr   = 0;
         int sch_packet = 0;
-        int FLAG_filtr = 0;
+        int FLAG_filtr = 0; //по умлочанию стоит AVG1
 
         string fileName;
         string text_from_file;
         int Flag_comport_rcv = 0;
         string selectedWindowName;
         int FLAG_CALIBROVKA = 0;
-        
+        string DATA0_IQ_TEXT = ""; //в этой переменной храним записываемые данные, принятые из поделки
+        string DATA1_IQ_TEXT = ""; //в этой переменной храним записываемые данные, принятые из поделки
+
         double LVL_Pin_DBm=0;//входная измеренная мощность сигнала (для контроля коэфф. передачи и коэфф. шума)
 
          Plot fig1 = new Plot(90,"I Input", "Sample", "Вольт","","","","","");
@@ -188,6 +188,8 @@ namespace fft_writer
             }
         }
 
+        Object DATAIQ = new Object();
+
         int FLAG_UDP_RCV = 0;
         string COMMAND_FOR_SERVER="HOMEWORLD!!!\n";
         int DATA_size = 0;
@@ -202,16 +204,20 @@ namespace fft_writer
                 if (this.Disposing) return;
                 try
                 { //receieve a message form a client.
-                    if (FLAG_BUF_SW == 1)  //тут висим пока не приходят данные
+                    lock (DATAIQ)
                     {
-                        DATA_SW0 = _server.Receive(ref _client);
-                        FLAG_BUF_SW = 0;
+                        if (FLAG_BUF_SW == 1)  //тут висим пока не приходят данные
+                        {
+                            DATA_SW0 = _server.Receive(ref _client);
+                            FLAG_BUF_SW = 0;
+                        }
+                        else
+                        {
+                            DATA_SW1 = _server.Receive(ref _client);
+                            FLAG_BUF_SW = 1;
+                        }
                     }
-                    else
-                    {
-                        DATA_SW1 = _server.Receive(ref _client);
-                        FLAG_BUF_SW = 1;
-                    }
+                    
                 }
                 catch (Exception excp)
                 {
@@ -238,20 +244,22 @@ namespace fft_writer
             {
                 if (FLAG_UDP_RCV == 1)
                 {
-                 //   
-                    if (FLAG_BUF_SW == 0)
-                    {
-                        Array.Copy(DATA_SW0, RCV, DATA_SW0.Length);//копируем массив отсчётов в форму обработки 
-                        FLAG_DATA_NEW = "0";
-                        DATA_size = DATA_SW0.Length;
+                    lock (DATAIQ)
+                      {
+                        if (FLAG_BUF_SW == 0)
+                        {
+                            Array.Copy(DATA_SW0, RCV, DATA_SW0.Length);//копируем массив отсчётов в форму обработки 
+                            FLAG_DATA_NEW = "0";
+                            DATA_size = DATA_SW0.Length;
+                        }
+                        if (FLAG_BUF_SW == 1)
+                        {
+                            Array.Copy(DATA_SW1, RCV, DATA_SW1.Length);//копируем массив отсчётов в форму обработки
+                            FLAG_DATA_NEW = "1";
+                            DATA_size = DATA_SW1.Length;
+                        }
+                        FLAG_UDP_RCV = 0;
                     }
-                    if (FLAG_BUF_SW == 1)
-                    {
-                        Array.Copy(DATA_SW1, RCV, DATA_SW1.Length);//копируем массив отсчётов в форму обработки
-                        FLAG_DATA_NEW = "1";
-                        DATA_size = DATA_SW1.Length;
-                    }
-                    FLAG_UDP_RCV = 0;
                 }
                 Thread.Sleep(0);
             }
@@ -262,18 +270,20 @@ namespace fft_writer
 
         void MSG_collector()
         {
-            int i;
            if (RCV[0] == 1) Array.Copy(RCV, BUFFER_1, BUF_N*4);//копируем массив отсчётов в форму обработки 
            if (RCV[0] == 2) Array.Copy(RCV, BUFFER_2, BUF_N*4);//
 
            if (Convert.ToByte(channal_box.Text) == 1) { BUF_convert(BUFFER_1, DATA_size); }
-           if (Convert.ToByte(channal_box.Text) == 2) { BUF_convert(BUFFER_2, DATA_size); }
+           if (Convert.ToByte(channal_box.Text) == 2) { BUF_convert(BUFFER_2, DATA_size); }           
 
-            Array.Copy(data_0_i, packet_data_q, BUF_N);//копируем массив отсчётов в форму обработки	
-            Array.Copy(data_0_q, packet_data_i, BUF_N);//копируем массив отсчётов в форму обработки	
-
-            flag_NEW_FFT = 1;//сообщаем форме что пришёл новый массив fft
-          //  fft_out();
+            if (flag_NEW_FFT == 0)
+            {
+                Array.Copy(data_0_i, packet_data_q, BUF_N);//копируем массив отсчётов в форму обработки	
+                Array.Copy(data_0_q, packet_data_i, BUF_N);//копируем массив отсчётов в форму обработки	
+               
+                flag_NEW_FFT = 1;//сообщаем форме что пришёл новый массив fft
+           //     fft_out();
+            }
         }
 
         private void ShowMsg(string msg)
@@ -383,10 +393,11 @@ namespace fft_writer
 
         void MainFormLoad(object sender, EventArgs e)
 		{
-			//fft_form.Show(this);
-			BUF_N =Convert.ToInt16(text_N_fft.Text);
+            IH_load();
+            BUF_N =Convert.ToInt16(text_N_fft.Text);
 			// Load window combo box with the Window Names (from ENUMS)
             cmbWindow.DataSource = Enum.GetNames(typeof(DSPLib.DSP.Window.Type));
+            cmbWindow.SelectedIndex = 5;//Hann
 #if TEST
             label_test.Visible = true;
 #endif
@@ -424,11 +435,11 @@ namespace fft_writer
                MeM[i] = new double[BUF_N];//формируем зубчатый массив памяти
             }
 
-           while ((true) && (FLAG_THREAD == "start"))
+          while ((true) && (FLAG_THREAD == "start"))
             {
                 if (flag_NEW_FFT == 1)
                 {
-                    flag_NEW_FFT = 0;
+        
                     UInt32 zeros = Convert.ToUInt32(0);
                     uint N_temp;
                     int N_complex;
@@ -494,8 +505,11 @@ namespace fft_writer
                             }
                             else
                                 {
-                                 fft_array_x[i] = Convert.ToDouble(packet_data_i[i]);
-                                 fft_array_y[i] = Convert.ToDouble(packet_data_q[i]);
+                        //         fft_array_x[i] = Convert.ToDouble(packet_data_i[i]);//переводим данные из целочисленного в вид с плаывующей точкой
+                        //         fft_array_y[i] = Convert.ToDouble(packet_data_q[i]);
+
+                                 fft_array_x[i] = (double)packet_data_i[i];//переводим данные из целочисленного в вид с плаывующей точкой
+                                 fft_array_y[i] = (double)packet_data_q[i];
                                 }
                         }                 
                     
@@ -532,7 +546,7 @@ namespace fft_writer
                         HxResult[i] = new System.Numerics.Complex(fh_i[i], fh_q[i]);//конвертируем в комплексный вектор
                         XxResult[i] = new System.Numerics.Complex(fx_i[i], fx_q[i]);
                         ZxResult[i] = Complex.Multiply(HxResult[i], XxResult[i]);   //перемножаем комплексные числа обработанной ИХ и входных данных
-                        ZxResult[i] = Complex.Divide(ZxResult[i], 10);
+                        ZxResult[i] = Complex.Divide(ZxResult[i],10);//10
                     }
 
                     for (i = 0; i < (N_complex * 2); i++)
@@ -542,8 +556,7 @@ namespace fft_writer
                     }
 
                     fft_h.FFT(-1, k + 1, fx_i, fx_q);//высчитываем обратное  БПФ 
-
-                   
+                                           
                         Array.Copy(fx_i, fft_array_x, N_temp);
                         Array.Copy(fx_q, fft_array_y, N_temp);
                   }
@@ -567,7 +580,7 @@ namespace fft_writer
 
                     // (km, A_out) = MAX_f(magA, BUF_N);
                     //------------------Расчитываем БПФ----------------------------------------
-                    fft_z.FFT(1, k, windowedTimeSeries_i, windowedTimeSeries_q);                    
+                    fft_z.FFT(1, k, windowedTimeSeries_i, windowedTimeSeries_q);  //внутри FFT происходит масштабирование расчитанных данных!                  
 
                     for (i = 0; i < N_complex; i++)
                     {
@@ -583,7 +596,7 @@ namespace fft_writer
 
                     // Convert and Plot Log Magnitude
                     double[] mag = DSP.ConvertComplex.ToMagnitude(cpxResult);
-                    mag = DSP.Math.Multiply(mag, 1);
+             //       mag = DSP.Math.Multiply(mag, 1);
                     double[] magLog = DSP.ConvertMagnitude.ToMagnitudeDBV(mag);
                     int j;
 
@@ -599,7 +612,7 @@ namespace fft_writer
                     for (j = 0; j < N_temp; j++)
                     {
                         magLog[j] = A[N_temp - 1 - j];
-                        if (magLog[j] < 0) magLog[j] = 0;
+    //                  if (magLog[j] < 0) magLog[j] = 0;
                     }
 
                     if (FLAG_filtr == 1) filtr_usr2(magLog,MeM,10);
@@ -661,7 +674,9 @@ namespace fft_writer
                     M3X = m3x;
                     M3Y = m3y;
                     FLAG_DISPAY = "1";
+                    flag_NEW_FFT = 0;
                 }
+
                 Thread.Sleep(0);
             }
         }
@@ -992,6 +1007,7 @@ namespace fft_writer
 
         private void button3_Click(object sender, EventArgs e)
         {
+            FLAG_filtr = 0;
             if (_isServerStarted==true)  timer3.Enabled = true;
             timer3.Interval = Convert.ToInt32(textBox_freq_delay.Text);
             freq_start = Convert.ToInt32(textBox_freq_start.Text);
@@ -1088,6 +1104,7 @@ namespace fft_writer
               //  progressBar1.Value = 100;
                 timer3.Enabled = false;
                 flag_progress = 0;
+                FLAG_filtr = 1;
                 ACH_error(freq_setup);//в режиме калибровки
                 progressBar1.Visible = false;
             }
@@ -1306,7 +1323,7 @@ namespace fft_writer
 
         private void button4_Click(object sender, EventArgs e)
         {
-            if (FLAG_CALIBROVKA == 0) FLAG_CALIBROVKA = 1; else FLAG_CALIBROVKA = 0;
+            if (FLAG_CALIBROVKA == 0) FLAG_CALIBROVKA = 1; else FLAG_CALIBROVKA = 0; //убирает постояннуюу составляющую!!!???
         }
 
         void Kih_load ()
@@ -1409,7 +1426,7 @@ namespace fft_writer
             Array.Copy(windowedTimeSeries_i, H_i, Korre_IH);
             Array.Copy(windowedTimeSeries_q, H_q, Korre_IH);
 
-            //---------------вводим усиление вектора ИХ-----------------
+            //---------------вводим усиление вектора ИХ------------
             H_i = DSP.Math.Multiply(H_i, 32767);
             H_q = DSP.Math.Multiply(H_q, 32767);
             //-----------------------------------------------------           
@@ -1452,6 +1469,63 @@ namespace fft_writer
             //MessageBox.Show("Файл сохранен");
         }
 
+        private void cmbWindow_ValueMemberChanged(object sender, EventArgs e)
+        {
+
+        }
+
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            DATA_CONVERT_TO_TEXT();
+            saveFileDialog2.Filter = "data|*.dat";
+            saveFileDialog2.Title = "Сохряняем массив принятый данных";
+            if (saveFileDialog2.ShowDialog() == DialogResult.Cancel)   return;
+            // сохраняем текст в файл
+            string filename =saveFileDialog2.FileName;
+            try
+            {
+                 System.IO.File.WriteAllText(filename, DATA0_IQ_TEXT);
+            }
+            catch
+            {
+
+            }
+        }
+
+        void DATA_CONVERT_TO_TEXT () //тут готовим данные из буфера к сохранению в файл, сохраняется N+1 данных чтобы получился ровный смещёный в центр - спектр
+        {
+            uint z;
+            int i = 0;
+            int n = Convert.ToInt32(text_N_fft.Text)-1;
+
+            for (i = 0; i < (n+1); i++)
+            {
+                if (packet_data_i[i] > 32767)
+                {
+                    z = (uint)(packet_data_i[i]);
+                    z = (~z) & 0xffff;
+                    packet_data_i[i] = -1 * Convert.ToInt32(z + 1);
+                }
+                else packet_data_i[i] = Convert.ToInt32(packet_data_i[i]);
+
+                if (packet_data_q[i] > 32767)
+                {
+                    z = (uint)(packet_data_q[i]);
+                    z = (~z) & 0xffff;
+                    packet_data_q[i] = -1 * Convert.ToInt32(z + 1);
+                }
+                else packet_data_q[i] = Convert.ToInt32(packet_data_q[i]);
+            }
+
+            DATA0_IQ_TEXT = "";
+            for (i=0;i<(n+1);i++)
+            {
+                if (i < n) DATA0_IQ_TEXT = DATA0_IQ_TEXT + packet_data_i[i].ToString() + "," + packet_data_q[i].ToString() + ";" + "\r\n";
+                else             DATA0_IQ_TEXT = DATA0_IQ_TEXT + packet_data_i[i].ToString() + "," + packet_data_q[i].ToString() + ";";
+            }
+        }
+
         int sch_line (string a)
         {
             int n = 0;
@@ -1485,6 +1559,29 @@ namespace fft_writer
 
                 }                
             }            
+        }
+
+        void IH_load ()
+        {
+            string path = @"x.txt";
+            StreamReader sr = new StreamReader(path);
+
+            if (sr!=null)
+            {
+                try
+                {
+                    VAR_IH_data.z = System.IO.File.ReadAllText(path);
+                    VAR_IH_data.lenght = sch_line(VAR_IH_data.z) - 2;
+                    FLAG_IH_load = true;
+                    Kih_load();
+                    ACH_error(1);
+                    btn_load_ach.ForeColor = Color.Green;
+                }
+                catch
+                {
+
+                }
+            }
         }
 
         int find_number (int freq,double [] m)//ищет ближайший порядковый номер в массиве частот

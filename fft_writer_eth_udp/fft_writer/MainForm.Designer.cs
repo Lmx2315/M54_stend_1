@@ -146,6 +146,9 @@ namespace fft_writer
             this.textBox_Pin = new System.Windows.Forms.TextBox();
             this.label42 = new System.Windows.Forms.Label();
             this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
+            this.saveFileDialog2 = new System.Windows.Forms.SaveFileDialog();
+            this.label43 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // my_port_box
@@ -192,6 +195,7 @@ namespace fft_writer
             this.save_botton.TabIndex = 6;
             this.save_botton.Text = "save";
             this.save_botton.UseVisualStyleBackColor = true;
+            this.save_botton.Visible = false;
             this.save_botton.Click += new System.EventHandler(this.Save_bottonClick);
             // 
             // Console1
@@ -263,6 +267,7 @@ namespace fft_writer
             this.cmbWindow.Size = new System.Drawing.Size(132, 24);
             this.cmbWindow.TabIndex = 14;
             this.cmbWindow.SelectedIndexChanged += new System.EventHandler(this.cmbWindow_SelectedIndexChanged);
+            this.cmbWindow.ValueMemberChanged += new System.EventHandler(this.cmbWindow_ValueMemberChanged);
             // 
             // my_ip_box
             // 
@@ -345,7 +350,7 @@ namespace fft_writer
             this.channal_box.Name = "channal_box";
             this.channal_box.Size = new System.Drawing.Size(99, 22);
             this.channal_box.TabIndex = 22;
-            this.channal_box.Text = "1";
+            this.channal_box.Text = "2";
             this.channal_box.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label7
@@ -544,10 +549,12 @@ namespace fft_writer
             // 
             // textBox_com_port
             // 
+            this.textBox_com_port.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.textBox_com_port.Location = new System.Drawing.Point(748, 28);
             this.textBox_com_port.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_com_port.Multiline = true;
             this.textBox_com_port.Name = "textBox_com_port";
-            this.textBox_com_port.Size = new System.Drawing.Size(99, 22);
+            this.textBox_com_port.Size = new System.Drawing.Size(99, 44);
             this.textBox_com_port.TabIndex = 39;
             this.textBox_com_port.Text = "COM5";
             this.textBox_com_port.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -555,10 +562,10 @@ namespace fft_writer
             // 
             // btn_com_open
             // 
-            this.btn_com_open.Location = new System.Drawing.Point(856, 62);
+            this.btn_com_open.Location = new System.Drawing.Point(856, 86);
             this.btn_com_open.Margin = new System.Windows.Forms.Padding(4);
             this.btn_com_open.Name = "btn_com_open";
-            this.btn_com_open.Size = new System.Drawing.Size(52, 28);
+            this.btn_com_open.Size = new System.Drawing.Size(52, 45);
             this.btn_com_open.TabIndex = 41;
             this.btn_com_open.Text = "send";
             this.btn_com_open.UseVisualStyleBackColor = true;
@@ -573,7 +580,7 @@ namespace fft_writer
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(703, 117);
+            this.label16.Location = new System.Drawing.Point(703, 164);
             this.label16.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(25, 16);
@@ -583,7 +590,7 @@ namespace fft_writer
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(703, 100);
+            this.label17.Location = new System.Drawing.Point(703, 147);
             this.label17.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(38, 16);
@@ -592,10 +599,12 @@ namespace fft_writer
             // 
             // textBox_att_m54
             // 
-            this.textBox_att_m54.Location = new System.Drawing.Point(748, 96);
+            this.textBox_att_m54.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBox_att_m54.Location = new System.Drawing.Point(748, 146);
             this.textBox_att_m54.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_att_m54.Multiline = true;
             this.textBox_att_m54.Name = "textBox_att_m54";
-            this.textBox_att_m54.Size = new System.Drawing.Size(99, 22);
+            this.textBox_att_m54.Size = new System.Drawing.Size(99, 44);
             this.textBox_att_m54.TabIndex = 45;
             this.textBox_att_m54.Text = "31";
             this.textBox_att_m54.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -603,7 +612,7 @@ namespace fft_writer
             // label18
             // 
             this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(703, 73);
+            this.label18.Location = new System.Drawing.Point(704, 115);
             this.label18.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(23, 16);
@@ -613,7 +622,7 @@ namespace fft_writer
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(703, 53);
+            this.label19.Location = new System.Drawing.Point(704, 95);
             this.label19.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(36, 16);
@@ -622,10 +631,12 @@ namespace fft_writer
             // 
             // textBox_freq_m54
             // 
-            this.textBox_freq_m54.Location = new System.Drawing.Point(748, 64);
+            this.textBox_freq_m54.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBox_freq_m54.Location = new System.Drawing.Point(748, 86);
             this.textBox_freq_m54.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_freq_m54.Multiline = true;
             this.textBox_freq_m54.Name = "textBox_freq_m54";
-            this.textBox_freq_m54.Size = new System.Drawing.Size(99, 22);
+            this.textBox_freq_m54.Size = new System.Drawing.Size(99, 44);
             this.textBox_freq_m54.TabIndex = 42;
             this.textBox_freq_m54.Text = "435000000";
             this.textBox_freq_m54.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -758,7 +769,7 @@ namespace fft_writer
             this.textBox_freq_delay.Name = "textBox_freq_delay";
             this.textBox_freq_delay.Size = new System.Drawing.Size(99, 22);
             this.textBox_freq_delay.TabIndex = 58;
-            this.textBox_freq_delay.Text = "300";
+            this.textBox_freq_delay.Text = "400";
             this.textBox_freq_delay.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // button3
@@ -792,7 +803,7 @@ namespace fft_writer
             this.btn_corr_spectr.Name = "btn_corr_spectr";
             this.btn_corr_spectr.Size = new System.Drawing.Size(100, 28);
             this.btn_corr_spectr.TabIndex = 63;
-            this.btn_corr_spectr.Text = "OFF";
+            this.btn_corr_spectr.Text = "ON";
             this.btn_corr_spectr.UseVisualStyleBackColor = true;
             this.btn_corr_spectr.Click += new System.EventHandler(this.btn_corr_spectr_Click);
             // 
@@ -805,13 +816,14 @@ namespace fft_writer
             this.label28.Size = new System.Drawing.Size(107, 16);
             this.label28.TabIndex = 64;
             this.label28.Text = "Коррекция АЧХ";
+            this.label28.Visible = false;
             // 
             // btn_com_open_2
             // 
-            this.btn_com_open_2.Location = new System.Drawing.Point(856, 94);
+            this.btn_com_open_2.Location = new System.Drawing.Point(855, 147);
             this.btn_com_open_2.Margin = new System.Windows.Forms.Padding(4);
             this.btn_com_open_2.Name = "btn_com_open_2";
-            this.btn_com_open_2.Size = new System.Drawing.Size(52, 28);
+            this.btn_com_open_2.Size = new System.Drawing.Size(52, 43);
             this.btn_com_open_2.TabIndex = 65;
             this.btn_com_open_2.Text = "send";
             this.btn_com_open_2.UseVisualStyleBackColor = true;
@@ -836,6 +848,7 @@ namespace fft_writer
             this.btn_calibrovka.TabIndex = 67;
             this.btn_calibrovka.Text = "калибровка";
             this.btn_calibrovka.UseVisualStyleBackColor = true;
+            this.btn_calibrovka.Visible = false;
             this.btn_calibrovka.Click += new System.EventHandler(this.btn_calibrovka_Click);
             // 
             // btn_load_ach
@@ -847,6 +860,7 @@ namespace fft_writer
             this.btn_load_ach.TabIndex = 68;
             this.btn_load_ach.Text = "load кор ИХ";
             this.btn_load_ach.UseVisualStyleBackColor = true;
+            this.btn_load_ach.Visible = false;
             this.btn_load_ach.Click += new System.EventHandler(this.btn_load_ach_Click);
             // 
             // checkBox1
@@ -859,6 +873,7 @@ namespace fft_writer
             this.checkBox1.TabIndex = 69;
             this.checkBox1.Text = "показать";
             this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.Visible = false;
             this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // label_test
@@ -876,10 +891,12 @@ namespace fft_writer
             // 
             // textBox_error_ach
             // 
-            this.textBox_error_ach.Location = new System.Drawing.Point(286, 213);
+            this.textBox_error_ach.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBox_error_ach.Location = new System.Drawing.Point(273, 202);
             this.textBox_error_ach.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_error_ach.Multiline = true;
             this.textBox_error_ach.Name = "textBox_error_ach";
-            this.textBox_error_ach.Size = new System.Drawing.Size(86, 22);
+            this.textBox_error_ach.Size = new System.Drawing.Size(99, 33);
             this.textBox_error_ach.TabIndex = 72;
             this.textBox_error_ach.Text = "0";
             this.textBox_error_ach.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -887,17 +904,18 @@ namespace fft_writer
             // label30
             // 
             this.label30.AutoSize = true;
-            this.label30.Location = new System.Drawing.Point(268, 194);
+            this.label30.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label30.Location = new System.Drawing.Point(282, 182);
             this.label30.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label30.Name = "label30";
-            this.label30.Size = new System.Drawing.Size(80, 16);
+            this.label30.Size = new System.Drawing.Size(90, 16);
             this.label30.TabIndex = 73;
             this.label30.Text = "нерав. АЧХ";
             // 
             // label31
             // 
             this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(253, 213);
+            this.label31.Location = new System.Drawing.Point(381, 213);
             this.label31.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label31.Name = "label31";
             this.label31.Size = new System.Drawing.Size(25, 16);
@@ -982,10 +1000,12 @@ namespace fft_writer
             // 
             // textBox_Level_in
             // 
+            this.textBox_Level_in.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.textBox_Level_in.Location = new System.Drawing.Point(511, 313);
             this.textBox_Level_in.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_Level_in.Multiline = true;
             this.textBox_Level_in.Name = "textBox_Level_in";
-            this.textBox_Level_in.Size = new System.Drawing.Size(132, 22);
+            this.textBox_Level_in.Size = new System.Drawing.Size(132, 37);
             this.textBox_Level_in.TabIndex = 82;
             this.textBox_Level_in.Text = "-5";
             this.textBox_Level_in.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -1004,7 +1024,7 @@ namespace fft_writer
             // label34
             // 
             this.label34.AutoSize = true;
-            this.label34.Location = new System.Drawing.Point(651, 316);
+            this.label34.Location = new System.Drawing.Point(651, 322);
             this.label34.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label34.Name = "label34";
             this.label34.Size = new System.Drawing.Size(34, 16);
@@ -1013,10 +1033,12 @@ namespace fft_writer
             // 
             // textBox_Ku
             // 
-            this.textBox_Ku.Location = new System.Drawing.Point(511, 361);
+            this.textBox_Ku.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBox_Ku.Location = new System.Drawing.Point(511, 374);
             this.textBox_Ku.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_Ku.Multiline = true;
             this.textBox_Ku.Name = "textBox_Ku";
-            this.textBox_Ku.Size = new System.Drawing.Size(132, 22);
+            this.textBox_Ku.Size = new System.Drawing.Size(132, 39);
             this.textBox_Ku.TabIndex = 85;
             this.textBox_Ku.Text = "0";
             this.textBox_Ku.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -1024,7 +1046,7 @@ namespace fft_writer
             // label38
             // 
             this.label38.AutoSize = true;
-            this.label38.Location = new System.Drawing.Point(485, 341);
+            this.label38.Location = new System.Drawing.Point(485, 354);
             this.label38.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label38.Name = "label38";
             this.label38.Size = new System.Drawing.Size(197, 16);
@@ -1034,7 +1056,7 @@ namespace fft_writer
             // label39
             // 
             this.label39.AutoSize = true;
-            this.label39.Location = new System.Drawing.Point(651, 364);
+            this.label39.Location = new System.Drawing.Point(652, 391);
             this.label39.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label39.Name = "label39";
             this.label39.Size = new System.Drawing.Size(25, 16);
@@ -1044,7 +1066,7 @@ namespace fft_writer
             // label40
             // 
             this.label40.AutoSize = true;
-            this.label40.Location = new System.Drawing.Point(651, 414);
+            this.label40.Location = new System.Drawing.Point(652, 452);
             this.label40.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label40.Name = "label40";
             this.label40.Size = new System.Drawing.Size(34, 16);
@@ -1054,7 +1076,7 @@ namespace fft_writer
             // label41
             // 
             this.label41.AutoSize = true;
-            this.label41.Location = new System.Drawing.Point(485, 391);
+            this.label41.Location = new System.Drawing.Point(485, 417);
             this.label41.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label41.Name = "label41";
             this.label41.Size = new System.Drawing.Size(342, 16);
@@ -1063,10 +1085,12 @@ namespace fft_writer
             // 
             // textBox_Pin
             // 
-            this.textBox_Pin.Location = new System.Drawing.Point(511, 411);
+            this.textBox_Pin.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBox_Pin.Location = new System.Drawing.Point(511, 437);
             this.textBox_Pin.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_Pin.Multiline = true;
             this.textBox_Pin.Name = "textBox_Pin";
-            this.textBox_Pin.Size = new System.Drawing.Size(132, 22);
+            this.textBox_Pin.Size = new System.Drawing.Size(132, 42);
             this.textBox_Pin.TabIndex = 88;
             this.textBox_Pin.Text = "0";
             this.textBox_Pin.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -1074,7 +1098,7 @@ namespace fft_writer
             // label42
             // 
             this.label42.AutoSize = true;
-            this.label42.Location = new System.Drawing.Point(693, 414);
+            this.label42.Location = new System.Drawing.Point(694, 452);
             this.label42.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label42.Name = "label42";
             this.label42.Size = new System.Drawing.Size(109, 16);
@@ -1090,13 +1114,36 @@ namespace fft_writer
             this.button4.TabIndex = 92;
             this.button4.Text = "калибровка";
             this.button4.UseVisualStyleBackColor = true;
+            this.button4.Visible = false;
             this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(29, 391);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(100, 24);
+            this.button5.TabIndex = 93;
+            this.button5.Text = "SAVE DATA";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // label43
+            // 
+            this.label43.AutoSize = true;
+            this.label43.Location = new System.Drawing.Point(136, 395);
+            this.label43.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label43.Name = "label43";
+            this.label43.Size = new System.Drawing.Size(244, 16);
+            this.label43.TabIndex = 94;
+            this.label43.Text = "Сохранить принятые данные в файл";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(917, 528);
+            this.Controls.Add(this.label43);
+            this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.label42);
             this.Controls.Add(this.label40);
@@ -1280,5 +1327,8 @@ namespace fft_writer
         private System.Windows.Forms.TextBox textBox_Pin;
         private System.Windows.Forms.Label label42;
         private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog2;
+        private System.Windows.Forms.Label label43;
     }
 }

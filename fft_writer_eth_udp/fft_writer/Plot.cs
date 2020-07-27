@@ -57,7 +57,7 @@ namespace PlotWrapper
             mdelta1_DB = delta1_DB;
             mdelta2_DB = delta2_DB;
             mMax = max;
-            mMin = 0;
+            mMin = -70;
         }
 
         private void Plot_Load(object sender, EventArgs e)
@@ -71,7 +71,7 @@ namespace PlotWrapper
             chart1.ChartAreas["ChartArea1"].AxisX.Maximum =  3125;
             chart1.ChartAreas["ChartArea1"].AxisY.Maximum = mMax;
             chart1.ChartAreas["ChartArea1"].AxisY.Minimum = mMin;
-            chart1.ChartAreas[0].AxisY.Interval = 10;
+            chart1.ChartAreas[0].AxisY.Interval = 5;
             chart1.ChartAreas[0].AxisX.Interval = 250;
 
             chart1.Titles["DB0"].Text = mDB0;
@@ -116,8 +116,8 @@ namespace PlotWrapper
 
             chart1.Titles["DB0"].Text = sDB0;
             chart1.Titles["DB1"].Text = sDB1;
-            chart1.Titles["delta1_DB"].Text = Convert.ToString("M0-M1:") + Convert.ToString(Math.Round(delta1));
-            chart1.Titles["delta2_DB"].Text = Convert.ToString("M0-M2:") + Convert.ToString(Math.Round(delta2));
+            chart1.Titles["delta1_DB"].Text = Convert.ToString("M0-M1:") + Convert.ToString(Math.Round(delta1,1));
+            chart1.Titles["delta2_DB"].Text = Convert.ToString("M0-M2:") + Convert.ToString(Math.Round(delta2,1));
 
          //   chart1.Titles["delta2_DB"].Text = sDB2;
 
@@ -155,8 +155,8 @@ namespace PlotWrapper
             chart1.Titles["DB1"].Text = sDB1;
             chart1.Titles["DB2"].Text = sDB2;
 
-            chart1.Titles["delta1_DB"].Text = Convert.ToString("M0-M1:") + Convert.ToString(Math.Round(delta1));
-            chart1.Titles["delta2_DB"].Text = Convert.ToString("M0-M2:") + Convert.ToString(Math.Round(delta2));
+            chart1.Titles["delta1_DB"].Text = Convert.ToString("M0-M1:") + Convert.ToString(Math.Round(delta1,1));
+            chart1.Titles["delta2_DB"].Text = Convert.ToString("M0-M2:") + Convert.ToString(Math.Round(delta2,1));
 
          //   chart1.Titles["delta2_DB"].Text = sDB2;
 

@@ -1281,10 +1281,9 @@ namespace DSPLib
                 {
                     double magVal = rawFFT[i].Magnitude;
 
-                    if (magVal <= 0.0)
-                        magVal = double.Epsilon;
+                    if (magVal <= 0.0) magVal = double.Epsilon;
 
-                    mag[i] = 20 * System.Math.Log10(magVal);
+                    mag[i] =20 * System.Math.Log10(magVal)-70;//приводим к 1 вольтовой шкале
                 }
 
                 return mag;

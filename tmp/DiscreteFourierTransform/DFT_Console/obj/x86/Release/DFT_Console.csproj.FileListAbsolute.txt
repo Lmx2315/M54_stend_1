@@ -1,0 +1,7 @@
+E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DFT_Console\bin\Release\DFT_Console.exe
+E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DFT_Console\bin\Release\DFT_Console.pdb
+E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DFT_Console\bin\Release\DiscreteFourierTransform.dll
+E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DFT_Console\bin\Release\DiscreteFourierTransform.pdb
+E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DFT_Console\obj\x86\Release\DFT_Console.csprojResolveAssemblyReference.cache
+E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DFT_Console\obj\x86\Release\DFT_Console.exe
+E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DFT_Console\obj\x86\Release\DFT_Console.pdb

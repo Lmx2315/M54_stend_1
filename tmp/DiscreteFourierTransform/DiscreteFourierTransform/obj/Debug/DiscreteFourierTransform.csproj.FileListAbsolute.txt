@@ -1,0 +1,5 @@
+E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DiscreteFourierTransform\bin\Debug\DiscreteFourierTransform.dll
+E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DiscreteFourierTransform\bin\Debug\DiscreteFourierTransform.pdb
+E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DiscreteFourierTransform\obj\Debug\DiscreteFourierTransform.dll
+E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DiscreteFourierTransform\obj\Debug\DiscreteFourierTransform.pdb
+E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DiscreteFourierTransform\obj\Debug\DiscreteFourierTransform.csprojResolveAssemblyReference.cache

@@ -1552,6 +1552,241 @@ namespace fft_writer
             if (channal_box.Text != "1" && channal_box.Text != "2") channal_box.Text = "1";
         }
 
+        private void button_AM_Click(object sender, EventArgs e)
+        {
+            //create a new telnet connection to hostname "x.x.x.x" on port "5025"
+            string host = textBox_ip_generator.Text;
+            int port = Convert.ToInt32(textBox_port_generator.Text);
+#if WORK
+            TelnetConnection tc = new TelnetConnection(host, port);
+            string prompt = "";
+            // while connected
+            while (tc.IsConnected && prompt.Trim() != "exit")
+            {
+                
+                if (button_AM.BackColor==SystemColors.Control)
+                {
+                    button_PM.BackColor    = SystemColors.Control;
+                    button_CHIRP.BackColor = SystemColors.Control;
+                    button_AM.BackColor    = SystemColors.ControlDark;
+
+                    prompt = "PM:STAT" + " OFF";
+                    tc.WriteLine(prompt);
+
+                    prompt = "freq " + textBox_freq_gen.Text + " Hz";
+                    tc.WriteLine(prompt);
+                    prompt = "pow " + textBox_level_gen.Text + " DBm";
+                    tc.WriteLine(prompt);
+                    prompt = "outp " + " 1";
+                    tc.WriteLine(prompt);
+
+                    prompt = "LFO1:FREQ 100kHz";
+                    tc.WriteLine(prompt);
+
+                    prompt = "AM:INT:SOUR LF1";
+                    tc.WriteLine(prompt);
+
+                    prompt = "AM:DEPT 1";
+                    tc.WriteLine(prompt);
+
+                    prompt = "AM:SOUR INT";
+                    tc.WriteLine(prompt);
+
+                    prompt = "AM:STAT" + " ON";
+                    tc.WriteLine(prompt);
+                    //    Console.Write(tc.Read());
+                    prompt = "exit";
+                } else
+                {
+                    button_AM.BackColor = SystemColors.Control;
+                    prompt = "AM:STAT" + " OFF";
+                    tc.WriteLine(prompt);
+                    //    Console.Write(tc.Read());
+                    prompt = "exit";
+                }
+                
+            }
+            Console.WriteLine("***DISCONNECTED");
+            Console.ReadLine();
+#endif
+            COMMAND_FOR_SERVER = Convert.ToString(Convert.ToDouble(textBox_freq_gen.Text) - Convert.ToDouble(textBox_freq_m54.Text));
+        }
+
+        private void button_CHIRP_Click(object sender, EventArgs e)
+        {
+            //create a new telnet connection to hostname "x.x.x.x" on port "5025"
+            string host = textBox_ip_generator.Text;
+            int port = Convert.ToInt32(textBox_port_generator.Text);
+#if WORK
+            TelnetConnection tc = new TelnetConnection(host, port);
+            string prompt = "";
+            // while connected
+            while (tc.IsConnected && prompt.Trim() != "exit")
+            {
+                try
+                {
+                    if (button_CHIRP.BackColor == SystemColors.Control)
+                    {
+                        textBox_CHIRP_DELTA_F.Enabled = true;
+                        button_AM.BackColor = SystemColors.Control;
+                        button_PM.BackColor = SystemColors.Control;
+                        button_CHIRP.BackColor = SystemColors.ControlDark;
+
+                        prompt = "freq " + textBox_freq_gen.Text + " Hz";
+                        tc.WriteLine(prompt);
+                        prompt = "pow " + textBox_level_gen.Text + " DBm";
+                        tc.WriteLine(prompt);
+                        prompt = "outp " + " 1";
+                        tc.WriteLine(prompt);
+
+                        int f = Convert.ToInt32(textBox_CHIRP_DELTA_F.Text);
+
+                        prompt = "CHIR:BAND " + f.ToString() + "000";
+                        tc.WriteLine(prompt);
+
+                        prompt = "SOUR:CHIR:DIR UP";
+                        tc.WriteLine(prompt);
+
+                        prompt = "CHIR:PULS:PER 103 us";
+                        tc.WriteLine(prompt);
+
+                        prompt = "CHIR:PULS:WIDT 100 us";
+                        tc.WriteLine(prompt);
+
+                        prompt = "CHIR:STAT ON";
+                        tc.WriteLine(prompt);
+                        //    Console.Write(tc.Read());
+                        prompt = "exit";
+                    }
+                    else
+                    {
+                        textBox_CHIRP_DELTA_F.Enabled = false;
+                        button_CHIRP.BackColor = SystemColors.Control;
+                        prompt = "CHIR:STAT" + " OFF";
+                        tc.WriteLine(prompt);
+                        //    Console.Write(tc.Read());
+                        prompt = "exit";
+                    }
+                } catch
+                {
+                    prompt = "exit";
+                }
+               
+            }
+            Console.WriteLine("***DISCONNECTED");
+            Console.ReadLine();
+#endif
+            COMMAND_FOR_SERVER = Convert.ToString(Convert.ToDouble(textBox_freq_gen.Text) - Convert.ToDouble(textBox_freq_m54.Text));
+        }
+
+        private void button_PM_Click(object sender, EventArgs e)
+        {
+            //create a new telnet connection to hostname "x.x.x.x" on port "5025"
+            string host = textBox_ip_generator.Text;
+            int port = Convert.ToInt32(textBox_port_generator.Text);
+#if WORK
+            TelnetConnection tc = new TelnetConnection(host, port);
+            string prompt = "";
+            // while connected
+            while (tc.IsConnected && prompt.Trim() != "exit")
+            {
+                if (button_PM.BackColor == SystemColors.Control)
+                {
+                    button_AM.BackColor    = SystemColors.Control;
+                    button_CHIRP.BackColor = SystemColors.Control;
+                    button_PM.BackColor    = SystemColors.ControlDark;
+
+                    prompt = "freq " + textBox_freq_gen.Text + " Hz";
+                    tc.WriteLine(prompt);
+                    prompt = "pow " + textBox_level_gen.Text + " DBm";
+                    tc.WriteLine(prompt);
+                    prompt = "outp " + " 1";
+                    tc.WriteLine(prompt);
+
+                    prompt = "LFO1:FREQ 100kHz";
+                    tc.WriteLine(prompt);
+
+                    prompt = "PM:INT:SOUR LF1";
+                    tc.WriteLine(prompt);
+
+                    prompt = "PM 6";
+                    tc.WriteLine(prompt);
+
+                    prompt = "AM:STAT" + " OFF";
+                    tc.WriteLine(prompt);
+
+                    prompt = "PM:INT:SOUR LF2N";
+                    tc.WriteLine(prompt);
+
+                    prompt = "PM:SOUR INT";
+                    tc.WriteLine(prompt);
+
+                    prompt = "PM:STAT ON";
+                    tc.WriteLine(prompt);
+                    //    Console.Write(tc.Read());
+                    prompt = "exit";
+                }
+                else
+                {
+                    button_PM.BackColor = SystemColors.Control;
+                    prompt = "PM:STAT" + " OFF";
+                    tc.WriteLine(prompt);
+                    //    Console.Write(tc.Read());
+                    prompt = "exit";
+                }
+            }
+            Console.WriteLine("***DISCONNECTED");
+            Console.ReadLine();
+#endif
+            COMMAND_FOR_SERVER = Convert.ToString(Convert.ToDouble(textBox_freq_gen.Text) - Convert.ToDouble(textBox_freq_m54.Text));
+        }
+
+        private void textBox_CHIRP_DELTA_F_TextChanged(object sender, EventArgs e)
+        {
+            //create a new telnet connection to hostname "x.x.x.x" on port "5025"
+            string host = textBox_ip_generator.Text;
+            int port = Convert.ToInt32(textBox_port_generator.Text);
+            TelnetConnection tc = new TelnetConnection(host, port);
+            string prompt = "";
+            // while connected
+            try 
+            {
+                int z = Convert.ToInt32(textBox_CHIRP_DELTA_F.Text);
+                if (z > 0)
+                {
+                    while (tc.IsConnected && prompt.Trim() != "exit")
+                    {
+                        if (button_CHIRP.BackColor == SystemColors.ControlDark)
+                        {
+                            int f = Convert.ToInt32(textBox_CHIRP_DELTA_F.Text);
+
+                            prompt = "CHIR:BAND " + f.ToString() + "000";
+                            tc.WriteLine(prompt);
+
+                            prompt = "SOUR:CHIR:DIR UP";
+                            tc.WriteLine(prompt);
+
+                            prompt = "CHIR:PULS:PER 103 us";
+                            tc.WriteLine(prompt);
+
+                            prompt = "CHIR:PULS:WIDT 100 us";
+                            tc.WriteLine(prompt);
+
+                            prompt = "CHIR:STAT ON";
+                            tc.WriteLine(prompt);
+                            //    Console.Write(tc.Read());
+
+                        }
+                        prompt = "exit";
+                    }
+                }
+            } catch
+            {
+
+            }           
+           
+        }
+
         int sch_line (string a)
         {
             int n = 0;

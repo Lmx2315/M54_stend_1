@@ -90,7 +90,7 @@ namespace fft_writer
 
          Plot fig1 = new Plot(15,"I Input", "Sample", "Вольт","","","","","");
 	     Plot fig2 = new Plot(15,"Q Input", "Sample", "Вольт","","","","","");
-		 Plot fig3 = new Plot(15,"FFT (dBV)", "кГц", "Mag (dBV)","","","","","");    	
+		 Plot fig3 = new Plot(15,"FFT (dBm)", "кГц", "Mag (dBm)","","","","","");
 
         private void MainForm_FormClosing(Object sender, FormClosingEventArgs e)
         {
@@ -130,8 +130,10 @@ namespace fft_writer
             my_ip = IPAddress.Parse(my_ip_box.Text);
             my_port = UInt16.Parse(my_port_box.Text);
 
+            fig3.Show();//показываем окно спектра 
+
             //Create the server.
-               IPEndPoint serverEnd = new IPEndPoint(my_ip, my_port);           
+            IPEndPoint serverEnd = new IPEndPoint(my_ip, my_port);           
             // IPEndPoint serverEnd = new IPEndPoint(IPAddress.Any, 1234);
 
             _server = new UdpClient(serverEnd);
@@ -157,8 +159,7 @@ namespace fft_writer
             
             Thread _PcontrolThread = new Thread(new ThreadStart(Pout_control));
             _PcontrolThread.Start();
-            _PcontrolThread.IsBackground=true;
-            
+            _PcontrolThread.IsBackground=true;            
 
             //Change state to indicate the server starts.
             _isServerStarted = true;
@@ -561,8 +562,8 @@ namespace fft_writer
                     Array.Copy(fft_array_y, fx_q, N_temp);
 
                     //БПФ должно быть размером больше чем длинна ИХ фильтра + длинна вектора данных - 1 !!!
-                    fft_h.FFT(1, k + 1, fh_i, fh_q);                  //расчитываем БПФ от импульсной характеристики фильтра
-                    fft_h.FFT(1, k + 1, fx_i, fx_q);                  //расчитываем БПФ от входных данных
+                    fft_h.FFT_filtr(1, k + 1, fh_i, fh_q); //расчитываем БПФ от импульсной характеристики фильтра
+                    fft_h.FFT_filtr(1, k + 1, fx_i, fx_q); //расчитываем БПФ от входных данных
 
                     System.Numerics.Complex[] HxResult = new System.Numerics.Complex[N_complex * 2];//комплексный массив для комплексной ИХ
                     System.Numerics.Complex[] XxResult = new System.Numerics.Complex[N_complex * 2];//комплексный массив для обработанных БПФ данных
@@ -573,7 +574,11 @@ namespace fft_writer
                         HxResult[i] = new System.Numerics.Complex(fh_i[i], fh_q[i]);//конвертируем в комплексный вектор
                         XxResult[i] = new System.Numerics.Complex(fx_i[i], fx_q[i]);
                         ZxResult[i] = Complex.Multiply(HxResult[i], XxResult[i]);   //перемножаем комплексные числа обработанной ИХ и входных данных
-                        ZxResult[i] = Complex.Divide(ZxResult[i],10);//10
+                            
+                      if (N_temp == 1024) ZxResult[i] = Complex.Divide(ZxResult[i], 1.34);//
+                      if (N_temp == 512)  ZxResult[i] = Complex.Divide(ZxResult[i], 1.98);//
+                      if (N_temp == 256)  ZxResult[i] = Complex.Divide(ZxResult[i], 2.92);//
+                      if (N_temp == 128)  ZxResult[i] = Complex.Divide(ZxResult[i], 2.72);//
                     }
 
                     for (i = 0; i < (N_complex * 2); i++)
@@ -586,17 +591,23 @@ namespace fft_writer
                                            
                         Array.Copy(fx_i, fft_array_x, N_temp);
                         Array.Copy(fx_q, fft_array_y, N_temp);
-                  }
+
+                        fft_array_x = DSP.Math.Divide(fft_array_x, 12 -  k + 1);//компенсируем усиление возникшее при обработке
+                        fft_array_y = DSP.Math.Divide(fft_array_y, 12 -  k + 1);
+                    }
 
                     // Apply window to the time series data
                     double[] wc = DSP.Window.Coefficients(windowToApply, N_temp);
                     double windowScaleFactor = DSP.Window.ScaleFactor.Signal(wc);
 
-                    double[] dat_I_scale = DSP.Math.Divide(fft_array_x, 1);//приводим к еденице 32768
-                    double[] dat_Q_scale = DSP.Math.Divide(fft_array_y, 1);
+            //      double[] dat_I_scale = DSP.Math.Divide(fft_array_x, 1);//приводим к еденице 32768
+            //      double[] dat_Q_scale = DSP.Math.Divide(fft_array_y, 1);
 
-                    double[] windowedTimeSeries_i = DSP.Math.Multiply(dat_I_scale, wc);
-                    double[] windowedTimeSeries_q = DSP.Math.Multiply(dat_Q_scale, wc);
+                    double[] windowedTimeSeries_i = DSP.Math.Multiply(fft_array_x, wc);
+                    double[] windowedTimeSeries_q = DSP.Math.Multiply(fft_array_y, wc);
+
+                    windowedTimeSeries_i = DSP.Math.Multiply(windowedTimeSeries_i, windowScaleFactor);  //учитываем разный коэффициент передачи окна
+                    windowedTimeSeries_q = DSP.Math.Multiply(windowedTimeSeries_q, windowScaleFactor);
 
                     System.Numerics.Complex[] cpxResult = new System.Numerics.Complex[N_complex];
                     //------------------Считаем амплитуду входного сигнала-------------------------
@@ -609,31 +620,37 @@ namespace fft_writer
                     double[] magA = DSP.ConvertComplex.ToMagnitude(cpxResult);//высчитываем массив модулей (длинну векторов) комплексных отсчётов входного массива
                     A_out=FILTR_MEDIANA(magA);
                     //------------------Расчитываем БПФ----------------------------------------      
-                   // fft_z.FFT(1, k, windowedTimeSeries_i, windowedTimeSeries_q);  //внутри FFT происходит масштабирование расчитанных данных!                  
+                   
+                    fft_z.FFT(1, k, windowedTimeSeries_i, windowedTimeSeries_q);  //внутри FFT происходит масштабирование расчитанных данных!                  
                     
                     for (i = 0; i < N_complex; i++)
                     {
                         cpxResult[i] = new System.Numerics.Complex(windowedTimeSeries_q[i], windowedTimeSeries_i[i]);
                     }
 
-                    Accord.Math.FourierTransform.FFT(cpxResult, Accord.Math.FourierTransform.Direction.Forward); //этот метод статический
+                    //Accord.Math.FourierTransform.FFT(cpxResult, Accord.Math.FourierTransform.Direction.Forward); //этот метод статический
 
                     //mag = DSP.Math.Multiply(mag, 1);
-                    double[] magLog = DSP.ConvertComplex.ToMagnitudeDBV(cpxResult);
+        
+                    double[] magLog_temp  = DSP.ConvertComplex.ToMagnitudeSquared(cpxResult);//получаем квадрат напряжения
+                    double[] magLog_temp2 = DSP.Math.Divide  (magLog_temp,50);
+                    double[] magLog       = DSP.Math.Log10   (magLog_temp2);
+                             magLog       = DSP.Math.Multiply(magLog,10);
+                             magLog       = DSP.Math.Subtract(magLog,79.7);
                     int j;
                          
-                    for (j = 0; j < magLog.Length; j++)
+                    for (j = 0; j < BUF_N; j++)
                     {
                         //	 A[j] = magLog[j];
-                        if (j <  (magLog.Length / 2))      A[j] = magLog[j + (magLog.Length / 2)];
-                        if (j > ((magLog.Length / 2) - 1)) A[j] = magLog[j - (magLog.Length / 2)];
-                        t[j] = -3121 + (6250 * j / (magLog.Length));//важно сначала умножить а потом поделить!!!! атоноль
+                        if (j <  (BUF_N / 2))      A[j] = magLog[j + (BUF_N / 2)];
+                        if (j > ((BUF_N / 2) - 1)) A[j] = magLog[j - (BUF_N / 2)];
+                        t[j] = -3121 + (6250 * j / (BUF_N));//важно сначала умножить а потом поделить!!!! атоноль
                              // Debug.WriteLine("t[]:"+t[j]);
                     }
 
-                    for (j = 0; j < magLog.Length; j++)
+                    for (j = 0; j <BUF_N; j++)
                     {
-                        magLog[j] = A[magLog.Length - 1 - j];
+                        magLog[j] = A[BUF_N - 1 - j];
                     //  if (magLog[j] < 0) magLog[j] = 0;
                     }
                     
@@ -678,14 +695,9 @@ namespace fft_writer
                     H_a = m1y;
                     H_b = m2y;
                     H_delta = m1y - m2y;
-
-                    // magLog[0] = 80;//выравниваю шкалу
-                    // fig3.PlotData(t, magLog, A_max, B_max, C_max, m1x, m1y, m2x, m2y, m3x, m3y);
-                    // fig3.Show();
-
                     //------------------------------------------------------------------------
-                    Array.Copy(magLog, MAG_LOG, magLog.Length);
-                    Array.Copy(t, TSAMPL, t.Length);
+                    Array.Copy(magLog, MAG_LOG, BUF_N);
+                    Array.Copy(t, TSAMPL, BUF_N);
 
                     AMAX = A_max;
                     BMAX = B_max;
@@ -699,7 +711,6 @@ namespace fft_writer
                     FLAG_DISPAY = "1";
                     flag_NEW_FFT = 0;
                 }
-
                 Thread.Sleep(0);
             }
         }
@@ -712,16 +723,23 @@ namespace fft_writer
       }
 
         void DISPLAY ()
-        {            
+        {
+            int Nbuf = BUF_N;// размер БПФ
+            double[] TSAMPL_tmp = new double[Nbuf];
+            double[] MAG_LOG_tmp = new double[Nbuf];
+
             if (FLAG_DISPAY=="1")
             {
+                Array.Copy(TSAMPL, TSAMPL_tmp, Nbuf); //благодаря этому у нас нормальный вывод спектра без артефактов при переключении размерности  БПФ
+                Array.Copy(MAG_LOG, MAG_LOG_tmp, Nbuf);
+
                 double a = Math.Round(M1Y - M2Y,1);
-                // Start a Stopwatch
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
+                //Start a Stopwatch
+                //Stopwatch stopwatch = new Stopwatch();
+                //stopwatch.Start();
                 textBox_din_diapazone.Text = a.ToString();
-                fig3.PlotData(TSAMPL, MAG_LOG, AMAX, BMAX, CMAX, M1X, M1Y, M2X, M2Y, M3X, M3Y);
-                fig3.Show();
+                fig3.PlotData(TSAMPL_tmp, MAG_LOG_tmp, AMAX, BMAX, CMAX, M1X, M1Y, M2X, M2Y, M3X, M3Y);
+                //fig3.Show();
                 FLAG_DISPAY = "";
             }            
         }
@@ -812,16 +830,15 @@ namespace fft_writer
 			textFile.WriteLine(text);	          
 			textFile.Close();
 		}
-	
 		void N_fftTextChanged(object sender, EventArgs e)
 		{
-            int n = 0;
-            
+            int n = 0;            
             n= Convert.ToInt16(text_N_fft.Text);
-
-            if ((n==64)||(n==128)||(n==256)||(n==512)||(n==1024)||(n==2048)||(n==4096) || (n == 8192))   BUF_N =Convert.ToInt16(text_N_fft.Text);
+            if ((n == 64) || (n == 128) || (n == 256) || (n == 512) || (n == 1024) || (n == 2048) || (n == 4096) || (n == 8192))
+            {
+                BUF_N = Convert.ToInt16(text_N_fft.Text);                
+            }  
             //Debug.WriteLine("изменили BUF_N:"+BUF_N);
-
 		}
 		void TextBox1TextChanged(object sender, EventArgs e)
 		{
@@ -832,7 +849,6 @@ namespace fft_writer
         private void cmbWindow_SelectedIndexChanged(object sender, EventArgs e)
         {
             string selectedWindowName = cmbWindow.SelectedValue.ToString();
-
             if (selectedWindowName == "Nutall3")    B_win = 2.02;
             if (selectedWindowName == "Hann")       B_win = 1.5;
             if (selectedWindowName == "None")       B_win = 1.0;

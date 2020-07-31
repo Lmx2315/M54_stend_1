@@ -373,7 +373,7 @@ namespace fft_writer
             var Level_in = Convert.ToDouble(textBox_Level_in.Text);
             var Level_in_mW = (0.001)*Math.Pow(10, (Level_in / 10));
             var Level_in_V = Math.Pow((Level_in_mW * 50), 0.5);
-            var Level_out = A_out/32000*1;//выходной сигнал в вольтах
+            var Level_out = A_out/32767*1;//выходной сигнал в вольтах
             var Ku = Math.Round((20*Math.Log10(Level_out/ Level_in_V)),2);
             textBox_Ku.Text = Convert.ToString(Ku);
         }
@@ -387,7 +387,7 @@ namespace fft_writer
             while (true)
             {
                 double A = A_out;//распаковываем переменную
-                var Lvl_U = A / 32000 * 1;//выходной сигнал в вольтах
+                var Lvl_U = A / 32767 * 1;//выходной сигнал в вольтах
                 var Lvl_P = Math.Pow(Lvl_U, 2) / 50 * 1000;    //мощность в мВт
                 if (Lvl_P == 0) Lvl_P = 0.0000000001;
                 var Lvl_Pdbm = 10 * System.Math.Log10(Lvl_P); //мощность в ДБм
@@ -539,8 +539,20 @@ namespace fft_writer
                                     tst_data_i[i] = packet_data_i[i];
                                     tst_data_q[i] = packet_data_q[i];
                             }
-                        }                 
-                    
+                        }
+
+                    //------------------Считаем амплитуду входного сигнала-------------------------
+                    System.Numerics.Complex[] cpxResult = new System.Numerics.Complex[N_complex];
+                    //---переводим входные вектора в комплексный вид
+                    for (i = 0; i < N_complex; i++)
+                    {
+                        cpxResult[i] = new System.Numerics.Complex(fft_array_x[i], fft_array_y[i]);
+                    }
+                    // Convert the complex result to a scalar magnitude 
+                    double[] magA = DSP.ConvertComplex.ToMagnitude(cpxResult);//высчитываем массив модулей (длинну векторов) комплексных отсчётов входного массива
+                    A_out = FILTR_MEDIANA(magA);
+
+
                     int k = Convert.ToInt16(LogBase(N_temp, 2));//порядок БПФ
 
                     FFTLibrary.Complex fft_z = new FFTLibrary.Complex();
@@ -600,25 +612,17 @@ namespace fft_writer
                     double[] wc = DSP.Window.Coefficients(windowToApply, N_temp);
                     double windowScaleFactor = DSP.Window.ScaleFactor.Signal(wc);
 
-            //      double[] dat_I_scale = DSP.Math.Divide(fft_array_x, 1);//приводим к еденице 32768
-            //      double[] dat_Q_scale = DSP.Math.Divide(fft_array_y, 1);
+                    double[] dat_I_scale = DSP.Math.Divide(fft_array_x, 1.11);//приводим к еденице
+                    double[] dat_Q_scale = DSP.Math.Divide(fft_array_y, 1.11);
 
-                    double[] windowedTimeSeries_i = DSP.Math.Multiply(fft_array_x, wc);
-                    double[] windowedTimeSeries_q = DSP.Math.Multiply(fft_array_y, wc);
+                    double[] windowedTimeSeries_i = DSP.Math.Multiply(dat_I_scale, wc);
+                    double[] windowedTimeSeries_q = DSP.Math.Multiply(dat_Q_scale, wc);
 
                     windowedTimeSeries_i = DSP.Math.Multiply(windowedTimeSeries_i, windowScaleFactor);  //учитываем разный коэффициент передачи окна
                     windowedTimeSeries_q = DSP.Math.Multiply(windowedTimeSeries_q, windowScaleFactor);
 
-                    System.Numerics.Complex[] cpxResult = new System.Numerics.Complex[N_complex];
-                    //------------------Считаем амплитуду входного сигнала-------------------------
-                    //---переводим входные вектора в комплексный вид
-                    for (i = 0; i < N_complex; i++)
-                    {
-                        cpxResult[i] = new System.Numerics.Complex(fft_array_x[i], fft_array_y[i]);
-                    }
-                    // Convert the complex result to a scalar magnitude 
-                    double[] magA = DSP.ConvertComplex.ToMagnitude(cpxResult);//высчитываем массив модулей (длинну векторов) комплексных отсчётов входного массива
-                    A_out=FILTR_MEDIANA(magA);
+                    
+                    
                     //------------------Расчитываем БПФ----------------------------------------      
                    
                     fft_z.FFT(1, k, windowedTimeSeries_i, windowedTimeSeries_q);  //внутри FFT происходит масштабирование расчитанных данных!                  
@@ -1703,10 +1707,10 @@ namespace fft_writer
                     prompt = "outp " + " 1";
                     tc.WriteLine(prompt);
 
-                    prompt = "LFO1:FREQ 100kHz";
+                    prompt = "LFO2:FREQ 100kHz";
                     tc.WriteLine(prompt);
 
-                    prompt = "PM:INT:SOUR LF1";
+                    prompt = "PM:INT:SOUR LF2";
                     tc.WriteLine(prompt);
 
                     prompt = "PM 6";

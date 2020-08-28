@@ -400,10 +400,12 @@ namespace fft_writer
         void MainFormLoad(object sender, EventArgs e)
 		{
             IH_load();
+            
             BUF_N =Convert.ToInt16(text_N_fft.Text);
 			// Load window combo box with the Window Names (from ENUMS)
             cmbWindow.DataSource = Enum.GetNames(typeof(DSPLib.DSP.Window.Type));
             cmbWindow.SelectedIndex = 5;//Hann
+            Start();
 #if TEST
             label_test.Visible = true;
 #endif
@@ -788,15 +790,15 @@ namespace fft_writer
 
 		void Button1Click(object sender, EventArgs e)
 		{
-            if (_isServerStarted)
+            if (Btn_start.Text== "ВЫКЛ")
             {
-                Stop();
+          //      Stop();
                 Btn_start.Text = "ВКЛ";
                 timer1.Enabled = false;
             }
             else
             {
-                Start();
+           //     Start();
                 Btn_start.Text = "ВЫКЛ";
                 timer1.Enabled = true;
             }

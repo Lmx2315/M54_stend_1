@@ -85,8 +85,9 @@ namespace fft_writer
         int FLAG_CALIBROVKA = 0;
         string DATA0_IQ_TEXT = ""; //в этой переменной храним записываемые данные, принятые из поделки
         string DATA1_IQ_TEXT = ""; //в этой переменной храним записываемые данные, принятые из поделки
-
+        double Din_DIAP_min = 0;
         double LVL_Pin_DBm=0;//входная измеренная мощность сигнала (для контроля коэфф. передачи и коэфф. шума)
+        int CORRECT_FREQ = -1_000_000; //поправочная частота связаная с гетеродином
 
          Plot fig1 = new Plot(15,"I Input", "Sample", "Вольт","","","","","");
 	     Plot fig2 = new Plot(15,"Q Input", "Sample", "Вольт","","","","","");
@@ -405,7 +406,11 @@ namespace fft_writer
 			// Load window combo box with the Window Names (from ENUMS)
             cmbWindow.DataSource = Enum.GetNames(typeof(DSPLib.DSP.Window.Type));
             cmbWindow.SelectedIndex = 5;//Hann
-            Start();
+            //Start();
+
+            //выводим всплывающую подсказку!
+            ToolTip t = new ToolTip();
+            t.SetToolTip(button5, "Сохранить принятые данные в файл");
 #if TEST
             label_test.Visible = true;
 #endif
@@ -798,7 +803,7 @@ namespace fft_writer
             }
             else
             {
-           //     Start();
+                Start();
                 Btn_start.Text = "ВЫКЛ";
                 timer1.Enabled = true;
             }
@@ -983,7 +988,7 @@ namespace fft_writer
             if (serialPort1.IsOpen == false) serialPort1.PortName = textBox_com_port.Text;
                 try
                 {
-                    command1 = command1 + Convert.ToString(freq) + "; ";//...и после команды , чтобы срабатывало.
+                    command1 = command1 + Convert.ToString(freq+ CORRECT_FREQ) + "; ";//...и после команды , чтобы срабатывало.
                     if (serialPort1.IsOpen == false)
                     {
                         serialPort1.Open();
@@ -998,6 +1003,7 @@ namespace fft_writer
                     // что-то пошло не так и упало исключение... Выведем сообщение исключения
                     Console.WriteLine(string.Format("Port:'{0}' Error:'{1}'", serialPort1.PortName, ex.Message));
                 }
+          //  serialPort1.Close();
         }
 
         bool FLAG_IH_load = false;
@@ -1006,12 +1012,16 @@ namespace fft_writer
         {
             string command1 = " ~0 freq:";
             string command2 = " ~0 upr_at";
+            int freq = 0;
+
+            freq = Convert.ToInt32(textBox_freq_m54.Text) + CORRECT_FREQ;
+
             checkBox1.Checked = false;
             if (serialPort1.IsOpen == false) serialPort1.PortName = textBox_com_port.Text;
                         
                 try
                 {
-                    command1 = command1 + textBox_freq_m54.Text + "; ";
+                    command1 = command1 + freq.ToString() + "; ";
                     //   command2 = command2 + channal_box.Text + ":" + textBox_att_m54.Text + ";";
                     if (serialPort1.IsOpen == false)
                     {
@@ -1030,6 +1040,8 @@ namespace fft_writer
                     Console.WriteLine(string.Format("Port:'{0}' Error:'{1}'", serialPort1.PortName, ex.Message));
                 }
          
+            serialPort1.Close();
+
             if (FLAG_IH_load == true) Kih_load();
             else MessageBox.Show("Загрузите корректирующую АЧХ характеристику");
         }
@@ -1053,7 +1065,8 @@ namespace fft_writer
 
         private void button3_Click(object sender, EventArgs e)
         {
-            FLAG_filtr = 0;
+            Din_DIAP_min = 100;
+            FLAG_filtr = 2;
             if (_isServerStarted==true)  timer3.Enabled = true;
             timer3.Interval = Convert.ToInt32(textBox_freq_delay.Text);
             freq_start = Convert.ToInt32(textBox_freq_start.Text);
@@ -1082,6 +1095,7 @@ namespace fft_writer
 
         Struct_buff VAR_IH_data;
         Struct_buff VAR_IH_data_obzor;
+
         
         private void timer3_Tick(object sender, EventArgs e)
         {
@@ -1108,6 +1122,9 @@ namespace fft_writer
                 //тут происходят измерения! и сразу запись в стринг
             text = Convert.ToString(freq_last) + ";" + Convert.ToString(Math.Round(H_a, 2)) + ";" + Convert.ToString(Math.Round(H_b, 2)) + ";" + Convert.ToString(Math.Round(H_delta, 2));
             Console1.Text = Console1.Text + "\r\n" + text;
+
+                if (Convert.ToDouble(textBox_din_diapazone.Text) < Din_DIAP_min) Din_DIAP_min = Convert.ToDouble(textBox_din_diapazone.Text);
+                textBox_min_dindiapaz.Text = Din_DIAP_min.ToString();
             }
 
             if ((freq_setup == 1) || (freq_setup == 2))
@@ -1153,6 +1170,11 @@ namespace fft_writer
                 FLAG_filtr = 1;
                 ACH_error(freq_setup);//в режиме калибровки
                 progressBar1.Visible = false;
+
+                if (serialPort1.IsOpen == true)
+                {
+                    serialPort1.Close();
+                }
             }
 
             if (FLAG_IH_load == true) Kih_load();
@@ -1791,6 +1813,11 @@ namespace fft_writer
 
             }           
            
+        }
+
+        private void button5_MouseHover(object sender, EventArgs e)
+        {
+          
         }
 
         int sch_line (string a)

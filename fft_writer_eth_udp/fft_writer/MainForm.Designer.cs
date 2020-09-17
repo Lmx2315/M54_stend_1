@@ -148,7 +148,6 @@ namespace fft_writer
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.saveFileDialog2 = new System.Windows.Forms.SaveFileDialog();
-            this.label43 = new System.Windows.Forms.Label();
             this.label45 = new System.Windows.Forms.Label();
             this.label46 = new System.Windows.Forms.Label();
             this.textBox_din_diapazone = new System.Windows.Forms.TextBox();
@@ -161,17 +160,19 @@ namespace fft_writer
             this.label49 = new System.Windows.Forms.Label();
             this.label50 = new System.Windows.Forms.Label();
             this.textBox_CHIRP_DELTA_F = new System.Windows.Forms.TextBox();
+            this.label43 = new System.Windows.Forms.Label();
+            this.label51 = new System.Windows.Forms.Label();
+            this.textBox_min_dindiapaz = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // my_port_box
             // 
-            this.my_port_box.Location = new System.Drawing.Point(1349, 82);
+            this.my_port_box.Location = new System.Drawing.Point(726, 20);
             this.my_port_box.Margin = new System.Windows.Forms.Padding(4);
             this.my_port_box.Name = "my_port_box";
-            this.my_port_box.Size = new System.Drawing.Size(99, 22);
+            this.my_port_box.Size = new System.Drawing.Size(76, 22);
             this.my_port_box.TabIndex = 0;
             this.my_port_box.Text = "8888";
-            this.my_port_box.Visible = false;
             // 
             // Btn_start
             // 
@@ -338,13 +339,12 @@ namespace fft_writer
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(1457, 82);
+            this.label5.Location = new System.Drawing.Point(810, 23);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(31, 16);
             this.label5.TabIndex = 20;
             this.label5.Text = "port";
-            this.label5.Visible = false;
             // 
             // label6
             // 
@@ -1148,16 +1148,7 @@ namespace fft_writer
             this.button5.Text = "SAVE DATA";
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
-            // 
-            // label43
-            // 
-            this.label43.AutoSize = true;
-            this.label43.Location = new System.Drawing.Point(135, 269);
-            this.label43.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label43.Name = "label43";
-            this.label43.Size = new System.Drawing.Size(244, 16);
-            this.label43.TabIndex = 94;
-            this.label43.Text = "Сохранить принятые данные в файл";
+            this.button5.MouseHover += new System.EventHandler(this.button5_MouseHover);
             // 
             // label45
             // 
@@ -1290,11 +1281,47 @@ namespace fft_writer
             this.textBox_CHIRP_DELTA_F.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.textBox_CHIRP_DELTA_F.TextChanged += new System.EventHandler(this.textBox_CHIRP_DELTA_F_TextChanged);
             // 
+            // label43
+            // 
+            this.label43.AutoSize = true;
+            this.label43.Location = new System.Drawing.Point(381, 275);
+            this.label43.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label43.Name = "label43";
+            this.label43.Size = new System.Drawing.Size(25, 16);
+            this.label43.TabIndex = 110;
+            this.label43.Text = "Дб";
+            // 
+            // label51
+            // 
+            this.label51.AutoSize = true;
+            this.label51.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label51.Location = new System.Drawing.Point(209, 244);
+            this.label51.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label51.Name = "label51";
+            this.label51.Size = new System.Drawing.Size(204, 16);
+            this.label51.TabIndex = 109;
+            this.label51.Text = "мин. динамический диапазон ";
+            // 
+            // textBox_min_dindiapaz
+            // 
+            this.textBox_min_dindiapaz.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBox_min_dindiapaz.Location = new System.Drawing.Point(273, 264);
+            this.textBox_min_dindiapaz.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_min_dindiapaz.Multiline = true;
+            this.textBox_min_dindiapaz.Name = "textBox_min_dindiapaz";
+            this.textBox_min_dindiapaz.Size = new System.Drawing.Size(99, 33);
+            this.textBox_min_dindiapaz.TabIndex = 108;
+            this.textBox_min_dindiapaz.Text = "0";
+            this.textBox_min_dindiapaz.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1085, 475);
+            this.ClientSize = new System.Drawing.Size(1090, 475);
+            this.Controls.Add(this.label43);
+            this.Controls.Add(this.label51);
+            this.Controls.Add(this.textBox_min_dindiapaz);
             this.Controls.Add(this.label49);
             this.Controls.Add(this.label50);
             this.Controls.Add(this.textBox_CHIRP_DELTA_F);
@@ -1307,7 +1334,6 @@ namespace fft_writer
             this.Controls.Add(this.label45);
             this.Controls.Add(this.label46);
             this.Controls.Add(this.textBox_din_diapazone);
-            this.Controls.Add(this.label43);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.label42);
@@ -1495,7 +1521,6 @@ namespace fft_writer
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.SaveFileDialog saveFileDialog2;
-        private System.Windows.Forms.Label label43;
         private System.Windows.Forms.Label label45;
         private System.Windows.Forms.Label label46;
         private System.Windows.Forms.TextBox textBox_din_diapazone;
@@ -1508,5 +1533,8 @@ namespace fft_writer
         private System.Windows.Forms.Label label49;
         private System.Windows.Forms.Label label50;
         private System.Windows.Forms.TextBox textBox_CHIRP_DELTA_F;
+        private System.Windows.Forms.Label label43;
+        private System.Windows.Forms.Label label51;
+        private System.Windows.Forms.TextBox textBox_min_dindiapaz;
     }
 }

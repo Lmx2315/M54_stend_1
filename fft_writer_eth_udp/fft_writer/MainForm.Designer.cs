@@ -201,14 +201,14 @@ namespace fft_writer
             // 
             // save_botton
             // 
-            this.save_botton.Location = new System.Drawing.Point(1755, 99);
+            this.save_botton.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.save_botton.Location = new System.Drawing.Point(509, 201);
             this.save_botton.Margin = new System.Windows.Forms.Padding(4);
             this.save_botton.Name = "save_botton";
-            this.save_botton.Size = new System.Drawing.Size(133, 28);
+            this.save_botton.Size = new System.Drawing.Size(99, 35);
             this.save_botton.TabIndex = 6;
-            this.save_botton.Text = "save";
+            this.save_botton.Text = "SAVE";
             this.save_botton.UseVisualStyleBackColor = true;
-            this.save_botton.Visible = false;
             this.save_botton.Click += new System.EventHandler(this.Save_bottonClick);
             // 
             // Console1
@@ -625,7 +625,7 @@ namespace fft_writer
             this.textBox_att_m54.Name = "textBox_att_m54";
             this.textBox_att_m54.Size = new System.Drawing.Size(99, 44);
             this.textBox_att_m54.TabIndex = 45;
-            this.textBox_att_m54.Text = "31";
+            this.textBox_att_m54.Text = "29";
             this.textBox_att_m54.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label18
@@ -1023,11 +1023,11 @@ namespace fft_writer
             // textBox_Level_in
             // 
             this.textBox_Level_in.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBox_Level_in.Location = new System.Drawing.Point(503, 213);
+            this.textBox_Level_in.Location = new System.Drawing.Point(601, 295);
             this.textBox_Level_in.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_Level_in.Multiline = true;
             this.textBox_Level_in.Name = "textBox_Level_in";
-            this.textBox_Level_in.Size = new System.Drawing.Size(105, 37);
+            this.textBox_Level_in.Size = new System.Drawing.Size(90, 34);
             this.textBox_Level_in.TabIndex = 82;
             this.textBox_Level_in.Text = "-5";
             this.textBox_Level_in.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -1036,7 +1036,7 @@ namespace fft_writer
             // label33
             // 
             this.label33.AutoSize = true;
-            this.label33.Location = new System.Drawing.Point(467, 193);
+            this.label33.Location = new System.Drawing.Point(550, 273);
             this.label33.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label33.Name = "label33";
             this.label33.Size = new System.Drawing.Size(183, 16);
@@ -1046,7 +1046,7 @@ namespace fft_writer
             // label34
             // 
             this.label34.AutoSize = true;
-            this.label34.Location = new System.Drawing.Point(616, 222);
+            this.label34.Location = new System.Drawing.Point(699, 302);
             this.label34.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label34.Name = "label34";
             this.label34.Size = new System.Drawing.Size(34, 16);
@@ -1098,12 +1098,12 @@ namespace fft_writer
             // label41
             // 
             this.label41.AutoSize = true;
-            this.label41.Location = new System.Drawing.Point(27, 333);
+            this.label41.Location = new System.Drawing.Point(44, 331);
             this.label41.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label41.Name = "label41";
-            this.label41.Size = new System.Drawing.Size(249, 16);
+            this.label41.Size = new System.Drawing.Size(190, 16);
             this.label41.TabIndex = 89;
-            this.label41.Text = "Продетектированый входной сигнал";
+            this.label41.Text = "Измеренный сигнал на АЦП";
             // 
             // textBox_Pin
             // 
@@ -1129,12 +1129,12 @@ namespace fft_writer
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(1788, 138);
+            this.button4.Location = new System.Drawing.Point(1826, 397);
             this.button4.Margin = new System.Windows.Forms.Padding(4);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(100, 28);
             this.button4.TabIndex = 92;
-            this.button4.Text = "калибровка";
+            this.button4.Text = "калиб. пост.";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Visible = false;
             this.button4.Click += new System.EventHandler(this.button4_Click);
@@ -1318,7 +1318,7 @@ namespace fft_writer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1090, 475);
+            this.ClientSize = new System.Drawing.Size(1094, 475);
             this.Controls.Add(this.label43);
             this.Controls.Add(this.label51);
             this.Controls.Add(this.textBox_min_dindiapaz);

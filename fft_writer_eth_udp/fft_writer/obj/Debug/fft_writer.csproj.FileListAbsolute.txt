@@ -79,3 +79,4 @@ C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\bin\Debug\Accord.x
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\bin\Debug\Accord.Math.xml
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\bin\Debug\Accord.Math.Core.xml
 C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\fft_writer.csproj.CopyComplete
+C:\Work\Project_M54\M54_stend_1\fft_writer_eth_udp\fft_writer\obj\Debug\fft_writer.csprojAssemblyReference.cache

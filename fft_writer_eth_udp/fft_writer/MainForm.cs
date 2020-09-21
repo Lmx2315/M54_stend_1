@@ -387,8 +387,8 @@ namespace fft_writer
 
             while (true)
             {
-                double A = A_out;//распаковываем переменную
-                var Lvl_U = A / 32767 * 1;//выходной сигнал в вольтах
+                double A = A_out;           //распаковываем переменную
+                var Lvl_U = A / 32767 * 1;  //выходной сигнал в вольтах
                 var Lvl_P = Math.Pow(Lvl_U, 2) / 50 * 1000;    //мощность в мВт
                 if (Lvl_P == 0) Lvl_P = 0.0000000001;
                 var Lvl_Pdbm = 10 * System.Math.Log10(Lvl_P); //мощность в ДБм
@@ -400,7 +400,7 @@ namespace fft_writer
 
         void MainFormLoad(object sender, EventArgs e)
 		{
-            IH_load();
+            IH_load();//загружаем реальную АЧХ для блока из неё быдут высчитаны поправочные коэффициенты
             
             BUF_N =Convert.ToInt16(text_N_fft.Text);
 			// Load window combo box with the Window Names (from ENUMS)
@@ -411,6 +411,7 @@ namespace fft_writer
             //выводим всплывающую подсказку!
             ToolTip t = new ToolTip();
             t.SetToolTip(button5, "Сохранить принятые данные в файл");
+            t.SetToolTip(save_botton, "Сохранить измеренные значения перебора частот в файл");
 #if TEST
             label_test.Visible = true;
 #endif
@@ -550,16 +551,13 @@ namespace fft_writer
 
                     //------------------Считаем амплитуду входного сигнала-------------------------
                     System.Numerics.Complex[] cpxResult = new System.Numerics.Complex[N_complex];
+                    
                     //---переводим входные вектора в комплексный вид
                     for (i = 0; i < N_complex; i++)
                     {
                         cpxResult[i] = new System.Numerics.Complex(fft_array_x[i], fft_array_y[i]);
                     }
-                    // Convert the complex result to a scalar magnitude 
-                    double[] magA = DSP.ConvertComplex.ToMagnitude(cpxResult);//высчитываем массив модулей (длинну векторов) комплексных отсчётов входного массива
-                    A_out = FILTR_MEDIANA(magA);
-
-
+                    
                     int k = Convert.ToInt16(LogBase(N_temp, 2));//порядок БПФ
 
                     FFTLibrary.Complex fft_z = new FFTLibrary.Complex();
@@ -626,9 +624,7 @@ namespace fft_writer
                     double[] windowedTimeSeries_q = DSP.Math.Multiply(dat_Q_scale, wc);
 
                     windowedTimeSeries_i = DSP.Math.Multiply(windowedTimeSeries_i, windowScaleFactor);  //учитываем разный коэффициент передачи окна
-                    windowedTimeSeries_q = DSP.Math.Multiply(windowedTimeSeries_q, windowScaleFactor);
-
-                    
+                    windowedTimeSeries_q = DSP.Math.Multiply(windowedTimeSeries_q, windowScaleFactor);                   
                     
                     //------------------Расчитываем БПФ----------------------------------------      
                    
@@ -639,10 +635,25 @@ namespace fft_writer
                         cpxResult[i] = new System.Numerics.Complex(windowedTimeSeries_q[i], windowedTimeSeries_i[i]);
                     }
 
+                    //-----------------Это мы расчитываем уровень сигнала на входе АЦП после коррекции искажений--------------------
+                    System.Numerics.Complex[] PinResult = new System.Numerics.Complex[N_complex];
+
+                    for (i = 0; i < N_complex; i++)
+                    {
+                        PinResult[i] = new System.Numerics.Complex(dat_I_scale[i], dat_Q_scale[i]);
+                    }
+
+                    // Convert the complex result to a scalar magnitude 
+                    double[] magA = DSP.ConvertComplex.ToMagnitude(PinResult);//высчитываем массив модулей (длинну векторов) комплексных отсчётов входного массива
+                    double[] mag_Corr = DSP.Math.Divide(magA, 9.33);//приводим показометр к такомуже значению как на спектре
+                    A_out = FILTR_MEDIANA(mag_Corr);
+
+                    //--------------------------------------------------------------------------------------------------------------
+
                     //Accord.Math.FourierTransform.FFT(cpxResult, Accord.Math.FourierTransform.Direction.Forward); //этот метод статический
 
                     //mag = DSP.Math.Multiply(mag, 1);
-        
+
                     double[] magLog_temp  = DSP.ConvertComplex.ToMagnitudeSquared(cpxResult);//получаем квадрат напряжения
                     double[] magLog_temp2 = DSP.Math.Divide  (magLog_temp,50);
                     double[] magLog       = DSP.Math.Log10   (magLog_temp2);
@@ -1434,11 +1445,11 @@ namespace fft_writer
 
             if (checkBox1.Checked ==true)
             {
-                Plot2 fig1 = new Plot2(85.0, "общая АЧХ", "N", "Дб");
+                Plot2 fig1 = new Plot2(15, "общая АЧХ", "N", "Дб");//(85.0, "общая АЧХ", "N", "Дб")
                 fig1.PlotData(M_ach);
                 fig1.Show();
                                 
-                Plot2 fig2 = new Plot2(85.0, "локальная АЧХ", "N", "Дб");
+                Plot2 fig2 = new Plot2(15, "локальная АЧХ", "N", "Дб");//(85.0, "локальная АЧХ", "N", "Дб")
                 fig2.PlotData(Local_ACH);
                 fig2.Show();
             }           
@@ -1481,7 +1492,7 @@ namespace fft_writer
 
             if (checkBox1.Checked == true)
             {
-                Plot2 fig3 = new Plot2(85.0, "импульсная х-ка", "N", "разы");
+                Plot2 fig3 = new Plot2(15, "импульсная х-ка", "N", "разы");//(85.0, "импульсная х-ка", "N", "разы")
                 fig3.PlotData(k_ach_i);
                 fig3.Show();
             }

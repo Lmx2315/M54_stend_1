@@ -737,7 +737,7 @@ namespace fft_writer
                     }
                     
                     if (FLAG_filtr == 1) filtr_usr2(magLog,MeM,10);
-                    if (FLAG_filtr == 2) filtr_usr2(magLog,MeM,30);
+                    if (FLAG_filtr == 2) filtr_usr2(magLog,MeM,33);
       
                     int k_max = 0;
                     double m1x, m1y;
@@ -941,9 +941,9 @@ namespace fft_writer
 			Debug.WriteLine("сохраняем сформированый массив в файл");
 			
 			for (int i = 0; i < N; i++)
-		            {
-						text=text+Convert.ToString(a[i])+"\r\n";
-		            }
+		      {
+				text=text+Convert.ToString(a[i])+"\r\n";
+		      }
 			textFile.WriteLine(text);	          
 			textFile.Close();
 		}
@@ -1049,7 +1049,7 @@ namespace fft_writer
                 serialPort1.Close();
             }
         }
-            private void Button1_Click(object sender, EventArgs e)
+        private void Button1_Click(object sender, EventArgs e)
         {
             if (FLAG_filtr == 1) FLAG_filtr = 0; else FLAG_filtr = 1;
         }
@@ -1089,18 +1089,19 @@ namespace fft_writer
 
         private void freq_send(int freq)
         {
-            string command1 = " ~0 freq:";//добавил пробебел перед командой
+            string command1 = "__~0 freq:";//добавил 2-пробела перед командой
 
             if (serialPort1.IsOpen == false) serialPort1.PortName = textBox_com_port.Text;
                 try
                 {
-                    command1 = command1 + Convert.ToString(freq+ CORRECT_FREQ) + "; ";//...и после команды , чтобы срабатывало.
+                    command1 = command1 + Convert.ToString(freq+ CORRECT_FREQ) + ";__";//2-пробела и после команды , чтобы срабатывало.
                     if (serialPort1.IsOpen == false)
                     {
                         serialPort1.Open();
                     }
                     serialPort1.Write(command1);
-                     // здесь может быть код еще...
+          //        serialPort1.Write(command1);
+                    // здесь может быть код еще...
                 }
                 catch (Exception ex)
                 {
@@ -1109,15 +1110,15 @@ namespace fft_writer
                     // что-то пошло не так и упало исключение... Выведем сообщение исключения
                     Console.WriteLine(string.Format("Port:'{0}' Error:'{1}'", serialPort1.PortName, ex.Message));
                 }
-          //  serialPort1.Close();
+                serialPort1.Close();
         }
 
         bool FLAG_IH_load = false;
 
         private void btn_com_open_Click(object sender, EventArgs e)
         {
-            string command1 = " ~0 freq:";
-            string command2 = " ~0 upr_at";
+            string command1 = "  ~0 freq:";
+            string command2 = "  ~0 upr_at";
             int freq = 0;
 
             freq = Convert.ToInt32(textBox_freq_m54.Text) + CORRECT_FREQ;
@@ -1127,7 +1128,7 @@ namespace fft_writer
                         
                 try
                 {
-                    command1 = command1 + freq.ToString() + "; ";
+                    command1 = command1 + freq.ToString() + ";  ";
                     //   command2 = command2 + channal_box.Text + ":" + textBox_att_m54.Text + ";";
                     if (serialPort1.IsOpen == false)
                     {
@@ -1172,7 +1173,7 @@ namespace fft_writer
         private void button3_Click(object sender, EventArgs e)
         {
             Din_DIAP_min = 100;
-            FLAG_filtr = 2;
+            FLAG_filtr = 2;//2
             if (_isServerStarted==true)  timer3.Enabled = true;
             timer3.Interval = Convert.ToInt32(textBox_freq_delay.Text);
             freq_start = Convert.ToInt32(textBox_freq_start.Text);
@@ -1304,8 +1305,8 @@ namespace fft_writer
 
         private void btn_com_open_2_Click(object sender, EventArgs e)
         {
-            string command1 = "~0 freq:";
-            string command2 = "~0 upr_at";
+            string command1 = "  ~0 freq:";
+            string command2 = "  ~0 upr_at";
             string chanal = "";
 
             if (serialPort1.IsOpen == false) serialPort1.PortName = textBox_com_port.Text;
@@ -1315,7 +1316,7 @@ namespace fft_writer
                 {     
                     var z = 63-(Convert.ToDouble(textBox_att_m54.Text) * 2);
                     if (channal_box.Text == "1") chanal = "1"; else chanal = "2";
-                    command2 = command2 + chanal + ":" + Convert.ToString(z) + ";";
+                    command2 = command2 + chanal + ":" + Convert.ToString(z) + ";  ";
 
                     if (serialPort1.IsOpen == false)
                     {

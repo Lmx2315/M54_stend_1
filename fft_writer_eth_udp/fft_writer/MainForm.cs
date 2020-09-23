@@ -345,26 +345,36 @@ namespace fft_writer
             return data;
         }
 
+        int N_usred = 50;
+        int N_sch_timer1=0;
+
         private void timer1_Tick(object sender, EventArgs e)
         {
             double[] z = new double[1];
+            
+                if ((FLAG_DATA_NEW == "0") || (FLAG_DATA_NEW == "1"))
+                {
+                    selectedWindowName = cmbWindow.SelectedValue.ToString();//выбираем тип окна для БПФ
+                    MSG_collector();
+                    FLAG_DATA_NEW = "";
+                }
+                Ku_control();
+                DISPLAY();
+                z[0] = LVL_Pin_DBm;
 
-            if ((FLAG_DATA_NEW =="0")|| (FLAG_DATA_NEW == "1"))
+            if (N_sch_timer1 > 0)
             {
-                selectedWindowName = cmbWindow.SelectedValue.ToString();//выбираем тип окна для БПФ
-                MSG_collector();
-                FLAG_DATA_NEW = "";
-            }
-            Ku_control();
-            DISPLAY();
-            z[0] = LVL_Pin_DBm;
-            filtr_usr2(z,MeM2,45);
-            var x = Math.Round(z[0],2);
-            textBox_Pin.Text = Convert.ToString(x); //выводим усреднённое значение входной мощности сигнала
-            textBox_sch.Text = Convert.ToString(sch_packet);
-            sch_packet = 0;
-            filtr = 12000 / BUF_N * B_win;
-            label8.Text = "полоса фильтра:" + Convert.ToString(filtr) + "кГц";
+                N_sch_timer1--;
+                filtr_usr_rst(z, MeM2, N_usred,false);
+                var y = 1_000_000 * Math.Pow(10, (z[0] / 10));//чтобы получить нВт
+                var x = Math.Round(y, 2);
+                textBox_Pin.Text = Convert.ToString(x); //выводим усреднённое значение входной мощности сигнала
+            } else filtr_usr_rst(z, MeM2, N_usred, true);
+
+                textBox_sch.Text = Convert.ToString(sch_packet);
+                sch_packet = 0;
+                filtr = 12000 / BUF_N * B_win;
+                label8.Text = "полоса фильтра:" + Convert.ToString(filtr) + "кГц";           
         }
 
 
@@ -379,11 +389,11 @@ namespace fft_writer
             textBox_Ku.Text = Convert.ToString(Ku);
         }
 
-        double[][] MeM2 = new double[50][];
+        double[][] MeM2 = new double[100][];
         void Pout_control ()
         {
             int i;
-            for (i=0;i<50;i++) MeM2[i] = new double[1];
+            for (i=0;i< N_usred; i++) MeM2[i] = new double[1];
 
             while (true)
             {
@@ -409,9 +419,10 @@ namespace fft_writer
             //Start();
 
             //выводим всплывающую подсказку!
-            ToolTip t = new ToolTip();
+            ToolTip t = new ToolTip(); 
             t.SetToolTip(button5, "Сохранить принятые данные в файл");
             t.SetToolTip(save_botton, "Сохранить измеренные значения перебора частот в файл");
+            t.SetToolTip(textBox_port_generator, "MXG - 5024 , SMA 100A - 5025");
 #if TEST
             label_test.Visible = true;
 #endif
@@ -421,6 +432,16 @@ namespace fft_writer
         private double LogBase(double number, double log_base)
         {
             return Math.Log(number) / Math.Log(log_base);
+        }
+
+        private System.Numerics.Complex[] POST_REMOVE (System.Numerics.Complex[] A) //функция удаляет постоянную составляющую из вектора
+        {
+            int i = 0;
+            System.Numerics.Complex z=0;
+            for (i = 0; i < A.Length; i++) z = (z + A[i]);
+            z = z / A.Length;
+            for (i = 0; i < A.Length; i++) A[i] = A[i] - z;
+            return A;
         }
 
         int [] tst_signal (int a,uint n)
@@ -636,18 +657,30 @@ namespace fft_writer
                     }
 
                     //-----------------Это мы расчитываем уровень сигнала на входе АЦП после коррекции искажений--------------------
-                    System.Numerics.Complex[] PinResult = new System.Numerics.Complex[N_complex];
+                    System.Numerics.Complex[] PinResult  = new System.Numerics.Complex[N_complex];
+                    System.Numerics.Complex[] CorrResult = new System.Numerics.Complex[N_complex];
 
                     for (i = 0; i < N_complex; i++)
                     {
                         PinResult[i] = new System.Numerics.Complex(dat_I_scale[i], dat_Q_scale[i]);
                     }
 
+                    //CorrResult=POST_REMOVE(PinResult);
+                    CorrResult = PinResult;
                     // Convert the complex result to a scalar magnitude 
-                    double[] magA = DSP.ConvertComplex.ToMagnitude(PinResult);//высчитываем массив модулей (длинну векторов) комплексных отсчётов входного массива
+                    double[] magA = DSP.ConvertComplex.ToMagnitude(CorrResult);//высчитываем массив модулей (длинну векторов) комплексных отсчётов входного массива
                     double[] mag_Corr = DSP.Math.Divide(magA, 9.33);//приводим показометр к такомуже значению как на спектре
                     A_out = FILTR_MEDIANA(mag_Corr);
-
+                    var index=Array.BinarySearch(mag_Corr, A_out);
+                    mag_Corr[index] = 0;
+                    A_out = FILTR_MEDIANA(mag_Corr);
+                    index = Array.BinarySearch(mag_Corr, A_out);
+                    mag_Corr[index] = 0;
+                    A_out = FILTR_MEDIANA(mag_Corr);
+                    index = Array.BinarySearch(mag_Corr, A_out);
+                    mag_Corr[index] = 0;
+                    A_out = FILTR_MEDIANA(mag_Corr);
+                    // A_out = FILTR_MAT(mag_Corr);
                     //--------------------------------------------------------------------------------------------------------------
 
                     //Accord.Math.FourierTransform.FFT(cpxResult, Accord.Math.FourierTransform.Direction.Forward); //этот метод статический
@@ -743,6 +776,14 @@ namespace fft_writer
         int k = (M.Length) / 2; //средний элемент массива
         return M[k];    //возвращаем медианное значение
       }
+        //фильтр - среднее
+        double FILTR_MAT(double[] M) //M - массив входных отсчётов
+        {
+            double z = 0;
+            for (var i = 0; i < M.Length; i++) z = z + M[i];
+            z = z / M.Length;
+            return z;    //возвращаем среднее значение
+        }
 
         void DISPLAY ()
         {
@@ -781,6 +822,33 @@ namespace fft_writer
             for (j = 0; j < data.Length; j++) o[j] = o[j] / k;
              
             Array.Copy(o, data, data.Length);
+        }
+
+        void filtr_usr_rst(double[] data, double[][] a, int k,bool rst)//входные данные, входной зубчатый массив памяти (в нулевом массиве текущий массив данных )и глубина усреднения
+        {
+            int i;
+            int j;
+            double[] o = new double[data.Length];
+
+            if (rst == false)
+            {
+                for (j = 0; j < data.Length; j++)
+                {
+                    for (i = 0; i < k; i++) if (i < (k - 1)) a[k - i - 1][j] = a[k - i - 2][j]; else a[k - i - 1][j] = data[j];
+
+                    for (i = 0; i < k; i++) o[j] = (o[j] + a[i][j]);
+                }
+                for (j = 0; j < data.Length; j++) o[j] = o[j] / k;
+
+                Array.Copy(o, data, data.Length);
+            }
+            else
+            {
+                for (j = 0; j < data.Length; j++)
+                {
+                    for (i = 0; i < k; i++) a[i][j] = 0;
+                }
+            }
         }
         void SerialPort1DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
 		{
@@ -880,7 +948,6 @@ namespace fft_writer
             if (selectedWindowName == "Nutall3A")   B_win = 2.02;
             if (selectedWindowName == "Nutall3B")   B_win = 2.02;
             if (selectedWindowName == "Nutall4A")   B_win = 2.02;
-
         }
 
         private void Open_file_BTN_Click(object sender, EventArgs e)
@@ -888,8 +955,7 @@ namespace fft_writer
             if (openFileDialog1.ShowDialog()==DialogResult.OK)
             {
                 fileName = openFileDialog1.FileName;
-                text_from_file = File.ReadAllText(fileName);
-   
+                text_from_file = File.ReadAllText(fileName);   
             }
         }
 
@@ -968,7 +1034,7 @@ namespace fft_writer
 
         private void btn_telnet_gen_Click(object sender, EventArgs e)
         {
-            //create a new telnet connection to hostname "x.x.x.x" on port "5025"
+            //create a new telnet connection to hostname "x.x.x.x" on port "5025 or 5024"
             string host = textBox_ip_generator.Text;
             int    port = Convert.ToInt32(textBox_port_generator.Text);
 #if WORK
@@ -977,13 +1043,15 @@ namespace fft_writer
             // while connected
             while (tc.IsConnected && prompt.Trim() != "exit")
             {
-                prompt = "freq " + textBox_freq_gen.Text + " Hz";
+                Console.WriteLine("-------");
+                prompt = "FREQ " + textBox_freq_gen.Text + "Hz;";
                 tc.WriteLine(prompt);
-                prompt = "pow " + textBox_level_gen.Text + " DBm";
+                prompt = "POW " + textBox_level_gen.Text + "DBM;";
                 tc.WriteLine(prompt);
-                prompt = "outp " + " 1";
+                prompt = "OUTPut " + "ON;\r\n";
                 tc.WriteLine(prompt);
-                //    Console.Write(tc.Read());
+
+                Console.Write(tc.Read());
                 prompt = "exit";
             }
             Console.WriteLine("***DISCONNECTED");
@@ -1113,7 +1181,7 @@ namespace fft_writer
             
             double a, b, c;
             string text = "";
-            //create a new telnet connection to hostname "x.x.x.x" on port "5025"
+            //create a new telnet connection to hostname "x.x.x.x" on port "5025 or 5024"
             string host = textBox_ip_generator.Text;
             int port = Convert.ToInt32(textBox_port_generator.Text);
             progressBar1.Visible = true;
@@ -1155,9 +1223,9 @@ namespace fft_writer
 
             textBox_freq_m54.Text = Convert.ToString(freq_temp);
             
-            prompt = "freq " + Convert.ToString(freq_current) + " Hz";
+            prompt = "FREQ " + Convert.ToString(freq_current) + "Hz;\n\r";
 #if WORK
-            tc.WriteLine(prompt);//отсылаем частоту в генератор SMA 100A
+            tc.WriteLine(prompt);//отсылаем частоту в генератор MXG//SMA 100A
 #endif
             COMMAND_FOR_SERVER = Convert.ToString(freq_current-freq_temp);//отсылаем частоту для ТЕСТ-а
 
@@ -1829,6 +1897,11 @@ namespace fft_writer
         private void button5_MouseHover(object sender, EventArgs e)
         {
           
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            N_sch_timer1 = 100;
         }
 
         int sch_line (string a)

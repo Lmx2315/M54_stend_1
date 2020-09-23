@@ -163,6 +163,7 @@ namespace fft_writer
             this.label43 = new System.Windows.Forms.Label();
             this.label51 = new System.Windows.Forms.Label();
             this.textBox_min_dindiapaz = new System.Windows.Forms.TextBox();
+            this.button6 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // my_port_box
@@ -481,7 +482,7 @@ namespace fft_writer
             this.textBox_port_generator.Name = "textBox_port_generator";
             this.textBox_port_generator.Size = new System.Drawing.Size(99, 22);
             this.textBox_port_generator.TabIndex = 28;
-            this.textBox_port_generator.Text = "5025";
+            this.textBox_port_generator.Text = "5024";
             this.textBox_port_generator.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // btn_telnet_gen
@@ -1091,9 +1092,9 @@ namespace fft_writer
             this.label40.Location = new System.Drawing.Point(194, 368);
             this.label40.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label40.Name = "label40";
-            this.label40.Size = new System.Drawing.Size(34, 16);
+            this.label40.Size = new System.Drawing.Size(40, 16);
             this.label40.TabIndex = 90;
-            this.label40.Text = "Дбм";
+            this.label40.Text = "мкВт";
             // 
             // label41
             // 
@@ -1101,9 +1102,9 @@ namespace fft_writer
             this.label41.Location = new System.Drawing.Point(44, 331);
             this.label41.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label41.Name = "label41";
-            this.label41.Size = new System.Drawing.Size(190, 16);
+            this.label41.Size = new System.Drawing.Size(187, 16);
             this.label41.TabIndex = 89;
-            this.label41.Text = "Измеренный сигнал на АЦП";
+            this.label41.Text = "Измерение мощности шума";
             // 
             // textBox_Pin
             // 
@@ -1314,11 +1315,22 @@ namespace fft_writer
             this.textBox_min_dindiapaz.Text = "0";
             this.textBox_min_dindiapaz.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(12, 360);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(70, 29);
+            this.button6.TabIndex = 111;
+            this.button6.Text = "ЗАМЕР";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1094, 475);
+            this.Controls.Add(this.button6);
             this.Controls.Add(this.label43);
             this.Controls.Add(this.label51);
             this.Controls.Add(this.textBox_min_dindiapaz);
@@ -1536,5 +1548,6 @@ namespace fft_writer
         private System.Windows.Forms.Label label43;
         private System.Windows.Forms.Label label51;
         private System.Windows.Forms.TextBox textBox_min_dindiapaz;
+        private System.Windows.Forms.Button button6;
     }
 }

@@ -461,6 +461,23 @@ namespace fft_writer
             return array;
         }
 
+        private double [] SPUR_REMOVE (double [] a,int k) //a-входной вектор, k - количество спур для удаления
+        {
+            int j=0;
+            int index=0;
+            double A_max=0;
+       //     Debug.WriteLine("----------");
+            for (j=0;j<k;j++)
+            {
+                A_max=a.Max();                      //ищем максимум в массиве
+                index = Array.IndexOf(a, A_max);    //определяем индекс найденого максимума
+                a[index] = 0;                       //обнуляем максимум
+       //         Debug.WriteLine("A_max:"+ A_max);
+       //         Debug.WriteLine("index:" + index);
+            }
+            return a;
+        }
+
         int km = 0;
         double A_out = 0;
 
@@ -665,26 +682,36 @@ namespace fft_writer
                         PinResult[i] = new System.Numerics.Complex(dat_I_scale[i], dat_Q_scale[i]);
                     }
 
-                    //CorrResult=POST_REMOVE(PinResult);
-                    CorrResult = PinResult;
+                    Array.Copy(PinResult, CorrResult, PinResult.Length);
+
                     // Convert the complex result to a scalar magnitude 
-                    double[] magA = DSP.ConvertComplex.ToMagnitude(CorrResult);//высчитываем массив модулей (длинну векторов) комплексных отсчётов входного массива
-                    double[] mag_Corr = DSP.Math.Divide(magA, 9.33);//приводим показометр к такомуже значению как на спектре
-                    A_out = FILTR_MEDIANA(mag_Corr);
-                    var index=Array.BinarySearch(mag_Corr, A_out);
-                    mag_Corr[index] = 0;
-                    A_out = FILTR_MEDIANA(mag_Corr);
-                    index = Array.BinarySearch(mag_Corr, A_out);
-                    mag_Corr[index] = 0;
-                    A_out = FILTR_MEDIANA(mag_Corr);
-                    index = Array.BinarySearch(mag_Corr, A_out);
-                    mag_Corr[index] = 0;
-                    A_out = FILTR_MEDIANA(mag_Corr);
-                    // A_out = FILTR_MAT(mag_Corr);
+                    double[] magA          = DSP.ConvertComplex.ToMagnitude(CorrResult);//высчитываем массив модулей (длинну векторов) комплексных отсчётов входного массива
+                    double[] mag_Corr      = DSP.Math.Divide(magA    , 9.33);           //приводим показометр к такомуже значению как на спектре                    
+                    double[] mag_free_spur = new double[mag_Corr.Length];
+                     /* тут мы делаем тестовый вектор для проверки спуроудаления
+                     Array.Clear(mag_Corr, 0, mag_Corr.Length);
+                     mag_Corr[1000] = 256;
+                     mag_Corr[1001] = 255;
+                     mag_Corr[1002] = 254;
+                     mag_Corr[1003] = 253;
+                     mag_Corr[1004] = 252;
+                     mag_Corr[1005] = 251;
+                     mag_Corr[1006] = 250;
+                     mag_Corr[1007] = 249;
+                     mag_Corr[1008] = 248;
+                     */
+
+                     A_out = FILTR_MAT(mag_Corr); //фильтруем вектор
+
+                    if (A_out < 1000)  //если маленький сигнал то это измерение коэффициента шума, если большой то это имзерение входного сигнала
+                    {
+                        mag_free_spur = SPUR_REMOVE(mag_Corr, 50);   //если сигнал меньше порога - то удаляем спуры, удаляем из вектора 5-ть спур
+                        A_out = FILTR_MAT(mag_free_spur);   //фильтруем вектор
+                    }
+                    // 
+                    //A_out = FILTR_MEDIANA(mag_free_spur);
                     //--------------------------------------------------------------------------------------------------------------
-
                     //Accord.Math.FourierTransform.FFT(cpxResult, Accord.Math.FourierTransform.Direction.Forward); //этот метод статический
-
                     //mag = DSP.Math.Multiply(mag, 1);
 
                     double[] magLog_temp  = DSP.ConvertComplex.ToMagnitudeSquared(cpxResult);//получаем квадрат напряжения

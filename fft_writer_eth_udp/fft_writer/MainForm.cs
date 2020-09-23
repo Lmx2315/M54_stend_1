@@ -1932,6 +1932,16 @@ namespace fft_writer
             N_sch_timer1 = 100;
         }
 
+        private void mXGToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void генераторСигналаПомехиToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+
+        }
+
         int sch_line (string a)
         {
             int n = 0;

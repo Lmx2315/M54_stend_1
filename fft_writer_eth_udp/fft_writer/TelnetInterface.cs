@@ -34,7 +34,6 @@ namespace MinimalisticTelnet
         public TelnetConnection(string Hostname, int Port)
         {
             tcpSocket = new TcpClient(Hostname, Port);
-
         }
 
         public string Login(string Username,string Password,int LoginTimeOutMs)
@@ -83,6 +82,13 @@ namespace MinimalisticTelnet
         public bool IsConnected
         {
             get { return tcpSocket.Connected; }
+        }
+
+        public string CLOSE ()
+        {
+            if (!tcpSocket.Connected) return null;
+            tcpSocket.Close();
+            return "ok";
         }
 
         void ParseTelnet(StringBuilder sb)

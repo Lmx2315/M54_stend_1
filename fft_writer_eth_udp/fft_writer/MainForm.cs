@@ -93,6 +93,12 @@ namespace fft_writer
 	     Plot fig2 = new Plot(15,"Q Input", "Sample", "Вольт","","","","","");
 		 Plot fig3 = new Plot(15,"FFT (dBm)", "кГц", "Mag (dBm)","","","","","");
 
+        IZM_Generator GEN_SIGN  = null;
+        IZM_Generator GEN_POMEH = null;
+
+        IZM_Generator GEN_MXG = new IZM_Generator("MXG");       //это управление генератором
+        IZM_Generator GEN_SMA = new IZM_Generator("SMA 100 A");
+
         private void MainForm_FormClosing(Object sender, FormClosingEventArgs e)
         {
             DialogResult dialog = MessageBox.Show(
@@ -423,6 +429,13 @@ namespace fft_writer
             t.SetToolTip(button5, "Сохранить принятые данные в файл");
             t.SetToolTip(save_botton, "Сохранить измеренные значения перебора частот в файл");
             t.SetToolTip(textBox_port_generator, "MXG - 5024 , SMA 100A - 5025");
+
+            GEN_SIGN  = GEN_MXG;
+            GEN_POMEH = GEN_MXG;
+
+            mXGToolStripMenuItem3.BackColor = Color.Aqua;
+            mXGToolStripMenuItem4.BackColor = Color.Aquamarine;
+            //    MainForm
 #if TEST
             label_test.Visible = true;
 #endif
@@ -1064,53 +1077,44 @@ namespace fft_writer
             //create a new telnet connection to hostname "x.x.x.x" on port "5025 or 5024"
             string host = textBox_ip_generator.Text;
             int    port = Convert.ToInt32(textBox_port_generator.Text);
-#if WORK
-            TelnetConnection tc = new TelnetConnection(host, port);
-            string prompt = "";
-            // while connected
-            while (tc.IsConnected && prompt.Trim() != "exit")
-            {
-                Console.WriteLine("-------");
-                prompt = "FREQ " + textBox_freq_gen.Text + "Hz;";
-                tc.WriteLine(prompt);
-                prompt = "POW " + textBox_level_gen.Text + "DBM;";
-                tc.WriteLine(prompt);
-                prompt = "OUTPut " + "ON;\r\n";
-                tc.WriteLine(prompt);
 
-                Console.Write(tc.Read());
-                prompt = "exit";
-            }
-            Console.WriteLine("***DISCONNECTED");
-            Console.ReadLine();
-#endif
+            GEN_SIGN.FREQ(Convert.ToInt32(textBox_freq_gen.Text ));
+            GEN_SIGN.POW (Convert.ToInt32(textBox_level_gen.Text));
+            GEN_SIGN.OUT (1);
+            GEN_SIGN.SEND(host,port);
+
             COMMAND_FOR_SERVER = Convert.ToString(Convert.ToDouble(textBox_freq_gen.Text) - Convert.ToDouble(textBox_freq_m54.Text));
         }
 
         private void freq_send(int freq)
         {
-            string command1 = "__~0 freq:";//добавил 2-пробела перед командой
+            string command1 = "__~0 freq:";//добавил 2-пробела перед командой         
 
-            if (serialPort1.IsOpen == false) serialPort1.PortName = textBox_com_port.Text;
                 try
                 {
+                    if (serialPort1.IsOpen == false) serialPort1.PortName = textBox_com_port.Text;
                     command1 = command1 + Convert.ToString(freq+ CORRECT_FREQ) + ";__";//2-пробела и после команды , чтобы срабатывало.
                     if (serialPort1.IsOpen == false)
                     {
                         serialPort1.Open();
                     }
                     serialPort1.Write(command1);
-          //        serialPort1.Write(command1);
-                    // здесь может быть код еще...
+                     // здесь может быть код еще...
                 }
                 catch (Exception ex)
                 {
                     btn_com_open.Text = "send";
                     btn_com_open.ForeColor = Color.Black;
                     // что-то пошло не так и упало исключение... Выведем сообщение исключения
-                    Console.WriteLine(string.Format("Port:'{0}' Error:'{1}'", serialPort1.PortName, ex.Message));
+                    //Console.WriteLine(string.Format("Port:'{0}' Error:'{1}'", serialPort1.PortName, ex.Message));
                 }
-                serialPort1.Close();
+
+                try
+                {
+                  serialPort1.Close();  
+                } catch (Exception ex)
+                {}
+                
         }
 
         bool FLAG_IH_load = false;
@@ -1213,16 +1217,7 @@ namespace fft_writer
             string host = textBox_ip_generator.Text;
             int port = Convert.ToInt32(textBox_port_generator.Text);
             progressBar1.Visible = true;
-#if WORK
-            TelnetConnection tc = new TelnetConnection(host, port); 
-#endif
-            string prompt = "";
             int freq_temp = Convert.ToInt32(textBox_freq_m54.Text);
-     
-            //Debug.WriteLine("freq_setup   : " + freq_setup);
-            //Debug.WriteLine("freq_last    : " + freq_last);
-            //Debug.WriteLine("freq_current : " + freq_current);
-            //Debug.WriteLine("flag_progress: " + flag_progress);
 
             if (freq_last>0)
             {
@@ -1250,11 +1245,10 @@ namespace fft_writer
             }
 
             textBox_freq_m54.Text = Convert.ToString(freq_temp);
-            
-            prompt = "FREQ " + Convert.ToString(freq_current) + "Hz;\n\r";
-#if WORK
-            tc.WriteLine(prompt);//отсылаем частоту в генератор MXG//SMA 100A
-#endif
+
+            GEN_SIGN.FREQ(freq_temp);
+            GEN_SIGN.SEND(host, port);
+
             COMMAND_FOR_SERVER = Convert.ToString(freq_current-freq_temp);//отсылаем частоту для ТЕСТ-а
 
             freq_last = freq_current;
@@ -1940,6 +1934,50 @@ namespace fft_writer
         private void генераторСигналаПомехиToolStripMenuItem1_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void mXGToolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            GEN_SIGN = GEN_MXG;
+            textBox_port_generator.Text = "5024";
+            mXGToolStripMenuItem3.BackColor = Color.Aqua;
+            sMA100AToolStripMenuItem2.BackColor= SystemColors.Control;
+        }
+
+        private void sMA100AToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            GEN_SIGN = GEN_SMA;
+            textBox_port_generator.Text = "5025";
+            sMA100AToolStripMenuItem2.BackColor = Color.Aqua;
+            mXGToolStripMenuItem3.BackColor = SystemColors.Control;
+        }
+
+        private void mXGToolStripMenuItem4_Click(object sender, EventArgs e)
+        {
+            GEN_POMEH= GEN_MXG;
+            textBox4.Text = "5024";
+            mXGToolStripMenuItem4.BackColor = Color.Aquamarine;
+            sMA100AToolStripMenuItem3.BackColor= SystemColors.Control;
+        }
+
+        private void sMA100AToolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            GEN_POMEH = GEN_SMA;
+            textBox4.Text = "5025";
+            mXGToolStripMenuItem4.BackColor = SystemColors.Control;
+            sMA100AToolStripMenuItem3.BackColor = Color.Aquamarine;
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            //create a new telnet connection to hostname "x.x.x.x" on port "5025 or 5024"
+            string host = textBox3.Text;
+            int port = Convert.ToInt32(textBox4.Text);
+
+            GEN_POMEH.FREQ(Convert.ToInt32(textBox2.Text));
+            GEN_POMEH.POW(Convert.ToInt32(textBox1.Text));
+            GEN_POMEH.OUT(1);
+            GEN_POMEH.SEND(host, port);
         }
 
         int sch_line (string a)

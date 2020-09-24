@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Text;
 using MinimalisticTelnet;
 using System.Linq;
+using System.Security.Policy;
 //using DiscreteFourierTransform;
 //using FFTLibrary;
 
@@ -93,11 +94,13 @@ namespace fft_writer
 	     Plot fig2 = new Plot(15,"Q Input", "Sample", "Вольт","","","","","");
 		 Plot fig3 = new Plot(15,"FFT (dBm)", "кГц", "Mag (dBm)","","","","","");
 
+        string  GEN_SIGN_HOST = "192.168.10.2";  //адреса генератора сигналов и генератора помехи
+        int     GEN_SIGN_PORT = 5024;
+        string  GEN_POMEH_HOST = "192.168.10.4";
+        int     GEN_POMEH_PORT = 5024;
+
         IZM_Generator GEN_SIGN  = null;
         IZM_Generator GEN_POMEH = null;
-
-        IZM_Generator GEN_MXG = new IZM_Generator("MXG");       //это управление генератором
-        IZM_Generator GEN_SMA = new IZM_Generator("SMA 100 A");
 
         bool FLAG_CALIBR_CH=false;
 
@@ -432,8 +435,18 @@ namespace fft_writer
             t.SetToolTip(save_botton, "Сохранить измеренные значения перебора частот в файл");
             t.SetToolTip(textBox_port_generator, "MXG - 5024 , SMA 100A - 5025");
 
-            GEN_SIGN  = GEN_MXG;
-            GEN_POMEH = GEN_MXG;
+            IZM_Generator GEN_MXG1 = new IZM_Generator("MXG");       //это управление генератором
+            IZM_Generator GEN_MXG2 = new IZM_Generator("MXG");       //это управление генератором
+            IZM_Generator GEN_SMA = new IZM_Generator("SMA 100 A");
+
+            GEN_SIGN  = GEN_MXG1;
+            GEN_POMEH = GEN_MXG2;
+
+            GEN_SIGN.host = GEN_SIGN_HOST;
+            GEN_SIGN.port = GEN_SIGN_PORT;
+
+            GEN_POMEH.host = GEN_POMEH_HOST;
+            GEN_POMEH.port = GEN_POMEH_PORT;
 
             mXGToolStripMenuItem3.BackColor = Color.Aqua;
             mXGToolStripMenuItem4.BackColor = Color.Aquamarine;
@@ -1076,14 +1089,10 @@ namespace fft_writer
 
         private void btn_telnet_gen_Click(object sender, EventArgs e)
         {
-            //create a new telnet connection to hostname "x.x.x.x" on port "5025 or 5024"
-            string host = textBox_ip_generator.Text;
-            int    port = Convert.ToInt32(textBox_port_generator.Text);
-
             GEN_SIGN.FREQ(Convert.ToInt32(textBox_freq_gen.Text ));
             GEN_SIGN.POW (Convert.ToInt32(textBox_level_gen.Text));
             GEN_SIGN.OUT (1);
-            GEN_SIGN.SEND(host,port);
+            GEN_SIGN.SEND();
 
             COMMAND_FOR_SERVER = Convert.ToString(Convert.ToDouble(textBox_freq_gen.Text) - Convert.ToDouble(textBox_freq_m54.Text));
         }
@@ -1248,8 +1257,8 @@ namespace fft_writer
 
             textBox_freq_m54.Text = Convert.ToString(freq_temp);
 
-            GEN_SIGN.FREQ(freq_temp);
-            GEN_SIGN.SEND(host, port);
+            GEN_SIGN.FREQ(freq_temp);//отсылаем частоту в генератор сигнала
+            GEN_SIGN.SEND();
 
             COMMAND_FOR_SERVER = Convert.ToString(freq_current-freq_temp);//отсылаем частоту для ТЕСТ-а
 
@@ -1299,7 +1308,7 @@ namespace fft_writer
 
         }
 
-        private void btn_com_open_2_Click(object sender, EventArgs e)
+        private void ATT_SEND ()
         {
             string command1 = "  ~0 freq:";
             string command2 = "  ~0 upr_at";
@@ -1309,8 +1318,8 @@ namespace fft_writer
             if (btn_com_open.Text == "send")
             {
                 try
-                {     
-                    var z = 63-(Convert.ToDouble(textBox_att_m54.Text) * 2);
+                {
+                    var z = 63 - (Convert.ToDouble(textBox_att_m54.Text) * 2);
                     if (channal_box.Text == "1") chanal = "1"; else chanal = "2";
                     command2 = command2 + chanal + ":" + Convert.ToString(z) + ";  ";
 
@@ -1318,9 +1327,7 @@ namespace fft_writer
                     {
                         serialPort1.Open();
                     }
-                    //       btn_com_open.Text = "trnsf";
                     btn_com_open.ForeColor = Color.Green;
-                //    serialPort1.Write(command1);
                     serialPort1.Write(command2);
                     // здесь может быть код еще...
                 }
@@ -1342,6 +1349,11 @@ namespace fft_writer
                 serialPort1.Close();
             }
             */
+        }
+
+        private void btn_com_open_2_Click(object sender, EventArgs e)
+        {
+            ATT_SEND();
         }
 
         private void btn_calibrovka_Click(object sender, EventArgs e)
@@ -1940,7 +1952,7 @@ namespace fft_writer
 
         private void mXGToolStripMenuItem3_Click(object sender, EventArgs e)
         {
-            GEN_SIGN = GEN_MXG;
+          //  GEN_SIGN = GEN_MXG;
             textBox_port_generator.Text = "5024";
             mXGToolStripMenuItem3.BackColor = Color.Aqua;
             sMA100AToolStripMenuItem2.BackColor= SystemColors.Control;
@@ -1948,7 +1960,7 @@ namespace fft_writer
 
         private void sMA100AToolStripMenuItem2_Click(object sender, EventArgs e)
         {
-            GEN_SIGN = GEN_SMA;
+          //  GEN_SIGN = GEN_SMA;
             textBox_port_generator.Text = "5025";
             sMA100AToolStripMenuItem2.BackColor = Color.Aqua;
             mXGToolStripMenuItem3.BackColor = SystemColors.Control;
@@ -1956,7 +1968,7 @@ namespace fft_writer
 
         private void mXGToolStripMenuItem4_Click(object sender, EventArgs e)
         {
-            GEN_POMEH= GEN_MXG;
+         //   GEN_POMEH= GEN_MXG;
             textBox4.Text = "5024";
             mXGToolStripMenuItem4.BackColor = Color.Aquamarine;
             sMA100AToolStripMenuItem3.BackColor= SystemColors.Control;
@@ -1964,7 +1976,7 @@ namespace fft_writer
 
         private void sMA100AToolStripMenuItem3_Click(object sender, EventArgs e)
         {
-            GEN_POMEH = GEN_SMA;
+         //   GEN_POMEH = GEN_SMA;
             textBox4.Text = "5025";
             mXGToolStripMenuItem4.BackColor = SystemColors.Control;
             sMA100AToolStripMenuItem3.BackColor = Color.Aquamarine;
@@ -1973,18 +1985,16 @@ namespace fft_writer
         private void button7_Click(object sender, EventArgs e)
         {
             //create a new telnet connection to hostname "x.x.x.x" on port "5025 or 5024"
-            string host = textBox3.Text;
-            int port = Convert.ToInt32(textBox4.Text);
-
             GEN_POMEH.FREQ(Convert.ToInt32(textBox2.Text));
-            GEN_POMEH.POW(Convert.ToInt32(textBox1.Text));
-            GEN_POMEH.OUT(1);
-            GEN_POMEH.SEND(host, port);
+            GEN_POMEH.POW (Convert.ToInt32(textBox1.Text));
+            GEN_POMEH.OUT (1);
+            GEN_POMEH.SEND();
         }
 
         private void btn_cal_ch_Click(object sender, EventArgs e)
         {
             FLAG_CALIBR_CH = true;//запускаем стейт машину калибровки
+            timer5.Start();
         }
 
         int sch_line (string a)
@@ -1993,7 +2003,148 @@ namespace fft_writer
             n = a.Split('\n').Count();
             return n;
         }
-       
+
+        enum STATE {START,ST1,ST2,ST3,ST4,END};
+        STATE stt;
+
+        private void textBox_ip_generator_TextChanged(object sender, EventArgs e)
+        {
+            GEN_SIGN.host = textBox_ip_generator.Text;
+        }
+
+        private void textBox_port_generator_TextChanged(object sender, EventArgs e)
+        {
+            GEN_SIGN.port = Convert.ToInt32(textBox_port_generator.Text);
+        }
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+            GEN_POMEH.host=textBox3.Text;
+        }
+
+        private void textBox4_TextChanged(object sender, EventArgs e)
+        {
+            GEN_POMEH.port = Convert.ToInt32(textBox4.Text);
+        }
+
+        double LEVEL_Pin_old=0;
+
+        private void timer5_Tick(object sender, EventArgs e)
+        {
+            if (FLAG_CALIBR_CH) CAL_CH_st();
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox2.Checked) 
+            {
+                GEN_POMEH.OUT(1);
+                GEN_POMEH.SEND();
+            } else
+            {
+                GEN_POMEH.OUT(0);
+                GEN_POMEH.SEND();
+            }
+        }
+
+        private void CAL_CH_st ()
+        {
+            double z =0;
+            double delta_old=0;
+            double delta_new=0;
+            double delta=0;
+            double ATT=0;
+            int sign=0;
+
+            string host = textBox_ip_generator.Text;
+            int port = Convert.ToInt32 (textBox_port_generator.Text);
+            ATT      = Convert.ToDouble(textBox_att_m54.Text);
+            Console.WriteLine("ATT:"+ATT);
+
+            if (stt==STATE.START)            //устанавливаем частоту центра рабочего диапазона
+            {
+                FLAG_filtr = 0;
+                Console.WriteLine("STATE.START");
+                stt = STATE.ST1;
+                GEN_SIGN.FREQ (435000000); //устанавливаем генератор сигнала
+                GEN_SIGN.SEND ();
+
+                GEN_POMEH.OUT (0);
+                GEN_POMEH.SEND();
+
+                textBox_att_m54.Text="31,5";//выставляем аттенюатор на максимум
+                ATT_SEND ();                //устанавливаем аттенюатор М54
+                freq_send(435000000);       //устанавливаем частоту М54
+
+            } else
+            if (stt == STATE.ST1)
+            {
+                Console.WriteLine("STATE.ST1");
+                z =LVL_Pin_DBm;
+                var att_diff=10-z;//считаем предварительную разницу между ожидаемым сигналом и реальным
+                var y = 1_000_000 * Math.Pow(10, (z / 10));//чтобы получить мкВт
+                var x = Math.Round(y, 2);
+
+                if ((ATT==31.5)&&(x>10_000_000)) 
+                {
+                    stt = STATE.END;
+                    MessageBox.Show("Слишком высокий уровень входного сигнала!");                    
+                } else
+                {
+                   ATT=ATT-att_diff; 
+                   textBox_att_m54.Text=ATT.ToString();
+                   ATT_SEND (); 
+                   stt = STATE.ST2;
+                }
+                Console.WriteLine("LVL_Pin_DBm:"+z); 
+
+            }else
+            if (stt == STATE.ST2) //измеряем уровень сигнала в полосе 5 МГц
+            {
+                Console.WriteLine("STATE.ST2");
+                z =LVL_Pin_DBm;
+                var y = 1_000_000 * Math.Pow(10, (z / 10));//чтобы получить мкВт
+                var x = Math.Round(y, 2);
+                delta    =x-10_000_000;
+                delta_old=Math.Abs(10_000_000-LEVEL_Pin_old); //предыдущая дельта
+                delta_new=Math.Abs (delta);              //текущая дельта
+                sign     =Math.Sign(delta);              //знак текущей дельты
+                Console.WriteLine("LVL_Pin_DBm:"+z);
+
+                    if (sign<0)
+                    {                        
+                        if (ATT>0) ATT=ATT-0.5; 
+                        else
+                        {
+                            stt = STATE.END;
+                            MessageBox.Show("Слишком низкий уровень входного сигнала!");                            
+                        } 
+                        textBox_att_m54.Text=ATT.ToString();
+                        ATT_SEND (); 
+                        stt = STATE.ST2;
+                    } else
+                    {
+                        if (delta_new>delta_old) 
+                        {
+                            ATT=ATT+0.5;
+                            textBox_att_m54.Text=ATT.ToString();
+                            ATT_SEND (); 
+                        } 
+                        stt = STATE.END;
+                    }   
+
+                LEVEL_Pin_old=LVL_Pin_DBm;               //запоминаем предыдущее значение
+            } else
+             if (stt == STATE.END)
+             {
+                 FLAG_filtr = 1;
+                Console.WriteLine("STATE.END");
+                 timer5.Stop();
+                 FLAG_CALIBR_CH=false;
+                 stt = STATE.START;
+             }
+        }
+
         private void btn_load_ach_Click(object sender, EventArgs e)
         {
             openFileDialog1.Filter = "text|*.txt|data|*.dat|fir coef|*.coff";

@@ -11,11 +11,15 @@ namespace fft_writer
     {
         private string MODEL;
         private string CMD_MSG;
+        public string host { set; get; }
+        public int port { set; get; }
 
        public IZM_Generator (string m) //конструктор
         {
             MODEL = m;
         }
+
+
 
         public string FREQ (int freq) //команда установки частоты
         {
@@ -71,7 +75,7 @@ namespace fft_writer
             return prompt;
         }
 
-        public string SEND(string host, int port)
+        public string SEND()
         {
             TelnetConnection tc = new TelnetConnection(host, port);
             string prompt = "";

@@ -185,6 +185,7 @@ namespace fft_writer
             this.label59 = new System.Windows.Forms.Label();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.textBox4 = new System.Windows.Forms.TextBox();
+            this.btn_cal_ch = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -1380,20 +1381,20 @@ namespace fft_writer
             this.mXGToolStripMenuItem3,
             this.sMA100AToolStripMenuItem2});
             this.mXGToolStripMenuItem2.Name = "mXGToolStripMenuItem2";
-            this.mXGToolStripMenuItem2.Size = new System.Drawing.Size(240, 22);
+            this.mXGToolStripMenuItem2.Size = new System.Drawing.Size(293, 26);
             this.mXGToolStripMenuItem2.Text = "Генератор основного сигнала";
             // 
             // mXGToolStripMenuItem3
             // 
             this.mXGToolStripMenuItem3.Name = "mXGToolStripMenuItem3";
-            this.mXGToolStripMenuItem3.Size = new System.Drawing.Size(180, 22);
+            this.mXGToolStripMenuItem3.Size = new System.Drawing.Size(158, 26);
             this.mXGToolStripMenuItem3.Text = "MXG";
             this.mXGToolStripMenuItem3.Click += new System.EventHandler(this.mXGToolStripMenuItem3_Click);
             // 
             // sMA100AToolStripMenuItem2
             // 
             this.sMA100AToolStripMenuItem2.Name = "sMA100AToolStripMenuItem2";
-            this.sMA100AToolStripMenuItem2.Size = new System.Drawing.Size(180, 22);
+            this.sMA100AToolStripMenuItem2.Size = new System.Drawing.Size(158, 26);
             this.sMA100AToolStripMenuItem2.Text = "SMA 100 A";
             this.sMA100AToolStripMenuItem2.Click += new System.EventHandler(this.sMA100AToolStripMenuItem2_Click);
             // 
@@ -1403,20 +1404,20 @@ namespace fft_writer
             this.mXGToolStripMenuItem4,
             this.sMA100AToolStripMenuItem3});
             this.sMA100AToolStripMenuItem1.Name = "sMA100AToolStripMenuItem1";
-            this.sMA100AToolStripMenuItem1.Size = new System.Drawing.Size(240, 22);
+            this.sMA100AToolStripMenuItem1.Size = new System.Drawing.Size(293, 26);
             this.sMA100AToolStripMenuItem1.Text = "Генератор сигнала помехи";
             // 
             // mXGToolStripMenuItem4
             // 
             this.mXGToolStripMenuItem4.Name = "mXGToolStripMenuItem4";
-            this.mXGToolStripMenuItem4.Size = new System.Drawing.Size(180, 22);
+            this.mXGToolStripMenuItem4.Size = new System.Drawing.Size(158, 26);
             this.mXGToolStripMenuItem4.Text = "MXG";
             this.mXGToolStripMenuItem4.Click += new System.EventHandler(this.mXGToolStripMenuItem4_Click);
             // 
             // sMA100AToolStripMenuItem3
             // 
             this.sMA100AToolStripMenuItem3.Name = "sMA100AToolStripMenuItem3";
-            this.sMA100AToolStripMenuItem3.Size = new System.Drawing.Size(180, 22);
+            this.sMA100AToolStripMenuItem3.Size = new System.Drawing.Size(158, 26);
             this.sMA100AToolStripMenuItem3.Text = "SMA 100 A";
             this.sMA100AToolStripMenuItem3.Click += new System.EventHandler(this.sMA100AToolStripMenuItem3_Click);
             // 
@@ -1554,11 +1555,23 @@ namespace fft_writer
             this.textBox4.Text = "5024";
             this.textBox4.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
+            // btn_cal_ch
+            // 
+            this.btn_cal_ch.Location = new System.Drawing.Point(20, 362);
+            this.btn_cal_ch.Margin = new System.Windows.Forms.Padding(4);
+            this.btn_cal_ch.Name = "btn_cal_ch";
+            this.btn_cal_ch.Size = new System.Drawing.Size(100, 30);
+            this.btn_cal_ch.TabIndex = 127;
+            this.btn_cal_ch.Text = "калибровка";
+            this.btn_cal_ch.UseVisualStyleBackColor = true;
+            this.btn_cal_ch.Click += new System.EventHandler(this.btn_cal_ch_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1218, 569);
+            this.Controls.Add(this.btn_cal_ch);
             this.Controls.Add(this.label54);
             this.Controls.Add(this.label55);
             this.Controls.Add(this.label56);
@@ -1817,5 +1830,6 @@ namespace fft_writer
         private System.Windows.Forms.Label label59;
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.TextBox textBox4;
+        private System.Windows.Forms.Button btn_cal_ch;
     }
 }

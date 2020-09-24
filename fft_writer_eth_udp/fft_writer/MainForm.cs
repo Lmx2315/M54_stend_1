@@ -99,6 +99,8 @@ namespace fft_writer
         IZM_Generator GEN_MXG = new IZM_Generator("MXG");       //это управление генератором
         IZM_Generator GEN_SMA = new IZM_Generator("SMA 100 A");
 
+        bool FLAG_CALIBR_CH=false;
+
         private void MainForm_FormClosing(Object sender, FormClosingEventArgs e)
         {
             DialogResult dialog = MessageBox.Show(
@@ -1978,6 +1980,11 @@ namespace fft_writer
             GEN_POMEH.POW(Convert.ToInt32(textBox1.Text));
             GEN_POMEH.OUT(1);
             GEN_POMEH.SEND(host, port);
+        }
+
+        private void btn_cal_ch_Click(object sender, EventArgs e)
+        {
+            FLAG_CALIBR_CH = true;//запускаем стейт машину калибровки
         }
 
         int sch_line (string a)

@@ -145,14 +145,12 @@ namespace fft_writer
             my_port = UInt16.Parse(my_port_box.Text);
 
             fig3.Show();//показываем окно спектра 
-
-            //Create the server.
-            IPEndPoint serverEnd = new IPEndPoint(my_ip, my_port);           
             // IPEndPoint serverEnd = new IPEndPoint(IPAddress.Any, 1234);
-
+            //Create the server.
+            IPEndPoint serverEnd = new IPEndPoint(my_ip, my_port);
             _server = new UdpClient(serverEnd);
             _server.Client.ReceiveBufferSize = 8192 * 300;//увеличиваем размер приёмного буфера!!!
-            Debug.WriteLine("Waiting for a client...");
+            //Debug.WriteLine("Waiting for a client...");
             //Create the client end.
             //_client = new IPEndPoint(IPAddress.Any, 0);
            
@@ -169,7 +167,7 @@ namespace fft_writer
             //Start fft-ing.
               Thread _fftThread = new Thread(new ThreadStart(fft_out));//тред расчёта fft
               _fftThread.Start();
-            _fftThread.IsBackground = true;
+              _fftThread.IsBackground = true;
             
             Thread _PcontrolThread = new Thread(new ThreadStart(Pout_control));
             _PcontrolThread.Start();
@@ -312,11 +310,6 @@ namespace fft_writer
         }
         //-----------------------------------------------
 
-        void Timer1Tick ()
-        {
-
-        }
-
         Byte sch =0;
 
         Byte[] cos_gen ()
@@ -436,7 +429,7 @@ namespace fft_writer
             t.SetToolTip(button5, "Сохранить принятые данные в файл");
             t.SetToolTip(save_botton, "Сохранить измеренные значения перебора частот в файл");
             t.SetToolTip(textBox_port_generator, "MXG - 5024 , SMA 100A - 5025");
-
+            t.SetToolTip(textBox_din_diapazone, "в режиме синхронизации генератора сигналов и помехи показывает разный даи. диапазон");
             /*
             t.SetToolTip(button_AM,"Генератор сигнала должен быть SMA 100A!");
             t.SetToolTip(button_CHIRP, "Генератор сигнала должен быть SMA 100A!");
@@ -865,10 +858,13 @@ namespace fft_writer
                 Array.Copy(MAG_LOG, MAG_LOG_tmp, Nbuf);
 
                 double a = Math.Round(M1Y - M2Y,1);
+                double b = Math.Round(M1Y - M3Y,1);
                 //Start a Stopwatch
                 //Stopwatch stopwatch = new Stopwatch();
                 //stopwatch.Start();
-                textBox_din_diapazone.Text = a.ToString();
+
+                if (FLAG_SYNC_GEN_SIGN_POMEH==false) textBox_din_diapazone.Text = a.ToString();
+                else                                 textBox_din_diapazone.Text = b.ToString();
                 fig3.PlotData(TSAMPL_tmp, MAG_LOG_tmp, AMAX, BMAX, CMAX, M1X, M1Y, M2X, M2Y, M3X, M3Y);
                 //fig3.Show();
                 FLAG_DISPAY = "";
@@ -952,6 +948,7 @@ namespace fft_writer
             {
                 Start();
                 Btn_start.Text = "ВЫКЛ";
+                Btn_start.Enabled = false;
                 timer1.Enabled = true;
             }
         }
@@ -1202,6 +1199,9 @@ namespace fft_writer
         {
             if (button3.Text=="SCAN")
             {
+                _FREQ_DELTA = Convert.ToInt32(textBox2.Text) - Convert.ToInt32(textBox_freq_gen.Text);
+                Console.WriteLine("_FREQ_DELTA:"+_FREQ_DELTA);
+                
                 button3.Text = "STOP";
                 Din_DIAP_min = 100;
                 FLAG_filtr = 2;//2
@@ -1223,7 +1223,7 @@ namespace fft_writer
                 VAR_IH_data_obzor.lenght = -2;//ато вываливаются ошибки - недостаточно данных
                 checkBox1.Checked = false;
                 progressBar1.Value = 0;
-                _FREQ_DELTA = Convert.ToInt32(textBox_freq_m54.Text) - Convert.ToInt32(textBox_freq_gen.Text);
+                
             }  
             else
             {
@@ -2034,6 +2034,7 @@ namespace fft_writer
         {
             FLAG_CALIBR_CH = true;//запускаем стейт машину калибровки
             timer5.Start();
+            btn_cal_ch.BackColor = SystemColors.ControlDarkDark;
         }
 
         int sch_line (string a)
@@ -2224,6 +2225,7 @@ namespace fft_writer
                  timer5.Stop();
                  FLAG_CALIBR_CH=false;
                  stt = STATE.START;
+                 btn_cal_ch.BackColor = SystemColors.Control;
              }
         }
 

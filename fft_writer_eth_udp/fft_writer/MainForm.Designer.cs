@@ -1576,7 +1576,7 @@ namespace fft_writer
             // 
             // timer5
             // 
-            this.timer5.Interval = 300;
+            this.timer5.Interval = 500;
             this.timer5.Tick += new System.EventHandler(this.timer5_Tick);
             // 
             // checkBox2

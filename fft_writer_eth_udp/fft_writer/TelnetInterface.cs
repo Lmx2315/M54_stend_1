@@ -42,12 +42,12 @@ namespace MinimalisticTelnet
             TimeOutMs = LoginTimeOutMs;
             string s = Read();
             if (!s.TrimEnd().EndsWith(":"))
-               throw new Exception("Failed to connect : no login prompt");
+            throw new Exception("Failed to connect : no login prompt");
             WriteLine(Username);
 
             s += Read();
             if (!s.TrimEnd().EndsWith(":"))
-                throw new Exception("Failed to connect : no password prompt");
+            throw new Exception("Failed to connect : no password prompt");
             WriteLine(Password);
 
             s += Read();

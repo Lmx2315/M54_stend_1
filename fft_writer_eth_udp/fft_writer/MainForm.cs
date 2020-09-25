@@ -103,6 +103,8 @@ namespace fft_writer
         IZM_Generator GEN_POMEH = null;
 
         bool FLAG_CALIBR_CH=false;
+        bool FLAG_SYNC_GEN_SIGN_POMEH=false;
+        int  _FREQ_DELTA = 0; //разница между частотой сигнального генератора и помехового
 
         private void MainForm_FormClosing(Object sender, FormClosingEventArgs e)
         {
@@ -435,6 +437,12 @@ namespace fft_writer
             t.SetToolTip(save_botton, "Сохранить измеренные значения перебора частот в файл");
             t.SetToolTip(textBox_port_generator, "MXG - 5024 , SMA 100A - 5025");
 
+            /*
+            t.SetToolTip(button_AM,"Генератор сигнала должен быть SMA 100A!");
+            t.SetToolTip(button_CHIRP, "Генератор сигнала должен быть SMA 100A!");
+            t.SetToolTip(button_PM, "Генератор сигнала должен быть SMA 100A!");
+            */
+
             IZM_Generator GEN_MXG1 = new IZM_Generator("MXG");       //это управление генератором
             IZM_Generator GEN_MXG2 = new IZM_Generator("MXG");       //это управление генератором
             IZM_Generator GEN_SMA = new IZM_Generator("SMA 100 A");
@@ -442,14 +450,19 @@ namespace fft_writer
             GEN_SIGN  = GEN_MXG1;
             GEN_POMEH = GEN_MXG2;
 
-            GEN_SIGN.host = GEN_SIGN_HOST;
-            GEN_SIGN.port = GEN_SIGN_PORT;
+            GEN_SIGN.host = textBox_ip_generator.Text;
+            GEN_SIGN.port = Convert.ToInt32(textBox_port_generator.Text);
 
-            GEN_POMEH.host = GEN_POMEH_HOST;
-            GEN_POMEH.port = GEN_POMEH_PORT;
+            GEN_POMEH.host = textBox3.Text;
+            GEN_POMEH.port = Convert.ToInt32(textBox4.Text);
 
             mXGToolStripMenuItem3.BackColor = Color.Aqua;
             mXGToolStripMenuItem4.BackColor = Color.Aquamarine;
+
+            button_AM.Enabled = false;
+            button_CHIRP.Enabled = false;
+            button_PM.Enabled = false;        
+
             //    MainForm
 #if TEST
             label_test.Visible = true;
@@ -1091,7 +1104,7 @@ namespace fft_writer
         {
             GEN_SIGN.FREQ(Convert.ToInt32(textBox_freq_gen.Text ));
             GEN_SIGN.POW (Convert.ToInt32(textBox_level_gen.Text));
-            GEN_SIGN.OUT (1);
+   //       GEN_SIGN.OUT (1);
             GEN_SIGN.SEND();
 
             COMMAND_FOR_SERVER = Convert.ToString(Convert.ToDouble(textBox_freq_gen.Text) - Convert.ToDouble(textBox_freq_m54.Text));
@@ -1187,25 +1200,40 @@ namespace fft_writer
 
         private void button3_Click(object sender, EventArgs e)
         {
-            Din_DIAP_min = 100;
-            FLAG_filtr = 2;//2
-            if (_isServerStarted==true)  timer3.Enabled = true;
-            timer3.Interval = Convert.ToInt32(textBox_freq_delay.Text);
-            freq_start = Convert.ToInt32(textBox_freq_start.Text);
-            freq_stop  = Convert.ToInt32(textBox_freq_stop.Text);
-            freq_step  = Convert.ToInt32(textBox_freq_step.Text);
-            freq_last = 0;
-            freq_current = freq_start;
-            freq_delta = freq_stop - freq_start;
-                                    progress_freq = freq_step;
-            if (freq_delta>0)       progress_freq = progress_freq * 100 / freq_delta;
-    //      Debug.WriteLine("progress_freq: " + progress_freq);
-            progressBar1.Value = 0;
-            flag_progress = 1;
-            Console1.Text = "";
-            freq_setup = 0;//перебор
-            VAR_IH_data_obzor.lenght = -2;//ато вываливаются ошибки - недостаточно данных
-            checkBox1.Checked = false;
+            if (button3.Text=="SCAN")
+            {
+                button3.Text = "STOP";
+                Din_DIAP_min = 100;
+                FLAG_filtr = 2;//2
+                if (_isServerStarted == true) timer3.Enabled = true;
+                timer3.Interval = Convert.ToInt32(textBox_freq_delay.Text);
+                freq_start = Convert.ToInt32(textBox_freq_start.Text);
+                freq_stop = Convert.ToInt32(textBox_freq_stop.Text);
+                freq_step = Convert.ToInt32(textBox_freq_step.Text);
+                freq_last = 0;
+                freq_current = freq_start;
+                freq_delta = freq_stop - freq_start;
+                progress_freq = freq_step;
+                if (freq_delta > 0) progress_freq = progress_freq * 100 / freq_delta;
+                //      Debug.WriteLine("progress_freq: " + progress_freq);
+                progressBar1.Value = 0;
+                flag_progress = 1;
+                Console1.Text = "";
+                freq_setup = 0;//перебор
+                VAR_IH_data_obzor.lenght = -2;//ато вываливаются ошибки - недостаточно данных
+                checkBox1.Checked = false;
+                progressBar1.Value = 0;
+                _FREQ_DELTA = Convert.ToInt32(textBox_freq_m54.Text) - Convert.ToInt32(textBox_freq_gen.Text);
+            }  
+            else
+            {
+                button3.Text = "SCAN";
+                timer3.Enabled = false;
+                flag_progress = 0;
+                FLAG_filtr = 1;
+                progressBar1.Visible = false;
+            }
+            
         }
 
     
@@ -1230,7 +1258,9 @@ namespace fft_writer
             progressBar1.Visible = true;
             int freq_temp = Convert.ToInt32(textBox_freq_m54.Text);
 
-            if (freq_last>0)
+            try
+            {
+               if (freq_last>0)
             {
                 //тут происходят измерения! и сразу запись в стринг
             text = Convert.ToString(freq_last) + ";" + Convert.ToString(Math.Round(H_a, 2)) + ";" + Convert.ToString(Math.Round(H_b, 2)) + ";" + Convert.ToString(Math.Round(H_delta, 2));
@@ -1260,6 +1290,14 @@ namespace fft_writer
             GEN_SIGN.FREQ(freq_temp);//отсылаем частоту в генератор сигнала
             GEN_SIGN.SEND();
 
+            if (FLAG_SYNC_GEN_SIGN_POMEH)//если включена синхронизация сигнального и помехового генераторов!
+            {
+               var _freq=freq_temp+_FREQ_DELTA;
+               textBox2.Text=_freq.ToString();
+               GEN_POMEH.FREQ(_freq); 
+               GEN_POMEH.SEND();
+            }
+
             COMMAND_FOR_SERVER = Convert.ToString(freq_current-freq_temp);//отсылаем частоту для ТЕСТ-а
 
             freq_last = freq_current;
@@ -1282,14 +1320,21 @@ namespace fft_writer
                 FLAG_filtr = 1;
                 ACH_error(freq_setup);//в режиме калибровки
                 progressBar1.Visible = false;
-
+                 button3.Text = "SCAN";
                 if (serialPort1.IsOpen == true)
                 {
                     serialPort1.Close();
                 }
             }
 
-            if (FLAG_IH_load == true) Kih_load();
+                if (FLAG_IH_load == true) Kih_load();     
+            }
+            catch
+            {
+                timer3.Enabled=false;
+                MessageBox.Show("Что то не то с IP/порт адресами!");
+            }
+            
         }
 
         private void btn_corr_spectr_Click(object sender, EventArgs e)
@@ -1713,38 +1758,14 @@ namespace fft_writer
                     button_CHIRP.BackColor = SystemColors.Control;
                     button_AM.BackColor    = SystemColors.ControlDark;
 
-                    prompt = "PM:STAT" + " OFF";
-                    tc.WriteLine(prompt);
-
-                    prompt = "freq " + textBox_freq_gen.Text + " Hz";
-                    tc.WriteLine(prompt);
-                    prompt = "pow " + textBox_level_gen.Text + " DBm";
-                    tc.WriteLine(prompt);
-                    prompt = "outp " + " 1";
-                    tc.WriteLine(prompt);
-
-                    prompt = "LFO1:FREQ 100kHz";
-                    tc.WriteLine(prompt);
-
-                    prompt = "AM:INT:SOUR LF1";
-                    tc.WriteLine(prompt);
-
-                    prompt = "AM:DEPT 1";
-                    tc.WriteLine(prompt);
-
-                    prompt = "AM:SOUR INT";
-                    tc.WriteLine(prompt);
-
-                    prompt = "AM:STAT" + " ON";
-                    tc.WriteLine(prompt);
-                    //    Console.Write(tc.Read());
+                    GEN_SIGN.CMD_AM(true);
+                    GEN_SIGN.SEND();
                     prompt = "exit";
                 } else
                 {
                     button_AM.BackColor = SystemColors.Control;
-                    prompt = "AM:STAT" + " OFF";
-                    tc.WriteLine(prompt);
-                    //    Console.Write(tc.Read());
+                    GEN_SIGN.CMD_AM(false);
+                    GEN_SIGN.SEND();
                     prompt = "exit";
                 }
                 
@@ -1952,34 +1973,52 @@ namespace fft_writer
 
         private void mXGToolStripMenuItem3_Click(object sender, EventArgs e)
         {
-          //  GEN_SIGN = GEN_MXG;
+            IZM_Generator GEN_MXG = new IZM_Generator("MXG"); 
+            GEN_SIGN = GEN_MXG;
             textBox_port_generator.Text = "5024";
             mXGToolStripMenuItem3.BackColor = Color.Aqua;
             sMA100AToolStripMenuItem2.BackColor= SystemColors.Control;
+            GEN_SIGN.host = textBox_ip_generator.Text;
+            GEN_SIGN.port = Convert.ToInt32(textBox_port_generator.Text);
+            button_AM.Enabled=false;
+            button_CHIRP.Enabled=false;
+            button_PM.Enabled=false;
         }
 
         private void sMA100AToolStripMenuItem2_Click(object sender, EventArgs e)
         {
-          //  GEN_SIGN = GEN_SMA;
+            IZM_Generator GEN_SMA = new IZM_Generator("SMA 100 A");
+            GEN_SIGN = GEN_SMA;
             textBox_port_generator.Text = "5025";
             sMA100AToolStripMenuItem2.BackColor = Color.Aqua;
             mXGToolStripMenuItem3.BackColor = SystemColors.Control;
+            GEN_SIGN.host = textBox_ip_generator.Text;
+            GEN_SIGN.port = Convert.ToInt32(textBox_port_generator.Text);
+            button_AM.Enabled=true;
+            button_CHIRP.Enabled=true;
+            button_PM.Enabled=true;
         }
 
         private void mXGToolStripMenuItem4_Click(object sender, EventArgs e)
         {
-         //   GEN_POMEH= GEN_MXG;
+            IZM_Generator GEN_MXG = new IZM_Generator("MXG"); 
+            GEN_POMEH= GEN_MXG;
             textBox4.Text = "5024";
             mXGToolStripMenuItem4.BackColor = Color.Aquamarine;
             sMA100AToolStripMenuItem3.BackColor= SystemColors.Control;
+            GEN_POMEH.host = textBox3.Text;
+            GEN_POMEH.port = Convert.ToInt32(textBox4.Text);
         }
 
         private void sMA100AToolStripMenuItem3_Click(object sender, EventArgs e)
         {
-         //   GEN_POMEH = GEN_SMA;
+            IZM_Generator GEN_SMA = new IZM_Generator("SMA 100 A");
+            GEN_POMEH = GEN_SMA;
             textBox4.Text = "5025";
             mXGToolStripMenuItem4.BackColor = SystemColors.Control;
             sMA100AToolStripMenuItem3.BackColor = Color.Aquamarine;
+            GEN_POMEH.host = textBox3.Text;
+            GEN_POMEH.port = Convert.ToInt32(textBox4.Text);
         }
 
         private void button7_Click(object sender, EventArgs e)
@@ -1987,7 +2026,7 @@ namespace fft_writer
             //create a new telnet connection to hostname "x.x.x.x" on port "5025 or 5024"
             GEN_POMEH.FREQ(Convert.ToInt32(textBox2.Text));
             GEN_POMEH.POW (Convert.ToInt32(textBox1.Text));
-            GEN_POMEH.OUT (1);
+    //      GEN_POMEH.OUT (1);
             GEN_POMEH.SEND();
         }
 
@@ -2036,15 +2075,57 @@ namespace fft_writer
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBox2.Checked) 
+            try
             {
-                GEN_POMEH.OUT(1);
-                GEN_POMEH.SEND();
+                if (checkBox2.Checked)
+                {
+                    GEN_POMEH.OUT(1);
+                    GEN_POMEH.SEND();
+                }
+                else
+                {
+                    GEN_POMEH.OUT(0);
+                    GEN_POMEH.SEND();
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Что-то не то с IP адресом!");
+            }
+            
+        }
+
+        private void checkBox3_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (checkBox3.Checked)
+                {
+                    GEN_SIGN.OUT(1);
+                    GEN_SIGN.SEND();
+                }
+                else
+                {
+                    GEN_SIGN.OUT(0);
+                    GEN_SIGN.SEND();
+                }
+            } catch
+            {
+                MessageBox.Show("Что-то не то с IP адресом!");
+            }
+            
+        }
+
+        private void checkBox_sync_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox_sync.Checked)
+            {
+                FLAG_SYNC_GEN_SIGN_POMEH = true;
             } else
             {
-                GEN_POMEH.OUT(0);
-                GEN_POMEH.SEND();
+                FLAG_SYNC_GEN_SIGN_POMEH = false;
             }
+            
         }
 
         private void CAL_CH_st ()
@@ -2069,7 +2150,7 @@ namespace fft_writer
                 GEN_SIGN.FREQ (435000000); //устанавливаем генератор сигнала
                 GEN_SIGN.SEND ();
 
-                GEN_POMEH.OUT (0);
+                GEN_POMEH.OUT (0); checkBox2.Checked = false;
                 GEN_POMEH.SEND();
 
                 textBox_att_m54.Text="31,5";//выставляем аттенюатор на максимум
@@ -2081,7 +2162,7 @@ namespace fft_writer
             {
                 Console.WriteLine("STATE.ST1");
                 z =LVL_Pin_DBm;
-                var att_diff=10-z;//считаем предварительную разницу между ожидаемым сигналом и реальным
+                var att_diff=Math.Floor(10-z);//считаем предварительную разницу между ожидаемым сигналом и реальным
                 var y = 1_000_000 * Math.Pow(10, (z / 10));//чтобы получить мкВт
                 var x = Math.Round(y, 2);
 
@@ -2092,6 +2173,7 @@ namespace fft_writer
                 } else
                 {
                    ATT=ATT-att_diff; 
+                   if (ATT<0) ATT=0; 
                    textBox_att_m54.Text=ATT.ToString();
                    ATT_SEND (); 
                    stt = STATE.ST2;

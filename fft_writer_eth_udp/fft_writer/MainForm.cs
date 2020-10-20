@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.IO.Ports;
 using System.IO;
 using PlotWrapper;
 using DSPLib;
@@ -1159,7 +1160,7 @@ namespace fft_writer
                     {
                         serialPort1.Open();
                     }
-                Debug.WriteLine("щлём:" + command1);
+                Debug.WriteLine("шлём:" + command1);
                 //       btn_com_open.Text = "trnsf";
                 btn_com_open.ForeColor = Color.Green;
                     serialPort1.Write(command1);
@@ -1172,7 +1173,7 @@ namespace fft_writer
                     Console.WriteLine(string.Format("Port:'{0}' Error:'{1}'", serialPort1.PortName, ex.Message));
                 }
          
-            serialPort1.Close();
+         //   serialPort1.Close();
 
             if (FLAG_IH_load == true) Kih_load();
             else MessageBox.Show("Загрузите корректирующую АЧХ характеристику");
@@ -1181,6 +1182,12 @@ namespace fft_writer
         private void serialPort1_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
             Flag_comport_rcv = 1;
+            var serialDevice = sender as SerialPort;
+            var buffer = new byte[serialDevice.BytesToRead];
+            serialDevice.Read(buffer, 0, buffer.Length);
+            string z = Encoding.GetEncoding(1251).GetString(buffer);//чтобы видеть русский шрифт!!!
+            Debug.WriteLine(":" + z);
+            serialPort1.Close();
         }
 
 
@@ -2024,10 +2031,18 @@ namespace fft_writer
         private void button7_Click(object sender, EventArgs e)
         {
             //create a new telnet connection to hostname "x.x.x.x" on port "5025 or 5024"
-            GEN_POMEH.FREQ(Convert.ToInt32(textBox2.Text));
-            GEN_POMEH.POW (Convert.ToInt32(textBox1.Text));
-    //      GEN_POMEH.OUT (1);
-            GEN_POMEH.SEND();
+            try
+            {
+                GEN_POMEH.FREQ(Convert.ToInt32(textBox2.Text));
+                GEN_POMEH.POW(Convert.ToInt32(textBox1.Text));
+                //      GEN_POMEH.OUT (1);
+                GEN_POMEH.SEND();
+            }
+            catch
+            {
+                MessageBox.Show("Проверте настройки сети!");
+            }
+            
         }
 
         private void btn_cal_ch_Click(object sender, EventArgs e)
@@ -2129,6 +2144,44 @@ namespace fft_writer
             
         }
 
+        private void button_com_port_Click(object sender, EventArgs e)
+        {
+
+            if (serialPort1.IsOpen == false)
+            {
+                // Allow the user to set the appropriate properties.
+                serialPort1.PortName = textBox_com_port.Text;
+                serialPort1.BaudRate = 115200;
+
+                // Set the read/write timeouts
+                serialPort1.ReadTimeout = 500;
+                serialPort1.WriteTimeout = 500;
+
+                try
+                {
+                    if (serialPort1.IsOpen == false)
+                    {
+                        serialPort1.Open();
+                    }
+                    Debug.WriteLine("open");
+
+                    // здесь может быть код еще...
+                }
+                catch (Exception ex)
+                {
+                    // что-то пошло не так и упало исключение... Выведем сообщение исключения
+                    Console.WriteLine(string.Format("Port:'{0}' Error:'{1}'", serialPort1.PortName, ex.Message));
+                    MessageBox.Show("Проблема с портом!");
+                }
+            }
+            else
+            {
+                serialPort1.Close();
+                button_com_port.Text = "open";
+            }
+
+        }
+
         private void CAL_CH_st ()
         {
             double z =0;
@@ -2137,6 +2190,7 @@ namespace fft_writer
             double delta=0;
             double ATT=0;
             int sign=0;
+            double LVL_ref = 10_300_000;
 
             string host = textBox_ip_generator.Text;
             int port = Convert.ToInt32 (textBox_port_generator.Text);
@@ -2150,6 +2204,7 @@ namespace fft_writer
                 stt = STATE.ST1;
                 GEN_SIGN.FREQ (435000000); //устанавливаем генератор сигнала
                 GEN_SIGN.SEND ();
+                textBox_freq_m54.Text = "435000000";
 
                 GEN_POMEH.OUT (0); checkBox2.Checked = false;
                 GEN_POMEH.SEND();
@@ -2167,7 +2222,7 @@ namespace fft_writer
                 var y = 1_000_000 * Math.Pow(10, (z / 10));//чтобы получить мкВт
                 var x = Math.Round(y, 2);
 
-                if ((ATT==31.5)&&(x>10_000_000)) 
+                if ((ATT==31.5)&&(x> LVL_ref)) 
                 {
                     stt = STATE.END;
                     MessageBox.Show("Слишком высокий уровень входного сигнала!");                    
@@ -2188,8 +2243,8 @@ namespace fft_writer
                 z =LVL_Pin_DBm;
                 var y = 1_000_000 * Math.Pow(10, (z / 10));//чтобы получить мкВт
                 var x = Math.Round(y, 2);
-                delta    =x-10_000_000;
-                delta_old=Math.Abs(10_000_000-LEVEL_Pin_old); //предыдущая дельта
+                delta    =x- LVL_ref;
+                delta_old=Math.Abs(LVL_ref - LEVEL_Pin_old); //предыдущая дельта
                 delta_new=Math.Abs (delta);              //текущая дельта
                 sign     =Math.Sign(delta);              //знак текущей дельты
                 Console.WriteLine("LVL_Pin_DBm:"+z);

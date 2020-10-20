@@ -190,6 +190,7 @@ namespace fft_writer
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.checkBox_sync = new System.Windows.Forms.CheckBox();
+            this.button_com_port = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -1617,11 +1618,23 @@ namespace fft_writer
             this.checkBox_sync.UseVisualStyleBackColor = true;
             this.checkBox_sync.CheckedChanged += new System.EventHandler(this.checkBox_sync_CheckedChanged);
             // 
+            // button_com_port
+            // 
+            this.button_com_port.Location = new System.Drawing.Point(1155, 72);
+            this.button_com_port.Margin = new System.Windows.Forms.Padding(4);
+            this.button_com_port.Name = "button_com_port";
+            this.button_com_port.Size = new System.Drawing.Size(52, 45);
+            this.button_com_port.TabIndex = 131;
+            this.button_com_port.Text = "open";
+            this.button_com_port.UseVisualStyleBackColor = true;
+            this.button_com_port.Click += new System.EventHandler(this.button_com_port_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1218, 569);
+            this.Controls.Add(this.button_com_port);
             this.Controls.Add(this.checkBox_sync);
             this.Controls.Add(this.checkBox3);
             this.Controls.Add(this.checkBox2);
@@ -1889,5 +1902,6 @@ namespace fft_writer
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.CheckBox checkBox_sync;
+        private System.Windows.Forms.Button button_com_port;
     }
 }

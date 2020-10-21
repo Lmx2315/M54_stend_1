@@ -430,7 +430,42 @@ namespace fft_writer
             t.SetToolTip(button5, "Сохранить принятые данные в файл");
             t.SetToolTip(save_botton, "Сохранить измеренные значения перебора частот в файл");
             t.SetToolTip(textBox_port_generator, "MXG - 5024 , SMA 100A - 5025");
-            t.SetToolTip(textBox_din_diapazone, "в режиме синхронизации генератора сигналов и помехи показывает разный даи. диапазон");
+            t.SetToolTip(textBox_din_diapazone, "в режиме синхронизации генератора сигналов и помехи показывает динамический диапазон между несущими и спурами \r\n в режиме без синхронизации - динамический диапазон между основной несущей и спурами!");
+            t.SetToolTip(channal_box, "Номер отображаемого канала 1 или 2");
+            t.SetToolTip(text_fsemple, "Тактовая частота по выходу приёмника, не меняется.");
+            t.SetToolTip(text_N_fft, "Размер окна обработки дискретного преобразования Фурье (128 - 8192)");
+            t.SetToolTip(cmbWindow, "Вид сглаживающего окна для ДПФ");
+            t.SetToolTip(button1, "Сглаживающий видеофильтр 1");
+            t.SetToolTip(button2, "Сглаживающий видеофильтр 2");
+            t.SetToolTip(btn_cal_ch, "Запуск калибровки канала приёмника перед проводимыми измерениями на динамический диапазон");
+            t.SetToolTip(button6, "Проведение замера мощности шума в полной полосе приёмника, при измерении коэффициента шума");
+            t.SetToolTip(textBox_Pin, "Отображение мощности шума в полной полосе пропускания приёмника, измерение производится по нажатию кнопки <Замер>");
+            t.SetToolTip(textBox_min_dindiapaz, "Измеренное значение минимального динамического диапазона");
+            t.SetToolTip(textBox_error_ach, "Измеренное значение неравномерности коэффициента усиления");
+            t.SetToolTip(btn_telnet_gen, "Отправка команды управления в Генератор сигналов");
+            t.SetToolTip(textBox_level_gen, "Выходной уровень сигнала генератора");
+            t.SetToolTip(textBox_freq_gen, "Частота сигнала генератора");
+            t.SetToolTip(textBox_port_generator, "Рабочий порт управления генератора по сети ethernet");
+            t.SetToolTip(textBox_ip_generator, "Рабочий адрес генератора по сети ethernet");
+            t.SetToolTip(checkBox_sync, "Синхронизация измерительный генераторов при тесте на динамический диапазон при подаче помехи");
+            t.SetToolTip(textBox_Level_in, "Заданный уровень сигнала на входе Приёмника, необходим для измерения реального коэффициента передачи.");
+            t.SetToolTip(textBox_Ku, "Расчитанный коэффициент усиления Приёмника, исходя из размаха сигнала на АЦП канала и уровня входного сигнала Приёмника.");
+            t.SetToolTip(save_botton, "Сохранение данных неравномерности коэффициента усиления в частотном диапазоне, необходимо предварительное сканирование.");
+            t.SetToolTip(button3, "Запуск режима сканирования в диапазоне частот");
+            t.SetToolTip(textBox_freq_delay, "Задержка переключения частот, 2000 мс - минимальная величена с запасом обеспечивающая время установления сигнала после одновременной перестройки генераторов и приёмника");
+            t.SetToolTip(textBox_freq_stop, "Конечная частота перестройки генератора");
+            t.SetToolTip(textBox_freq_start, "Начальная частота перестройки генератора");
+            t.SetToolTip(textBox_freq_step, "Шаг перестройки частоты генератора");
+            t.SetToolTip(textBox_CHIRP_DELTA_F, "Полоса частот занимаемая сигналом ЛЧМ");
+            t.SetToolTip(button_AM, "Включение АМ модуляции с предустановленными параметрами, для демонстрации");
+            t.SetToolTip(button_CHIRP, "Включение ЛЧМ модуляции");
+            t.SetToolTip(button_PM, "Включение ФМ модуляции");
+            t.SetToolTip(textBox_com_port, "Адрес COM порта для управления приёмником (используется младший компорт и двух)");
+            t.SetToolTip(textBox_freq_m54, "Частота настройки приёмника");
+            t.SetToolTip(textBox_att_m54, "Уровень ослабления входного аттенюатора, соответствует номеру канала");
+            t.SetToolTip(Btn_start, "Включает приём данных для отображения спектра, от приёмного модуля по сети ethernet");
+            t.SetToolTip(my_port_box, "Номер приёмного порта сети ethernet, если производится запуск двух копий программы (8888 и 8889) для одновременного отображения двух каналов");
+            t.SetToolTip(textBox_sch, "Число принятых программой пакетов в интервале обработки");    
             /*
             t.SetToolTip(button_AM,"Генератор сигнала должен быть SMA 100A!");
             t.SetToolTip(button_CHIRP, "Генератор сигнала должен быть SMA 100A!");
@@ -1102,7 +1137,11 @@ namespace fft_writer
         {
             GEN_SIGN.FREQ(Convert.ToInt32(textBox_freq_gen.Text ));
             GEN_SIGN.POW (Convert.ToInt32(textBox_level_gen.Text));
-   //       GEN_SIGN.OUT (1);
+            if (checkBox3.Checked)
+            {
+                GEN_SIGN.OUT(1);
+                GEN_SIGN.SEND();
+            }
             GEN_SIGN.SEND();
 
             COMMAND_FOR_SERVER = Convert.ToString(Convert.ToDouble(textBox_freq_gen.Text) - Convert.ToDouble(textBox_freq_m54.Text));
@@ -1187,6 +1226,21 @@ namespace fft_writer
             serialDevice.Read(buffer, 0, buffer.Length);
             string z = Encoding.GetEncoding(1251).GetString(buffer);//чтобы видеть русский шрифт!!!
             Debug.WriteLine(":" + z);
+            if (FLAG_COMPORT_ERROR==1)
+            {
+                FLAG_COMPORT_ERROR = 0;
+                bool FLAG = z.Contains("help");
+                if (FLAG)
+                {
+                    Debug.WriteLine("Найден ответ!");
+                    button_com_port.BackColor = Color.Green;
+                }
+                else
+                {
+                    Debug.WriteLine("нет ответа!");
+                    button_com_port.BackColor = Color.Gray;
+                }
+            }
             serialPort1.Close();
         }
 
@@ -1360,8 +1414,9 @@ namespace fft_writer
 
         }
 
-        private void ATT_SEND ()
+        private int ATT_SEND ()
         {
+            int error=0;
             string command1 = "  ~0 freq:";
             string command2 = "  ~0 upr_at";
             string chanal = "";
@@ -1389,6 +1444,8 @@ namespace fft_writer
                     btn_com_open.ForeColor = Color.Black;
                     // что-то пошло не так и упало исключение... Выведем сообщение исключения
                     Console.WriteLine(string.Format("Port:'{0}' Error:'{1}'", serialPort1.PortName, ex.Message));
+                    
+                    error=-1;
                 }
                 serialPort1.Close();
             }
@@ -1401,6 +1458,7 @@ namespace fft_writer
                 serialPort1.Close();
             }
             */
+            return error;
         }
 
         private void btn_com_open_2_Click(object sender, EventArgs e)
@@ -2047,6 +2105,8 @@ namespace fft_writer
 
         private void btn_cal_ch_Click(object sender, EventArgs e)
         {
+            textBox_att_m54.Text = "31,5";
+            ATT_SEND();
             FLAG_CALIBR_CH = true;//запускаем стейт машину калибровки
             timer5.Start();
             btn_cal_ch.BackColor = SystemColors.ControlDarkDark;
@@ -2144,9 +2204,10 @@ namespace fft_writer
             
         }
 
+        int FLAG_COMPORT_ERROR = 0;
         private void button_com_port_Click(object sender, EventArgs e)
         {
-
+            string command1 = "  ~0 help;";
             if (serialPort1.IsOpen == false)
             {
                 // Allow the user to set the appropriate properties.
@@ -2161,10 +2222,11 @@ namespace fft_writer
                 {
                     if (serialPort1.IsOpen == false)
                     {
-                        serialPort1.Open();
+                        FLAG_COMPORT_ERROR = 1;
+                        serialPort1.Open();                        
                     }
                     Debug.WriteLine("open");
-
+                    serialPort1.Write(command1);
                     // здесь может быть код еще...
                 }
                 catch (Exception ex)
@@ -2184,6 +2246,7 @@ namespace fft_writer
 
         private void CAL_CH_st ()
         {
+            int error=0;
             double z =0;
             double delta_old=0;
             double delta_new=0;
@@ -2196,6 +2259,14 @@ namespace fft_writer
             int port = Convert.ToInt32 (textBox_port_generator.Text);
             ATT      = Convert.ToDouble(textBox_att_m54.Text);
             Console.WriteLine("ATT:"+ATT);
+            //-------------------
+            GEN_POMEH.host = textBox3.Text;
+            GEN_POMEH.port = Convert.ToInt32(textBox4.Text);
+
+            GEN_SIGN.host = textBox_ip_generator.Text;
+            GEN_SIGN.port = Convert.ToInt32(textBox_port_generator.Text);
+
+            //-------------------
 
             if (stt==STATE.START)            //устанавливаем частоту центра рабочего диапазона
             {
@@ -2210,8 +2281,10 @@ namespace fft_writer
                 GEN_POMEH.SEND();
 
                 textBox_att_m54.Text="31,5";//выставляем аттенюатор на максимум
-                ATT_SEND ();                //устанавливаем аттенюатор М54
+                error=ATT_SEND ();                //устанавливаем аттенюатор М54
                 freq_send(435000000);       //устанавливаем частоту М54
+
+               if (error==-1) {stt = STATE.END;button_com_port.BackColor=Color.Red;MessageBox.Show("не работает компорт!");}//если ошибка в процессе работы - останавливаемся!
 
             } else
             if (stt == STATE.ST1)
@@ -2231,10 +2304,11 @@ namespace fft_writer
                    ATT=ATT-att_diff; 
                    if (ATT<0) ATT=0; 
                    textBox_att_m54.Text=ATT.ToString();
-                   ATT_SEND (); 
+                   error=ATT_SEND (); 
                    stt = STATE.ST2;
                 }
                 Console.WriteLine("LVL_Pin_DBm:"+z); 
+                if (error==-1) {stt = STATE.END;button_com_port.BackColor=Color.Red;MessageBox.Show("не работает компорт!");}//если ошибка в процессе работы - останавливаемся!
 
             }else
             if (stt == STATE.ST2) //измеряем уровень сигнала в полосе 5 МГц
@@ -2258,7 +2332,7 @@ namespace fft_writer
                             MessageBox.Show("Слишком низкий уровень входного сигнала!");                            
                         } 
                         textBox_att_m54.Text=ATT.ToString();
-                        ATT_SEND (); 
+                        error=ATT_SEND (); 
                         stt = STATE.ST2;
                     } else
                     {
@@ -2266,21 +2340,23 @@ namespace fft_writer
                         {
                             ATT=ATT+0.5;
                             textBox_att_m54.Text=ATT.ToString();
-                            ATT_SEND (); 
+                            error=ATT_SEND (); 
                         } 
                         stt = STATE.END;
                     }   
-
+                
+                if (error==-1) {stt = STATE.END;button_com_port.BackColor=Color.Red;MessageBox.Show("не работает компорт!");}//если ошибка в процессе работы - останавливаемся!
                 LEVEL_Pin_old=LVL_Pin_DBm;               //запоминаем предыдущее значение
             } else
              if (stt == STATE.END)
              {
                  FLAG_filtr = 1;
-                Console.WriteLine("STATE.END");
+                 Console.WriteLine("STATE.END");
                  timer5.Stop();
                  FLAG_CALIBR_CH=false;
                  stt = STATE.START;
                  btn_cal_ch.BackColor = SystemColors.Control;
+    
              }
         }
 

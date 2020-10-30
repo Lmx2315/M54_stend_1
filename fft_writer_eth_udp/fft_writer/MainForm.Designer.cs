@@ -191,6 +191,7 @@ namespace fft_writer
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.checkBox_sync = new System.Windows.Forms.CheckBox();
             this.button_com_port = new System.Windows.Forms.Button();
+            this.checkBox4 = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -1394,14 +1395,14 @@ namespace fft_writer
             // mXGToolStripMenuItem3
             // 
             this.mXGToolStripMenuItem3.Name = "mXGToolStripMenuItem3";
-            this.mXGToolStripMenuItem3.Size = new System.Drawing.Size(158, 26);
+            this.mXGToolStripMenuItem3.Size = new System.Drawing.Size(180, 26);
             this.mXGToolStripMenuItem3.Text = "MXG";
             this.mXGToolStripMenuItem3.Click += new System.EventHandler(this.mXGToolStripMenuItem3_Click);
             // 
             // sMA100AToolStripMenuItem2
             // 
             this.sMA100AToolStripMenuItem2.Name = "sMA100AToolStripMenuItem2";
-            this.sMA100AToolStripMenuItem2.Size = new System.Drawing.Size(158, 26);
+            this.sMA100AToolStripMenuItem2.Size = new System.Drawing.Size(180, 26);
             this.sMA100AToolStripMenuItem2.Text = "SMA 100 A";
             this.sMA100AToolStripMenuItem2.Click += new System.EventHandler(this.sMA100AToolStripMenuItem2_Click);
             // 
@@ -1417,14 +1418,14 @@ namespace fft_writer
             // mXGToolStripMenuItem4
             // 
             this.mXGToolStripMenuItem4.Name = "mXGToolStripMenuItem4";
-            this.mXGToolStripMenuItem4.Size = new System.Drawing.Size(158, 26);
+            this.mXGToolStripMenuItem4.Size = new System.Drawing.Size(180, 26);
             this.mXGToolStripMenuItem4.Text = "MXG";
             this.mXGToolStripMenuItem4.Click += new System.EventHandler(this.mXGToolStripMenuItem4_Click);
             // 
             // sMA100AToolStripMenuItem3
             // 
             this.sMA100AToolStripMenuItem3.Name = "sMA100AToolStripMenuItem3";
-            this.sMA100AToolStripMenuItem3.Size = new System.Drawing.Size(158, 26);
+            this.sMA100AToolStripMenuItem3.Size = new System.Drawing.Size(180, 26);
             this.sMA100AToolStripMenuItem3.Text = "SMA 100 A";
             this.sMA100AToolStripMenuItem3.Click += new System.EventHandler(this.sMA100AToolStripMenuItem3_Click);
             // 
@@ -1629,11 +1630,25 @@ namespace fft_writer
             this.button_com_port.UseVisualStyleBackColor = true;
             this.button_com_port.Click += new System.EventHandler(this.button_com_port_Click);
             // 
+            // checkBox4
+            // 
+            this.checkBox4.AutoSize = true;
+            this.checkBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.checkBox4.Location = new System.Drawing.Point(1070, 478);
+            this.checkBox4.Name = "checkBox4";
+            this.checkBox4.Size = new System.Drawing.Size(75, 20);
+            this.checkBox4.TabIndex = 132;
+            this.checkBox4.Text = "160006";
+            this.checkBox4.UseVisualStyleBackColor = true;
+            this.checkBox4.Visible = false;
+            this.checkBox4.CheckedChanged += new System.EventHandler(this.checkBox4_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1218, 569);
+            this.Controls.Add(this.checkBox4);
             this.Controls.Add(this.button_com_port);
             this.Controls.Add(this.checkBox_sync);
             this.Controls.Add(this.checkBox3);
@@ -1903,5 +1918,6 @@ namespace fft_writer
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.CheckBox checkBox_sync;
         private System.Windows.Forms.Button button_com_port;
+        private System.Windows.Forms.CheckBox checkBox4;
     }
 }

@@ -293,9 +293,9 @@ namespace fft_writer
            if (RCV[0] == 2) Array.Copy(RCV, BUFFER_2, BUF_N*4);//
 
            if (Convert.ToByte(channal_box.Text) == 1) { BUF_convert(BUFFER_1, DATA_size); }
-           if (Convert.ToByte(channal_box.Text) == 2) { BUF_convert(BUFFER_2, DATA_size); }           
-
-            if (flag_NEW_FFT == 0)
+           if (Convert.ToByte(channal_box.Text) == 2) { BUF_convert(BUFFER_2, DATA_size); }
+ 
+           if (flag_NEW_FFT == 0)
             {
                 Array.Copy(data_0_i, packet_data_q, BUF_N);//копируем массив отсчётов в форму обработки	
                 Array.Copy(data_0_q, packet_data_i, BUF_N);//копируем массив отсчётов в форму обработки	
@@ -2242,6 +2242,11 @@ namespace fft_writer
                 button_com_port.Text = "open";
             }
 
+        }
+        bool FLAG_N160006 = false;//флаг того что работаем с поделкой 160006
+        private void checkBox4_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox4.Checked == true) FLAG_N160006 = true; else FLAG_N160006 = false;
         }
 
         private void CAL_CH_st ()

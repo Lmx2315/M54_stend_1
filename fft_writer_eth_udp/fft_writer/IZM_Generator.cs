@@ -69,7 +69,8 @@ namespace fft_writer
             else
             if (MODEL == "SMA 100 A")
             {
-                prompt = "outp " + outp.ToString() + " DBm;";
+                if (outp == 1) z = " ON"; else z = " OFF";
+                prompt = "OUTP " + z + " ";
             }
             CMD_MSG = CMD_MSG + prompt;
 

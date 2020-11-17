@@ -192,6 +192,7 @@ namespace fft_writer
             this.checkBox_sync = new System.Windows.Forms.CheckBox();
             this.button_com_port = new System.Windows.Forms.Button();
             this.checkBox4 = new System.Windows.Forms.CheckBox();
+            this.button8 = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -235,7 +236,7 @@ namespace fft_writer
             // save_botton
             // 
             this.save_botton.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.save_botton.Location = new System.Drawing.Point(468, 258);
+            this.save_botton.Location = new System.Drawing.Point(468, 251);
             this.save_botton.Margin = new System.Windows.Forms.Padding(4);
             this.save_botton.Name = "save_botton";
             this.save_botton.Size = new System.Drawing.Size(99, 35);
@@ -312,7 +313,7 @@ namespace fft_writer
             this.cmbWindow.Location = new System.Drawing.Point(20, 195);
             this.cmbWindow.Margin = new System.Windows.Forms.Padding(4);
             this.cmbWindow.Name = "cmbWindow";
-            this.cmbWindow.Size = new System.Drawing.Size(116, 24);
+            this.cmbWindow.Size = new System.Drawing.Size(100, 24);
             this.cmbWindow.TabIndex = 14;
             this.cmbWindow.SelectedIndexChanged += new System.EventHandler(this.cmbWindow_SelectedIndexChanged);
             this.cmbWindow.ValueMemberChanged += new System.EventHandler(this.cmbWindow_ValueMemberChanged);
@@ -1059,7 +1060,7 @@ namespace fft_writer
             // textBox_Level_in
             // 
             this.textBox_Level_in.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBox_Level_in.Location = new System.Drawing.Point(468, 322);
+            this.textBox_Level_in.Location = new System.Drawing.Point(579, 386);
             this.textBox_Level_in.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_Level_in.Multiline = true;
             this.textBox_Level_in.Name = "textBox_Level_in";
@@ -1072,7 +1073,7 @@ namespace fft_writer
             // label33
             // 
             this.label33.AutoSize = true;
-            this.label33.Location = new System.Drawing.Point(417, 302);
+            this.label33.Location = new System.Drawing.Point(528, 366);
             this.label33.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label33.Name = "label33";
             this.label33.Size = new System.Drawing.Size(183, 16);
@@ -1082,7 +1083,7 @@ namespace fft_writer
             // label34
             // 
             this.label34.AutoSize = true;
-            this.label34.Location = new System.Drawing.Point(566, 329);
+            this.label34.Location = new System.Drawing.Point(677, 393);
             this.label34.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label34.Name = "label34";
             this.label34.Size = new System.Drawing.Size(34, 16);
@@ -1092,7 +1093,7 @@ namespace fft_writer
             // textBox_Ku
             // 
             this.textBox_Ku.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBox_Ku.Location = new System.Drawing.Point(468, 381);
+            this.textBox_Ku.Location = new System.Drawing.Point(579, 445);
             this.textBox_Ku.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_Ku.Multiline = true;
             this.textBox_Ku.Name = "textBox_Ku";
@@ -1104,7 +1105,7 @@ namespace fft_writer
             // label38
             // 
             this.label38.AutoSize = true;
-            this.label38.Location = new System.Drawing.Point(417, 361);
+            this.label38.Location = new System.Drawing.Point(528, 425);
             this.label38.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label38.Name = "label38";
             this.label38.Size = new System.Drawing.Size(197, 16);
@@ -1114,7 +1115,7 @@ namespace fft_writer
             // label39
             // 
             this.label39.AutoSize = true;
-            this.label39.Location = new System.Drawing.Point(566, 386);
+            this.label39.Location = new System.Drawing.Point(677, 450);
             this.label39.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label39.Name = "label39";
             this.label39.Size = new System.Drawing.Size(25, 16);
@@ -1395,14 +1396,14 @@ namespace fft_writer
             // mXGToolStripMenuItem3
             // 
             this.mXGToolStripMenuItem3.Name = "mXGToolStripMenuItem3";
-            this.mXGToolStripMenuItem3.Size = new System.Drawing.Size(180, 26);
+            this.mXGToolStripMenuItem3.Size = new System.Drawing.Size(158, 26);
             this.mXGToolStripMenuItem3.Text = "MXG";
             this.mXGToolStripMenuItem3.Click += new System.EventHandler(this.mXGToolStripMenuItem3_Click);
             // 
             // sMA100AToolStripMenuItem2
             // 
             this.sMA100AToolStripMenuItem2.Name = "sMA100AToolStripMenuItem2";
-            this.sMA100AToolStripMenuItem2.Size = new System.Drawing.Size(180, 26);
+            this.sMA100AToolStripMenuItem2.Size = new System.Drawing.Size(158, 26);
             this.sMA100AToolStripMenuItem2.Text = "SMA 100 A";
             this.sMA100AToolStripMenuItem2.Click += new System.EventHandler(this.sMA100AToolStripMenuItem2_Click);
             // 
@@ -1418,14 +1419,14 @@ namespace fft_writer
             // mXGToolStripMenuItem4
             // 
             this.mXGToolStripMenuItem4.Name = "mXGToolStripMenuItem4";
-            this.mXGToolStripMenuItem4.Size = new System.Drawing.Size(180, 26);
+            this.mXGToolStripMenuItem4.Size = new System.Drawing.Size(158, 26);
             this.mXGToolStripMenuItem4.Text = "MXG";
             this.mXGToolStripMenuItem4.Click += new System.EventHandler(this.mXGToolStripMenuItem4_Click);
             // 
             // sMA100AToolStripMenuItem3
             // 
             this.sMA100AToolStripMenuItem3.Name = "sMA100AToolStripMenuItem3";
-            this.sMA100AToolStripMenuItem3.Size = new System.Drawing.Size(180, 26);
+            this.sMA100AToolStripMenuItem3.Size = new System.Drawing.Size(158, 26);
             this.sMA100AToolStripMenuItem3.Text = "SMA 100 A";
             this.sMA100AToolStripMenuItem3.Click += new System.EventHandler(this.sMA100AToolStripMenuItem3_Click);
             // 
@@ -1570,7 +1571,7 @@ namespace fft_writer
             this.btn_cal_ch.Location = new System.Drawing.Point(20, 362);
             this.btn_cal_ch.Margin = new System.Windows.Forms.Padding(4);
             this.btn_cal_ch.Name = "btn_cal_ch";
-            this.btn_cal_ch.Size = new System.Drawing.Size(100, 30);
+            this.btn_cal_ch.Size = new System.Drawing.Size(100, 31);
             this.btn_cal_ch.TabIndex = 127;
             this.btn_cal_ch.Text = "калибровка";
             this.btn_cal_ch.UseVisualStyleBackColor = true;
@@ -1643,11 +1644,23 @@ namespace fft_writer
             this.checkBox4.Visible = false;
             this.checkBox4.CheckedChanged += new System.EventHandler(this.checkBox4_CheckedChanged);
             // 
+            // button8
+            // 
+            this.button8.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.button8.Location = new System.Drawing.Point(800, 250);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(99, 32);
+            this.button8.TabIndex = 133;
+            this.button8.Text = "INIT";
+            this.button8.UseVisualStyleBackColor = true;
+            this.button8.Click += new System.EventHandler(this.button8_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1218, 569);
+            this.Controls.Add(this.button8);
             this.Controls.Add(this.checkBox4);
             this.Controls.Add(this.button_com_port);
             this.Controls.Add(this.checkBox_sync);
@@ -1919,5 +1932,6 @@ namespace fft_writer
         private System.Windows.Forms.CheckBox checkBox_sync;
         private System.Windows.Forms.Button button_com_port;
         private System.Windows.Forms.CheckBox checkBox4;
+        private System.Windows.Forms.Button button8;
     }
 }

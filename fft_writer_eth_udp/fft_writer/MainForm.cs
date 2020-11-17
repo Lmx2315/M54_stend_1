@@ -400,7 +400,7 @@ namespace fft_writer
         void Pout_control ()
         {
             int i;
-            for (i=0;i< N_usred; i++) MeM2[i] = new double[1];
+            for (i=0;i< N_usred; i++) MeM2[i] = new double[1];//создаём зубчатый массив один раз , потом дальше поток ввходит в whileи не возвращается сюда.
 
             while (true)
             {
@@ -775,7 +775,7 @@ namespace fft_writer
 
                     if (A_out < 1000)  //если маленький сигнал то это измерение коэффициента шума, если большой то это имзерение входного сигнала
                     {
-                        mag_free_spur = SPUR_REMOVE(mag_Corr, 50);   //если сигнал меньше порога - то удаляем спуры, удаляем из вектора 5-ть спур
+                        mag_free_spur = SPUR_REMOVE(mag_Corr,10);   //если сигнал меньше порога - то удаляем спуры, удаляем из вектора 5-ть спур
                         A_out = FILTR_MAT(mag_free_spur);   //фильтруем вектор
                     }
                     // 
@@ -2247,6 +2247,15 @@ namespace fft_writer
         private void checkBox4_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBox4.Checked == true) FLAG_N160006 = true; else FLAG_N160006 = false;
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            textBox2.Text = (Convert.ToInt32(textBox_freq_gen.Text) + 3000000).ToString();
+            textBox_freq_m54.Text = textBox_freq_gen.Text;
+            btn_com_open_Click(null,null);
+            button7_Click(null, null);
+            btn_telnet_gen_Click(null, null);
         }
 
         private void CAL_CH_st ()

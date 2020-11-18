@@ -109,7 +109,7 @@ namespace fft_writer
         bool FLAG_SYNC_GEN_SIGN_POMEH=false;
         int  _FREQ_DELTA = 0; //разница между частотой сигнального генератора и помехового
         bool FLAG_TEST3 = false; //флаг того что запущен тест 3 (проверка подавления помехи поставленной за полосой)
-
+        bool FLAG_TEST5 = false; /*флаг что запущен тест 5 (проверка основных параметров при воздействии помехи за полосой )*/
         private void MainForm_FormClosing(Object sender, FormClosingEventArgs e)
         {
             DialogResult dialog = MessageBox.Show(
@@ -473,6 +473,8 @@ namespace fft_writer
             t.SetToolTip(button8, "тест №1 проверка динамического диапазона по сигналу");
             t.SetToolTip(button10, "тест №3 проверка уровня подавления сигнала помехи в диапазоне 395 - 419,5 МГц");
             t.SetToolTip(button11, "тест №4 проверка уровня подавления сигнала помехи в диапазоне 450,5 - 475 МГц");
+            t.SetToolTip(button12, "тест №5 проверка динамического диапазона при наличии входного сигнала и сигнала помехи в диапазоне 395 - 419,5 МГц");
+            t.SetToolTip(button13, "тест №6 проверка динамического диапазона при наличии входного сигнала и сигнала помехи в диапазоне 450,5 - 475 МГц");
             /*
             t.SetToolTip(button_AM,"Генератор сигнала должен быть SMA 100A!");
             t.SetToolTip(button_CHIRP, "Генератор сигнала должен быть SMA 100A!");
@@ -498,8 +500,8 @@ namespace fft_writer
             button_AM.Enabled = false;
             button_CHIRP.Enabled = false;
             button_PM.Enabled = false;
-
-            MessageBox.Show("Перед работой:\r\nУстановите связь по COM порту с изделием.\r\nУбедитесь в правильности IP адресов приборов.\r\nВыберите тип измерительных генераторов.");
+             textBox_error_ach.Text="0";
+            MessageBox.Show("Перед работой:\r\nУстановите связь по COM порту с изделием.\r\nУбедитесь в правильности IP адресов измерительных приборов.\r\nВыберите тип измерительных генераторов.");
 
             //    MainForm
 #if TEST
@@ -1174,7 +1176,8 @@ namespace fft_writer
                 {
                     if (serialPort1.IsOpen == false) serialPort1.PortName = textBox_com_port.Text;
                     command1 = command1 + Convert.ToString(freq+ CORRECT_FREQ) + ";__";//2-пробела и после команды , чтобы срабатывало.
-                    if (serialPort1.IsOpen == false)
+                    textBox_freq_m54.Text = Convert.ToString(freq);
+                if (serialPort1.IsOpen == false)
                     {
                         serialPort1.Open();
                     }
@@ -1308,6 +1311,8 @@ namespace fft_writer
             }  
             else
             {
+                FLAG_TEST5 = false;
+                FLAG_TEST3 = false;
                 button3.Text = "SCAN";
                 timer3.Enabled = false;
                 flag_progress = 0;
@@ -1363,7 +1368,7 @@ namespace fft_writer
             {
                 VAR_IH_data.lenght++;
                 freq_temp = freq_current;
-                if (FLAG_TEST3==false) freq_send(freq_temp);//отсылаем текущую частоту в поделку для перестройки поделки её в центр диапазона, если это не ТЕСТ3,4
+                if ((FLAG_TEST3==false)&&(FLAG_TEST5==false)) freq_send(freq_temp);//отсылаем текущую частоту в поделку для перестройки поделки её в центр диапазона, если это не ТЕСТ3,4
             }
      //       else VAR_IH_data_obzor.lenght++;
 
@@ -1371,21 +1376,28 @@ namespace fft_writer
             {
                 VAR_IH_data_obzor.lenght++;
                 freq_temp = freq_current;
-                if (FLAG_TEST3 == false) freq_send(freq_temp);//отсылаем текущую частоту в поделку для перестройки поделки её в центр диапазона
-            }
+                if ((FLAG_TEST3==false)&&(FLAG_TEST5==false)) freq_send(freq_temp);//отсылаем текущую частоту в поделку для перестройки поделки её в центр диапазона
+            }            
 
-            textBox_freq_m54.Text = Convert.ToString(freq_temp);
-
-            GEN_SIGN.FREQ(freq_temp);//отсылаем частоту в генератор сигнала
-            GEN_SIGN.SEND();
-
-            if (FLAG_SYNC_GEN_SIGN_POMEH)//если включена синхронизация сигнального и помехового генераторов!
+            if (FLAG_TEST5==false)
             {
-               var _freq=freq_temp+_FREQ_DELTA;
-               textBox2.Text=_freq.ToString();
-               GEN_POMEH.FREQ(_freq); 
-               GEN_POMEH.SEND();
+                GEN_SIGN.FREQ(freq_temp);//отсылаем частоту в генератор сигнала
+                GEN_SIGN.SEND();
+
+                if (FLAG_SYNC_GEN_SIGN_POMEH)//если включена синхронизация сигнального и помехового генераторов!
+                {
+                var _freq=freq_temp+_FREQ_DELTA;
+                textBox2.Text=_freq.ToString();
+                GEN_POMEH.FREQ(_freq); 
+                GEN_POMEH.SEND();
+                }    
+            } else
+            {
+                textBox2.Text=freq_temp.ToString();
+                GEN_POMEH.FREQ(freq_temp); 
+                GEN_POMEH.SEND();
             }
+            
 
             COMMAND_FOR_SERVER = Convert.ToString(freq_current-freq_temp);//отсылаем частоту для ТЕСТ-а
 
@@ -1410,6 +1422,7 @@ namespace fft_writer
                 ACH_error(freq_setup);//в режиме калибровки
                 progressBar1.Visible = false;
                  button3.Text = "SCAN";
+                 FLAG_TEST5=false;
                 if (serialPort1.IsOpen == true)
                 {
                     serialPort1.Close();
@@ -2279,6 +2292,10 @@ namespace fft_writer
 
         private void button8_Click(object sender, EventArgs e)
         {
+            GEN_POMEH.OUT(0);/*выключаем выход сигнала помехи*/
+            GEN_POMEH.SEND();
+            checkBox2.Checked = false;
+
             checkBox2.Checked = false;
             checkBox3.Checked = true;
             radioButton1.Checked = true;
@@ -2327,7 +2344,7 @@ namespace fft_writer
             textBox_freq_stop.Text ="440500000";
             textBox_freq_delay.Text="2000";
 	        textBox_level_gen.Text ="25";
-            textBox1.Text="8";
+            textBox1.Text="10";
             textBox2.Text = (Convert.ToInt32(textBox_freq_gen.Text) + 3000000).ToString();
             textBox_freq_m54.Text = textBox_freq_gen.Text;
             btn_com_open_Click(null, null);
@@ -2340,6 +2357,8 @@ namespace fft_writer
 
         private void button10_Click(object sender, EventArgs e)
         {
+            GEN_POMEH.OUT(0);/*выключаем выход сигнала помехи*/
+            GEN_POMEH.SEND();
             checkBox2.Checked = false;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ3";
             textBox_att_m54.Text = "31,5";
@@ -2362,6 +2381,8 @@ namespace fft_writer
 
         private void button11_Click(object sender, EventArgs e)
         {
+            GEN_POMEH.OUT(0);/*выключаем выход сигнала помехи*/
+            GEN_POMEH.SEND();
             checkBox2.Checked = false;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ4";
             textBox_att_m54.Text = "31,5";
@@ -2380,6 +2401,54 @@ namespace fft_writer
             FLAG_TEST3 = true;
             btn_cal_ch_Click(null, null);
             radioButton2.Checked = true;
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+            radioButton1.Checked = true;
+            checkBox2.Checked = false;
+            label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ5";
+            textBox_att_m54.Text = "31,5";
+            ATT_SEND();
+            textBox_freq_gen.Text = "435000000";
+            textBox_freq_start.Text = "395000000";
+            textBox_freq_step.Text = "250000";
+            textBox_freq_stop.Text = "419500000";
+            textBox_freq_delay.Text = "2000";
+            textBox_level_gen.Text = "25";
+            textBox1.Text         = "10";/*уровень сигнала генератора помехи*/
+            textBox_freq_m54.Text = textBox_freq_gen.Text;
+            checkBox_sync.Checked = false;
+            btn_com_open_Click(null, null);
+            btn_telnet_gen_Click(null, null);
+            //запускаем калибровку
+            FLAG_TEST3 = false;
+            FLAG_TEST5 = true;
+            btn_cal_ch_Click(null, null);
+        }
+
+        private void button13_Click(object sender, EventArgs e)
+        {
+            radioButton1.Checked = true;
+            checkBox2.Checked = false;
+            label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ6";
+            textBox_att_m54.Text = "31,5";
+            ATT_SEND();
+            textBox_freq_gen.Text = "435000000";
+            textBox_freq_start.Text = "450500000";
+            textBox_freq_step.Text = "250000";
+            textBox_freq_stop.Text = "475000000";
+            textBox_freq_delay.Text = "2000";
+            textBox_level_gen.Text = "25";
+            textBox1.Text = "10";/*уровень сигнала генератора помехи*/
+            textBox_freq_m54.Text = textBox_freq_gen.Text;
+            checkBox_sync.Checked = false;
+            btn_com_open_Click(null, null);
+            btn_telnet_gen_Click(null, null);
+            //запускаем калибровку
+            FLAG_TEST3 = false;
+            FLAG_TEST5 = true;
+            btn_cal_ch_Click(null, null);
         }
 
         private void CAL_CH_st ()
@@ -2498,7 +2567,10 @@ namespace fft_writer
                 {
                     LEVEL_TEST_SIGNAL = LVL_Pin_DBm;//запоминаем уровень тестового сигнала
                 }
-    
+
+                if (FLAG_TEST5) checkBox2.Checked = true;
+
+
              }
         }
 

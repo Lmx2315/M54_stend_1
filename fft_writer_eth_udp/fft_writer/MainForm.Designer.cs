@@ -201,6 +201,8 @@ namespace fft_writer
             this.label60 = new System.Windows.Forms.Label();
             this.button11 = new System.Windows.Forms.Button();
             this.label61 = new System.Windows.Forms.Label();
+            this.button12 = new System.Windows.Forms.Button();
+            this.button13 = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -515,7 +517,7 @@ namespace fft_writer
             this.textBox_ip_generator.Name = "textBox_ip_generator";
             this.textBox_ip_generator.Size = new System.Drawing.Size(99, 22);
             this.textBox_ip_generator.TabIndex = 29;
-            this.textBox_ip_generator.Text = "192.168.10.4";
+            this.textBox_ip_generator.Text = "192.168.10.3";
             this.textBox_ip_generator.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.textBox_ip_generator.TextChanged += new System.EventHandler(this.textBox_ip_generator_TextChanged);
             // 
@@ -622,7 +624,7 @@ namespace fft_writer
             this.textBox_com_port.Name = "textBox_com_port";
             this.textBox_com_port.Size = new System.Drawing.Size(99, 44);
             this.textBox_com_port.TabIndex = 39;
-            this.textBox_com_port.Text = "COM5";
+            this.textBox_com_port.Text = "COM3";
             this.textBox_com_port.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.textBox_com_port.TextChanged += new System.EventHandler(this.textBox_com_port_TextChanged);
             // 
@@ -856,7 +858,7 @@ namespace fft_writer
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(33, 621);
+            this.progressBar1.Location = new System.Drawing.Point(39, 721);
             this.progressBar1.Margin = new System.Windows.Forms.Padding(4);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(1123, 28);
@@ -948,7 +950,7 @@ namespace fft_writer
             // label_test
             // 
             this.label_test.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label_test.Location = new System.Drawing.Point(907, 671);
+            this.label_test.Location = new System.Drawing.Point(1173, 656);
             this.label_test.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_test.Name = "label_test";
             this.label_test.Size = new System.Drawing.Size(249, 57);
@@ -1561,7 +1563,7 @@ namespace fft_writer
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(99, 22);
             this.textBox3.TabIndex = 117;
-            this.textBox3.Text = "192.168.10.3";
+            this.textBox3.Text = "192.168.10.4";
             this.textBox3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
             // 
@@ -1645,7 +1647,7 @@ namespace fft_writer
             // 
             this.checkBox4.AutoSize = true;
             this.checkBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.checkBox4.Location = new System.Drawing.Point(1098, 642);
+            this.checkBox4.Location = new System.Drawing.Point(1180, 603);
             this.checkBox4.Name = "checkBox4";
             this.checkBox4.Size = new System.Drawing.Size(75, 20);
             this.checkBox4.TabIndex = 132;
@@ -1753,11 +1755,35 @@ namespace fft_writer
             this.label61.TabIndex = 141;
             this.label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ3";
             // 
+            // button12
+            // 
+            this.button12.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.button12.Location = new System.Drawing.Point(16, 601);
+            this.button12.Name = "button12";
+            this.button12.Size = new System.Drawing.Size(100, 32);
+            this.button12.TabIndex = 142;
+            this.button12.Text = "TEST5";
+            this.button12.UseVisualStyleBackColor = true;
+            this.button12.Click += new System.EventHandler(this.button12_Click);
+            // 
+            // button13
+            // 
+            this.button13.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.button13.Location = new System.Drawing.Point(16, 639);
+            this.button13.Name = "button13";
+            this.button13.Size = new System.Drawing.Size(100, 32);
+            this.button13.TabIndex = 143;
+            this.button13.Text = "TEST6";
+            this.button13.UseVisualStyleBackColor = true;
+            this.button13.Click += new System.EventHandler(this.button13_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1218, 662);
+            this.ClientSize = new System.Drawing.Size(1218, 762);
+            this.Controls.Add(this.button13);
+            this.Controls.Add(this.button12);
             this.Controls.Add(this.label61);
             this.Controls.Add(this.button11);
             this.Controls.Add(this.label60);
@@ -1894,8 +1920,8 @@ namespace fft_writer
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(4);
-            this.MaximumSize = new System.Drawing.Size(1234, 700);
-            this.MinimumSize = new System.Drawing.Size(1234, 700);
+            this.MaximumSize = new System.Drawing.Size(1234, 800);
+            this.MinimumSize = new System.Drawing.Size(1234, 800);
             this.Name = "MainForm";
             this.Text = "fft_writer";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
@@ -2047,5 +2073,7 @@ namespace fft_writer
         private System.Windows.Forms.Label label60;
         private System.Windows.Forms.Button button11;
         private System.Windows.Forms.Label label61;
+        private System.Windows.Forms.Button button12;
+        private System.Windows.Forms.Button button13;
     }
 }

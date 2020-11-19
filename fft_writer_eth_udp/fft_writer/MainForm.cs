@@ -91,9 +91,9 @@ namespace fft_writer
         double Podav_DIAP_min = 0;
         double LEVEL_TEST_SIGNAL = 0;//измеренный уровень входного тестового сигнала в ДБм, применяется при тесте на подавление помехи за полосой (сначала измеряем уровень помехи в полосе сигнала и запоминаем его, затем помещаем помеху за полосу и сравниваем)
         double LVL_Pin_DBm=0;//входная измеренная мощность сигнала (для контроля коэфф. передачи и коэфф. шума)
-        int CORRECT_FREQ = -1_000_000; //поправочная частота связаная с гетеродином
+        int CORRECT_FREQ = -1_000_000; //поправочная частота связаная с гетеродином -1_000_000
 
-         Plot fig1 = new Plot(15,"I Input", "Sample", "Вольт","","","","","");
+        Plot fig1 = new Plot(15,"I Input", "Sample", "Вольт","","","","","");
 	     Plot fig2 = new Plot(15,"Q Input", "Sample", "Вольт","","","","","");
 		 Plot fig3 = new Plot(15,"FFT (dBm)", "кГц", "Mag (dBm)","","","","","");
 
@@ -391,12 +391,34 @@ namespace fft_writer
         void Ku_control ()
         {
             //32000 - 1Вольт
+            var Pomeh = B_out+32.3;//В ДБм  и учитываем коэффициент подавления фильтром при отстройке 3 МГц
+            var koeff = 6;
+
+            if (Pomeh > (M_out - 3)) koeff = 6; else 
+            if (Pomeh >-10) koeff = 1; else koeff = 0;
+
             var Level_in = Convert.ToDouble(textBox_Level_in.Text);
             var Level_in_mW = (0.001)*Math.Pow(10, (Level_in / 10));
             var Level_in_V = Math.Pow((Level_in_mW * 50), 0.5);
             var Level_out = A_out/32767*1;//выходной сигнал в вольтах
             var Ku = Math.Round((20*Math.Log10(Level_out/ Level_in_V)),2);
-            textBox_Ku.Text = Convert.ToString(Ku);
+            var Delta = Math.Abs(Convert.ToInt32(textBox2.Text) - Convert.ToInt32(textBox_freq_m54.Text));
+            if (( checkBox2.Checked)&&(Delta<3125000))   textBox_Ku.Text = Convert.ToString(Ku+ koeff);  else /*koeff - поправочный коэффициент*/
+                textBox_Ku.Text = Convert.ToString(Ku);
+
+            //-------------------------
+            var poteri_sig   = Convert.ToDouble(toolStripTextBox1.Text);
+            var poteri_pomeh = Convert.ToDouble(toolStripTextBox2.Text);
+            if (checkBox2.Checked)
+            {
+               
+                var a = Math.Pow(10,  (Convert.ToDouble(textBox1.Text)        - poteri_pomeh) / 10);      //это милливаты
+                var b = Math.Pow(10, ((Convert.ToDouble(textBox_level_gen.Text)-poteri_sig) / 10));
+                var c = a + b;
+                var d = Math.Round((Math.Log10(c) * 10),2);
+                textBox_Level_in.Text = d.ToString();
+            } else
+            textBox_Level_in.Text = (Convert.ToDouble(textBox_level_gen.Text) - poteri_sig).ToString();
         }
 
         double[][] MeM2 = new double[100][];
@@ -469,12 +491,14 @@ namespace fft_writer
             t.SetToolTip(Btn_start, "Включает приём данных для отображения спектра, от приёмного модуля по сети ethernet");
             t.SetToolTip(my_port_box, "Номер приёмного порта сети ethernet, если производится запуск двух копий программы (8888 и 8889) для одновременного отображения двух каналов");
             t.SetToolTip(textBox_sch, "Число принятых программой пакетов в интервале обработки");    
-	        t.SetToolTip(button9,"тест №2 проверка динамического диапазона при воздействии помехи в полосе обработки");
-            t.SetToolTip(button8, "тест №1 проверка динамического диапазона по сигналу");
+	        t.SetToolTip(button9,  "тест №2 проверка динамического диапазона и неравномерности АЧХ, при воздействии помехи в полосе обработки");
+            t.SetToolTip(button8,  "тест №1 проверка динамического диапазона и неравномерности АЧХ");
             t.SetToolTip(button10, "тест №3 проверка уровня подавления сигнала помехи в диапазоне 395 - 419,5 МГц");
             t.SetToolTip(button11, "тест №4 проверка уровня подавления сигнала помехи в диапазоне 450,5 - 475 МГц");
             t.SetToolTip(button12, "тест №5 проверка динамического диапазона при наличии входного сигнала и сигнала помехи в диапазоне 395 - 419,5 МГц");
             t.SetToolTip(button13, "тест №6 проверка динамического диапазона при наличии входного сигнала и сигнала помехи в диапазоне 450,5 - 475 МГц");
+            t.SetToolTip(button14, "тест №7 проверка динамического диапазона и неравномерности АЧХ, при наличии сигнала помехи за диапазоном приёма <419.5 МГц");
+            t.SetToolTip(button15, "тест №8 проверка динамического диапазона и неравномерности АЧХ, при наличии сигнала помехи за диапазоном приёма >450.5 МГц");
             /*
             t.SetToolTip(button_AM,"Генератор сигнала должен быть SMA 100A!");
             t.SetToolTip(button_CHIRP, "Генератор сигнала должен быть SMA 100A!");
@@ -561,6 +585,8 @@ namespace fft_writer
 
         int km = 0;
         double A_out = 0;
+        double B_out = 0;//амплитуда второй гармоники (обычно условная помеха)
+        double M_out = 0; //амплитуда главной гармоники
 
         string FLAG_DISPAY = "";
         double  AMAX, BMAX, CMAX, M1X, M1Y, M2X, M2Y, M3X, M3Y;
@@ -786,7 +812,7 @@ namespace fft_writer
 
                     if (A_out < 1000)  //если маленький сигнал то это измерение коэффициента шума, если большой то это имзерение входного сигнала
                     {
-                        mag_free_spur = SPUR_REMOVE(mag_Corr,10);   //если сигнал меньше порога - то удаляем спуры, удаляем из вектора 5-ть спур
+                        mag_free_spur = SPUR_REMOVE(mag_Corr,30);   //если сигнал меньше порога - то удаляем спуры, удаляем из вектора 5-ть спур
                         A_out = FILTR_MAT(mag_free_spur);   //фильтруем вектор
                     }
                     // 
@@ -866,9 +892,9 @@ namespace fft_writer
                     BMAX = B_max;
                     CMAX = C_max;
                     M1X = m1x;
-                    M1Y = m1y;
+                    M1Y = m1y; M_out = M1Y;
                     M2X = m2x;
-                    M2Y = m2y;
+                    M2Y = m2y; B_out = M2Y;
                     M3X = m3x;
                     M3Y = m3y;
                     FLAG_DISPAY = "1";
@@ -1502,6 +1528,53 @@ namespace fft_writer
             return error;
         }
 
+        private int ATT (string ch,string at)
+        {
+            int error=0;
+            string command1 = "  ~0 freq:";
+            string command2 = "  ~0 upr_at";
+            string chanal = "";
+
+            if (serialPort1.IsOpen == false) serialPort1.PortName = textBox_com_port.Text;
+            if (btn_com_open.Text == "send")
+            {
+                try
+                {
+                    var z = 63 - (Convert.ToDouble(at) * 2);
+                    if (ch == "1") chanal = "1"; else chanal = "2";
+                    command2 = command2 + chanal + ":" + Convert.ToString(z) + ";  ";
+
+                    if (serialPort1.IsOpen == false)
+                    {
+                        serialPort1.Open();
+                    }
+                    btn_com_open.ForeColor = Color.Green;
+                    serialPort1.Write(command2);
+                    // здесь может быть код еще...
+                }
+                catch (Exception ex)
+                {
+                    btn_com_open.Text = "send";
+                    btn_com_open.ForeColor = Color.Black;
+                    // что-то пошло не так и упало исключение... Выведем сообщение исключения
+                    Console.WriteLine(string.Format("Port:'{0}' Error:'{1}'", serialPort1.PortName, ex.Message));
+                    
+                    error=-1;
+                }
+                serialPort1.Close();
+            }
+
+            /*
+            else if (serialPort1.IsOpen == true)
+            {
+                btn_com_open.Text = "open";
+                btn_com_open.ForeColor = Color.Black;
+                serialPort1.Close();
+            }
+            */
+            return error;
+        }
+
         private void btn_com_open_2_Click(object sender, EventArgs e)
         {
             ATT_SEND();
@@ -1844,6 +1917,8 @@ namespace fft_writer
         private void channal_box_TextChanged(object sender, EventArgs e)
         {
             if (channal_box.Text != "1" && channal_box.Text != "2") channal_box.Text = "1";
+            if (channal_box.Text == "1") ATT("2", "31,5");else //
+            if (channal_box.Text == "2") ATT("1", "31,5");
         }
 
         private void button_AM_Click(object sender, EventArgs e)
@@ -2217,7 +2292,7 @@ namespace fft_writer
             try
             {
                 if (checkBox3.Checked)
-                {
+                {                    
                     GEN_SIGN.OUT(1);
                     GEN_SIGN.SEND();
                 }
@@ -2308,7 +2383,7 @@ namespace fft_writer
             textBox_freq_step.Text = "250000";
             textBox_freq_stop.Text = "440500000";
             textBox_freq_delay.Text = "2000";
-            textBox_level_gen.Text = "25";
+            textBox_level_gen.Text = "10";
             textBox2.Text = (Convert.ToInt32(textBox_freq_gen.Text) + 3000000).ToString();
             textBox_freq_m54.Text = textBox_freq_gen.Text;
             checkBox_sync.Checked = false;
@@ -2336,14 +2411,14 @@ namespace fft_writer
             radioButton1.Checked = true;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ2";
             FLAG_TEST3 = false;
-            textBox_att_m54.Text = "31,5";
+            textBox_att_m54.Text = "15";
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
 	        textBox_freq_start.Text="429500000";
             textBox_freq_step.Text ="250000";
             textBox_freq_stop.Text ="440500000";
             textBox_freq_delay.Text="2000";
-	        textBox_level_gen.Text ="25";
+	        textBox_level_gen.Text ="10";
             textBox1.Text="10";
             textBox2.Text = (Convert.ToInt32(textBox_freq_gen.Text) + 3000000).ToString();
             textBox_freq_m54.Text = textBox_freq_gen.Text;
@@ -2449,6 +2524,72 @@ namespace fft_writer
             FLAG_TEST3 = false;
             FLAG_TEST5 = true;
             btn_cal_ch_Click(null, null);
+        }
+
+        private void button14_Click(object sender, EventArgs e)
+        {
+            radioButton1.Checked = true;
+            label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ7";
+            FLAG_TEST3 = false;
+            FLAG_TEST5 = false;
+            textBox_att_m54.Text = "31,5";
+            ATT_SEND();
+            textBox_freq_gen.Text = "435000000";
+            textBox_freq_start.Text = "429500000";
+            textBox_freq_step.Text = "250000";
+            textBox_freq_stop.Text = "440500000";
+            textBox_freq_delay.Text = "2000";
+            textBox_level_gen.Text = "25";
+            textBox1.Text = "10";
+            textBox2.Text = "419500000";//генератор помехи
+            textBox_freq_m54.Text = textBox_freq_gen.Text;
+            btn_com_open_Click(null, null);
+            button7_Click(null, null);
+            btn_telnet_gen_Click(null, null);
+            checkBox_sync.Checked = false;
+            checkBox2.Checked = true;
+            checkBox3.Checked = true;
+        }
+
+        private void button15_Click(object sender, EventArgs e)
+        {
+            radioButton1.Checked = true;
+            label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ8";
+            FLAG_TEST3 = false;
+            FLAG_TEST5 = false;
+            textBox_att_m54.Text = "31,5";
+            ATT_SEND();
+            textBox_freq_gen.Text = "435000000";
+            textBox_freq_start.Text = "432500000";
+            textBox_freq_step.Text = "250000";
+            textBox_freq_stop.Text = "439500000";
+            textBox_freq_delay.Text = "2000";
+            textBox_level_gen.Text = "25";
+            textBox1.Text = "10";
+            textBox2.Text = "450500000";//генератор помехи
+            textBox_freq_m54.Text = textBox_freq_gen.Text;
+            btn_com_open_Click(null, null);
+            button7_Click(null, null);
+            btn_telnet_gen_Click(null, null);
+            checkBox_sync.Checked = false;
+            checkBox2.Checked = true;
+            checkBox3.Checked = true;
+        }
+
+        private void textBox_level_gen_TextChanged(object sender, EventArgs e)
+        {
+  
+            
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void toolStripTextBox1_Click(object sender, EventArgs e)
+        {
+
         }
 
         private void CAL_CH_st ()

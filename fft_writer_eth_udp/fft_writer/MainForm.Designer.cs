@@ -203,6 +203,13 @@ namespace fft_writer
             this.label61 = new System.Windows.Forms.Label();
             this.button12 = new System.Windows.Forms.Button();
             this.button13 = new System.Windows.Forms.Button();
+            this.button14 = new System.Windows.Forms.Button();
+            this.button15 = new System.Windows.Forms.Button();
+            this.потериСигналаВКабеляхToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.сигналToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.помехаToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripTextBox1 = new System.Windows.Forms.ToolStripTextBox();
+            this.toolStripTextBox2 = new System.Windows.Forms.ToolStripTextBox();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -603,6 +610,7 @@ namespace fft_writer
             this.textBox_level_gen.TabIndex = 36;
             this.textBox_level_gen.Text = "2";
             this.textBox_level_gen.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.textBox_level_gen.TextChanged += new System.EventHandler(this.textBox_level_gen_TextChanged);
             // 
             // label15
             // 
@@ -858,10 +866,10 @@ namespace fft_writer
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(39, 721);
+            this.progressBar1.Location = new System.Drawing.Point(33, 804);
             this.progressBar1.Margin = new System.Windows.Forms.Padding(4);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(1123, 28);
+            this.progressBar1.Size = new System.Drawing.Size(1123, 45);
             this.progressBar1.TabIndex = 62;
             this.progressBar1.Visible = false;
             // 
@@ -1072,7 +1080,7 @@ namespace fft_writer
             // textBox_Level_in
             // 
             this.textBox_Level_in.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBox_Level_in.Location = new System.Drawing.Point(623, 389);
+            this.textBox_Level_in.Location = new System.Drawing.Point(473, 592);
             this.textBox_Level_in.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_Level_in.Multiline = true;
             this.textBox_Level_in.Name = "textBox_Level_in";
@@ -1085,7 +1093,7 @@ namespace fft_writer
             // label33
             // 
             this.label33.AutoSize = true;
-            this.label33.Location = new System.Drawing.Point(572, 369);
+            this.label33.Location = new System.Drawing.Point(422, 572);
             this.label33.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label33.Name = "label33";
             this.label33.Size = new System.Drawing.Size(183, 16);
@@ -1095,7 +1103,7 @@ namespace fft_writer
             // label34
             // 
             this.label34.AutoSize = true;
-            this.label34.Location = new System.Drawing.Point(721, 396);
+            this.label34.Location = new System.Drawing.Point(571, 599);
             this.label34.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label34.Name = "label34";
             this.label34.Size = new System.Drawing.Size(34, 16);
@@ -1105,7 +1113,7 @@ namespace fft_writer
             // textBox_Ku
             // 
             this.textBox_Ku.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBox_Ku.Location = new System.Drawing.Point(623, 448);
+            this.textBox_Ku.Location = new System.Drawing.Point(473, 651);
             this.textBox_Ku.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_Ku.Multiline = true;
             this.textBox_Ku.Name = "textBox_Ku";
@@ -1117,7 +1125,7 @@ namespace fft_writer
             // label38
             // 
             this.label38.AutoSize = true;
-            this.label38.Location = new System.Drawing.Point(572, 428);
+            this.label38.Location = new System.Drawing.Point(422, 631);
             this.label38.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label38.Name = "label38";
             this.label38.Size = new System.Drawing.Size(197, 16);
@@ -1127,7 +1135,7 @@ namespace fft_writer
             // label39
             // 
             this.label39.AutoSize = true;
-            this.label39.Location = new System.Drawing.Point(721, 453);
+            this.label39.Location = new System.Drawing.Point(571, 656);
             this.label39.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label39.Name = "label39";
             this.label39.Size = new System.Drawing.Size(25, 16);
@@ -1137,7 +1145,7 @@ namespace fft_writer
             // label40
             // 
             this.label40.AutoSize = true;
-            this.label40.Location = new System.Drawing.Point(738, 525);
+            this.label40.Location = new System.Drawing.Point(367, 602);
             this.label40.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label40.Name = "label40";
             this.label40.Size = new System.Drawing.Size(40, 16);
@@ -1147,7 +1155,7 @@ namespace fft_writer
             // label41
             // 
             this.label41.AutoSize = true;
-            this.label41.Location = new System.Drawing.Point(567, 490);
+            this.label41.Location = new System.Drawing.Point(196, 567);
             this.label41.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label41.Name = "label41";
             this.label41.Size = new System.Drawing.Size(187, 16);
@@ -1157,11 +1165,11 @@ namespace fft_writer
             // textBox_Pin
             // 
             this.textBox_Pin.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBox_Pin.Location = new System.Drawing.Point(612, 517);
+            this.textBox_Pin.Location = new System.Drawing.Point(202, 594);
             this.textBox_Pin.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_Pin.Multiline = true;
             this.textBox_Pin.Name = "textBox_Pin";
-            this.textBox_Pin.Size = new System.Drawing.Size(118, 31);
+            this.textBox_Pin.Size = new System.Drawing.Size(157, 31);
             this.textBox_Pin.TabIndex = 88;
             this.textBox_Pin.Text = "0";
             this.textBox_Pin.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -1169,7 +1177,7 @@ namespace fft_writer
             // label42
             // 
             this.label42.AutoSize = true;
-            this.label42.Location = new System.Drawing.Point(609, 552);
+            this.label42.Location = new System.Drawing.Point(238, 629);
             this.label42.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label42.Name = "label42";
             this.label42.Size = new System.Drawing.Size(109, 16);
@@ -1366,9 +1374,9 @@ namespace fft_writer
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(785, 517);
+            this.button6.Location = new System.Drawing.Point(213, 656);
             this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(95, 29);
+            this.button6.Size = new System.Drawing.Size(134, 29);
             this.button6.TabIndex = 111;
             this.button6.Text = "Измерение";
             this.button6.UseVisualStyleBackColor = true;
@@ -1378,7 +1386,8 @@ namespace fft_writer
             // 
             this.menuStrip1.BackColor = System.Drawing.SystemColors.ControlLight;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.генераторОсновногоСигналаToolStripMenuItem1});
+            this.генераторОсновногоСигналаToolStripMenuItem1,
+            this.потериСигналаВКабеляхToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1218, 29);
@@ -1503,6 +1512,7 @@ namespace fft_writer
             this.textBox1.TabIndex = 123;
             this.textBox1.Text = "2";
             this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // label57
             // 
@@ -1777,11 +1787,77 @@ namespace fft_writer
             this.button13.UseVisualStyleBackColor = true;
             this.button13.Click += new System.EventHandler(this.button13_Click);
             // 
+            // button14
+            // 
+            this.button14.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.button14.Location = new System.Drawing.Point(16, 676);
+            this.button14.Name = "button14";
+            this.button14.Size = new System.Drawing.Size(100, 32);
+            this.button14.TabIndex = 144;
+            this.button14.Text = "TEST7";
+            this.button14.UseVisualStyleBackColor = true;
+            this.button14.Click += new System.EventHandler(this.button14_Click);
+            // 
+            // button15
+            // 
+            this.button15.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.button15.Location = new System.Drawing.Point(17, 714);
+            this.button15.Name = "button15";
+            this.button15.Size = new System.Drawing.Size(100, 32);
+            this.button15.TabIndex = 145;
+            this.button15.Text = "TEST8";
+            this.button15.UseVisualStyleBackColor = true;
+            this.button15.Click += new System.EventHandler(this.button15_Click);
+            // 
+            // потериСигналаВКабеляхToolStripMenuItem
+            // 
+            this.потериСигналаВКабеляхToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.сигналToolStripMenuItem,
+            this.помехаToolStripMenuItem});
+            this.потериСигналаВКабеляхToolStripMenuItem.Name = "потериСигналаВКабеляхToolStripMenuItem";
+            this.потериСигналаВКабеляхToolStripMenuItem.Size = new System.Drawing.Size(162, 25);
+            this.потериСигналаВКабеляхToolStripMenuItem.Text = "Потери сигнала в кабелях";
+            // 
+            // сигналToolStripMenuItem
+            // 
+            this.сигналToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripTextBox1});
+            this.сигналToolStripMenuItem.Name = "сигналToolStripMenuItem";
+            this.сигналToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.сигналToolStripMenuItem.Text = "Сигнал";
+            // 
+            // помехаToolStripMenuItem
+            // 
+            this.помехаToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripTextBox2});
+            this.помехаToolStripMenuItem.Name = "помехаToolStripMenuItem";
+            this.помехаToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.помехаToolStripMenuItem.Text = "Помеха";
+            // 
+            // toolStripTextBox1
+            // 
+            this.toolStripTextBox1.Name = "toolStripTextBox1";
+            this.toolStripTextBox1.Size = new System.Drawing.Size(100, 23);
+            this.toolStripTextBox1.Text = "15";
+            this.toolStripTextBox1.TextBoxTextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.toolStripTextBox1.ToolTipText = "Потери сигнала в Дб";
+            this.toolStripTextBox1.Click += new System.EventHandler(this.toolStripTextBox1_Click);
+            // 
+            // toolStripTextBox2
+            // 
+            this.toolStripTextBox2.Name = "toolStripTextBox2";
+            this.toolStripTextBox2.Size = new System.Drawing.Size(100, 23);
+            this.toolStripTextBox2.Text = "15";
+            this.toolStripTextBox2.TextBoxTextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.toolStripTextBox2.ToolTipText = "Потери сигнала в Дб";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1218, 762);
+            this.ClientSize = new System.Drawing.Size(1218, 862);
+            this.Controls.Add(this.button15);
+            this.Controls.Add(this.button14);
             this.Controls.Add(this.button13);
             this.Controls.Add(this.button12);
             this.Controls.Add(this.label61);
@@ -1920,8 +1996,8 @@ namespace fft_writer
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(4);
-            this.MaximumSize = new System.Drawing.Size(1234, 800);
-            this.MinimumSize = new System.Drawing.Size(1234, 800);
+            this.MaximumSize = new System.Drawing.Size(1234, 900);
+            this.MinimumSize = new System.Drawing.Size(1234, 900);
             this.Name = "MainForm";
             this.Text = "fft_writer";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
@@ -2075,5 +2151,12 @@ namespace fft_writer
         private System.Windows.Forms.Label label61;
         private System.Windows.Forms.Button button12;
         private System.Windows.Forms.Button button13;
+        private System.Windows.Forms.Button button14;
+        private System.Windows.Forms.Button button15;
+        private System.Windows.Forms.ToolStripMenuItem потериСигналаВКабеляхToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem сигналToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem помехаToolStripMenuItem;
+        private System.Windows.Forms.ToolStripTextBox toolStripTextBox1;
+        private System.Windows.Forms.ToolStripTextBox toolStripTextBox2;
     }
 }

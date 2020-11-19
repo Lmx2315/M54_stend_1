@@ -500,7 +500,7 @@ namespace fft_writer
             button_AM.Enabled = false;
             button_CHIRP.Enabled = false;
             button_PM.Enabled = false;
-             textBox_error_ach.Text="0";
+            textBox_error_ach.Text="0";
             MessageBox.Show("Перед работой:\r\nУстановите связь по COM порту с изделием.\r\nУбедитесь в правильности IP адресов измерительных приборов.\r\nВыберите тип измерительных генераторов.");
 
             //    MainForm
@@ -1157,7 +1157,7 @@ namespace fft_writer
         private void btn_telnet_gen_Click(object sender, EventArgs e)
         {
             GEN_SIGN.FREQ(Convert.ToInt32(textBox_freq_gen.Text ));
-            GEN_SIGN.POW (Convert.ToInt32(textBox_level_gen.Text));
+            GEN_SIGN.POW (textBox_level_gen.Text);
             if (checkBox3.Checked)
             {
                 GEN_SIGN.OUT(1);
@@ -2133,7 +2133,7 @@ namespace fft_writer
             try
             {
                 GEN_POMEH.FREQ(Convert.ToInt32(textBox2.Text));
-                GEN_POMEH.POW(Convert.ToInt32(textBox1.Text));
+                GEN_POMEH.POW(textBox1.Text);
                 //      GEN_POMEH.OUT (1);
                 GEN_POMEH.SEND();
             }

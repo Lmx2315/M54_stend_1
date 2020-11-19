@@ -39,18 +39,18 @@ namespace fft_writer
             return prompt;
         }
 
-        public string POW(int pow)   //команда установки мощности
+        public string POW(string pow)   //команда установки мощности
         {
             string prompt = "error!";
 
             if (MODEL == "MXG")
             {
-                prompt = ":POW " + pow.ToString() + "DBM;";
+                prompt = ":POW " + pow + "DBM;";
             }
             else
             if (MODEL == "SMA 100 A")
             {
-                prompt = "pow " + pow.ToString() + " DBm;";
+                prompt = "pow " + pow + " DBm;";
             }
             CMD_MSG = CMD_MSG + prompt;
 

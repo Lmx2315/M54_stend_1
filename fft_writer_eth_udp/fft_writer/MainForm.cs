@@ -28,6 +28,7 @@ using System.Text;
 using MinimalisticTelnet;
 using System.Linq;
 using System.Security.Policy;
+using Accord;
 //using DiscreteFourierTransform;
 //using FFTLibrary;
 
@@ -387,45 +388,71 @@ namespace fft_writer
                 label8.Text = "полоса фильтра:" + Convert.ToString(filtr) + "кГц";           
         }
 
+        double func1(double lvl, double x)
+        {
+            double solv=0;
+            double koeff = 0;
+
+            if ((x > -2450) && (x < 2450)) koeff =   -2 ; else
+            if ((x > -2550) && (x < 2550)) koeff = -4.5 ; else
+            if ((x > -2650) && (x < 2650)) koeff = -5.23; else
+            if ((x > -2750) && (x < 2750)) koeff = -10.0 ; else
+            if ((x > -2850) && (x < 2850)) koeff = -14.0 ; else
+            if ((x > -2950) && (x < 2950)) koeff = -21.2; else
+            if ((x > -3050) && (x < 3050)) koeff = -37.2; else
+            if ((x > -3150) && (x < 3150)) koeff = -64.2; else koeff = -70.0;
+
+            solv = lvl - koeff;
+            solv = (0.001) * Math.Pow(10, (solv / 10));
+            solv = Math.Pow((solv * 50), 0.5);//в вольтах
+
+            return solv;
+        }
 
         void Ku_control ()
         {
             //32000 - 1Вольт
-            var Pomeh = B_out+32.3;//В ДБм  и учитываем коэффициент подавления фильтром при отстройке 3 МГц
-            var koeff = 6;
 
-            if (Pomeh > (M_out - 3)) koeff = 6; else 
-            if (Pomeh >-10) koeff = 1; else koeff = 0;
-
+            var Lvl_pom=func1(B_out, B_xout);
             var Level_in = Convert.ToDouble(textBox_Level_in.Text);
             var Level_in_mW = (0.001)*Math.Pow(10, (Level_in / 10));
             var Level_in_V = Math.Pow((Level_in_mW * 50), 0.5);
             var Level_out = A_out/32767*1;//выходной сигнал в вольтах
-            var Ku = Math.Round((20*Math.Log10(Level_out/ Level_in_V)),2);
-            var Delta = Math.Abs(Convert.ToInt32(textBox2.Text) - Convert.ToInt32(textBox_freq_m54.Text));
-            if (( checkBox2.Checked)&&(Delta<3125000))   textBox_Ku.Text = Convert.ToString(Ku+ koeff);  else /*koeff - поправочный коэффициент*/
-                textBox_Ku.Text = Convert.ToString(Ku);
+            var Ku = Math.Round((20 * Math.Log10(Level_out / Level_in_V)), 2);
 
             //-------------------------
             var poteri_sig   = Convert.ToDouble(toolStripTextBox1.Text);
             var poteri_pomeh = Convert.ToDouble(toolStripTextBox2.Text);
             if (checkBox2.Checked)
             {
-               
+                var z1 = Math.Pow(Lvl_pom, 2);
+                var z2 = Math.Pow(Level_out, 2);
+                var z3 = Math.Pow(z1+z2,0.5);//считаем геометрическую сумму
+                var z4 = Math.Pow(z3, 2) / 50*1000;//переводим в мВт
+                var Lvl = Math.Round((10 * Math.Log10(z4)), 2);
                 var a = Math.Pow(10,  (Convert.ToDouble(textBox1.Text)        - poteri_pomeh) / 10);      //это милливаты
                 var b = Math.Pow(10, ((Convert.ToDouble(textBox_level_gen.Text)-poteri_sig) / 10));
                 var c = a + b;
                 var d = Math.Round((Math.Log10(c) * 10),2);
-                textBox_Level_in.Text = d.ToString();
+                   Ku = Lvl - d;
+                textBox_Ku.Text = Convert.ToString(Ku);
+         //     textBox_Ku.BackColor = Color.Blue;
+                textBox_Level_in.Text = d.ToString();        
+
             } else
-            textBox_Level_in.Text = (Convert.ToDouble(textBox_level_gen.Text) - poteri_sig).ToString();
+            {
+                textBox_Ku.Text = Convert.ToString(Ku);
+         //     textBox_Ku.BackColor = Color.White;
+                textBox_Level_in.Text = (Convert.ToDouble(textBox_level_gen.Text) - poteri_sig).ToString();
+            }
+            
         }
 
         double[][] MeM2 = new double[100][];
         void Pout_control ()
         {
             int i;
-            for (i=0;i< N_usred; i++) MeM2[i] = new double[1];//создаём зубчатый массив один раз , потом дальше поток ввходит в whileи не возвращается сюда.
+            for (i=0;i< N_usred; i++) MeM2[i] = new double[1];//создаём зубчатый массив один раз , потом дальше поток ввходит в while и не возвращается сюда.
 
             while (true)
             {
@@ -499,6 +526,8 @@ namespace fft_writer
             t.SetToolTip(button13, "тест №6 проверка динамического диапазона при наличии входного сигнала и сигнала помехи в диапазоне 450,5 - 475 МГц");
             t.SetToolTip(button14, "тест №7 проверка динамического диапазона и неравномерности АЧХ, при наличии сигнала помехи за диапазоном приёма <419.5 МГц");
             t.SetToolTip(button15, "тест №8 проверка динамического диапазона и неравномерности АЧХ, при наличии сигнала помехи за диапазоном приёма >450.5 МГц");
+            t.SetToolTip(textBox_Ku, "Для измерение коэффициента услиления изделия, при наличии сложного сигнала в полосе пропускания - необходимо провести калибровку!");
+        
             /*
             t.SetToolTip(button_AM,"Генератор сигнала должен быть SMA 100A!");
             t.SetToolTip(button_CHIRP, "Генератор сигнала должен быть SMA 100A!");
@@ -586,6 +615,7 @@ namespace fft_writer
         int km = 0;
         double A_out = 0;
         double B_out = 0;//амплитуда второй гармоники (обычно условная помеха)
+        double B_xout = 0;/*координата второй гармоники*/
         double M_out = 0; //амплитуда главной гармоники
 
         string FLAG_DISPAY = "";
@@ -868,15 +898,22 @@ namespace fft_writer
                     step  = (int)(step * B_win);
                     pstep = step / 2;
 
-                    if (k_max > pstep && k_max < (BUF_N - step)) for (i = 0; i < step; i++) m_sort[k_max + i - pstep] = -90;
+                    if (k_max > pstep && k_max < (BUF_N - step)) 
+                        for (i = 0; i < step; i++) m_sort[k_max + i - pstep] = -90;//очищаем буфер поиска от уже ненужных величин
 
                     (k_max, B_max) = MAX_f(m_sort, BUF_N);      //определяем Х координату второго максимума
                     m2x = t[k_max];
                     m2y = B_max;                                //определяем второй максимум
 
-                    if (k_max > pstep && k_max < (BUF_N - step)) for (i = 0; i < step; i++) m_sort[k_max + i - pstep] = -90;
+                    if (k_max > pstep && k_max < (BUF_N - step))  for (i = 0; i < step; i++) m_sort[k_max + i - pstep] = -90; 
+                    else //очищаем буфер поиска от уже ненужных величин
+                        if (k_max > pstep)
+                    {
+                        step = (BUF_N - k_max) * 2;
+                        for (i = 0; i < step; i++) m_sort[k_max + i - step/2] = -90;
+                    }
 
-                    (k_max, C_max) = MAX_f(m_sort, BUF_N);
+                        (k_max, C_max) = MAX_f(m_sort, BUF_N);      //определяем Х координату третьего максимума
 
                     m3y = C_max;
                     m3x = t[k_max]; ;
@@ -893,7 +930,7 @@ namespace fft_writer
                     CMAX = C_max;
                     M1X = m1x;
                     M1Y = m1y; M_out = M1Y;
-                    M2X = m2x;
+                    M2X = m2x; B_xout = M2X;
                     M2Y = m2y; B_out = M2Y;
                     M3X = m3x;
                     M3Y = m3y;
@@ -927,9 +964,6 @@ namespace fft_writer
 
             if (FLAG_DISPAY=="1")
             {
-                Array.Copy(TSAMPL, TSAMPL_tmp, Nbuf); //благодаря этому у нас нормальный вывод спектра без артефактов при переключении размерности  БПФ
-                Array.Copy(MAG_LOG, MAG_LOG_tmp, Nbuf);
-
                 double a = Math.Round(M1Y - M2Y,1);
                 double b = Math.Round(M1Y - M3Y,1);
                 double c = Math.Round(LEVEL_TEST_SIGNAL - M1Y); // отношение к уровню входного сигнала
@@ -945,8 +979,9 @@ namespace fft_writer
                 {
                     textBox_din_diapazone.Text = c.ToString();
                 }
-                
 
+                Array.Copy(TSAMPL, TSAMPL_tmp, Nbuf); //благодаря этому у нас нормальный вывод спектра без артефактов при переключении размерности  БПФ
+                Array.Copy(MAG_LOG, MAG_LOG_tmp, Nbuf);
 
                 fig3.PlotData(TSAMPL_tmp, MAG_LOG_tmp, AMAX, BMAX, CMAX, M1X, M1Y, M2X, M2Y, M3X, M3Y);
                 //fig3.Show();
@@ -1314,7 +1349,7 @@ namespace fft_writer
                 button3.Text = "STOP";
                 Din_DIAP_min = 100;
                 Podav_DIAP_min = 100;
-                FLAG_filtr = 2;//2
+                FLAG_filtr = 0;//2
                 if (_isServerStarted == true) timer3.Enabled = true;
                 timer3.Interval = Convert.ToInt32(textBox_freq_delay.Text);
                 freq_start = Convert.ToInt32(textBox_freq_start.Text);
@@ -2383,7 +2418,7 @@ namespace fft_writer
             textBox_freq_step.Text = "250000";
             textBox_freq_stop.Text = "440500000";
             textBox_freq_delay.Text = "2000";
-            textBox_level_gen.Text = "10";
+            textBox_level_gen.Text = "25";
             textBox2.Text = (Convert.ToInt32(textBox_freq_gen.Text) + 3000000).ToString();
             textBox_freq_m54.Text = textBox_freq_gen.Text;
             checkBox_sync.Checked = false;
@@ -2411,14 +2446,14 @@ namespace fft_writer
             radioButton1.Checked = true;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ2";
             FLAG_TEST3 = false;
-            textBox_att_m54.Text = "15";
+            textBox_att_m54.Text = "31,5";
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
 	        textBox_freq_start.Text="429500000";
             textBox_freq_step.Text ="250000";
             textBox_freq_stop.Text ="440500000";
             textBox_freq_delay.Text="2000";
-	        textBox_level_gen.Text ="10";
+	        textBox_level_gen.Text ="25";
             textBox1.Text="10";
             textBox2.Text = (Convert.ToInt32(textBox_freq_gen.Text) + 3000000).ToString();
             textBox_freq_m54.Text = textBox_freq_gen.Text;
@@ -2440,7 +2475,7 @@ namespace fft_writer
             ATT_SEND();
             textBox_freq_gen.Text   = "435000000";
             textBox_freq_start.Text = "395000000";
-            textBox_freq_step.Text  = "250000";
+            textBox_freq_step.Text  = "500000";
             textBox_freq_stop.Text  = "419500000";
             textBox_freq_delay.Text = "2000";
             textBox_level_gen.Text  = "25";
@@ -2464,7 +2499,7 @@ namespace fft_writer
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
             textBox_freq_start.Text = "450500000";
-            textBox_freq_step.Text = "250000";
+            textBox_freq_step.Text = "500000";
             textBox_freq_stop.Text = "475000000";
             textBox_freq_delay.Text = "2000";
             textBox_level_gen.Text = "25";
@@ -2487,7 +2522,7 @@ namespace fft_writer
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
             textBox_freq_start.Text = "395000000";
-            textBox_freq_step.Text = "250000";
+            textBox_freq_step.Text = "500000";
             textBox_freq_stop.Text = "419500000";
             textBox_freq_delay.Text = "2000";
             textBox_level_gen.Text = "25";
@@ -2511,7 +2546,7 @@ namespace fft_writer
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
             textBox_freq_start.Text = "450500000";
-            textBox_freq_step.Text = "250000";
+            textBox_freq_step.Text = "500000";
             textBox_freq_stop.Text = "475000000";
             textBox_freq_delay.Text = "2000";
             textBox_level_gen.Text = "25";
@@ -2536,7 +2571,7 @@ namespace fft_writer
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
             textBox_freq_start.Text = "429500000";
-            textBox_freq_step.Text = "250000";
+            textBox_freq_step.Text = "500000";
             textBox_freq_stop.Text = "440500000";
             textBox_freq_delay.Text = "2000";
             textBox_level_gen.Text = "25";
@@ -2561,7 +2596,7 @@ namespace fft_writer
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
             textBox_freq_start.Text = "432500000";
-            textBox_freq_step.Text = "250000";
+            textBox_freq_step.Text = "500000";
             textBox_freq_stop.Text = "439500000";
             textBox_freq_delay.Text = "2000";
             textBox_level_gen.Text = "25";

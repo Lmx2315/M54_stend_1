@@ -172,6 +172,11 @@ namespace fft_writer
             this.sMA100AToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.mXGToolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.sMA100AToolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
+            this.потериСигналаВКабеляхToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.сигналToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripTextBox1 = new System.Windows.Forms.ToolStripTextBox();
+            this.помехаToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripTextBox2 = new System.Windows.Forms.ToolStripTextBox();
             this.label52 = new System.Windows.Forms.Label();
             this.label53 = new System.Windows.Forms.Label();
             this.label54 = new System.Windows.Forms.Label();
@@ -205,11 +210,6 @@ namespace fft_writer
             this.button13 = new System.Windows.Forms.Button();
             this.button14 = new System.Windows.Forms.Button();
             this.button15 = new System.Windows.Forms.Button();
-            this.потериСигналаВКабеляхToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.сигналToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.помехаToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripTextBox1 = new System.Windows.Forms.ToolStripTextBox();
-            this.toolStripTextBox2 = new System.Windows.Forms.ToolStripTextBox();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -239,7 +239,7 @@ namespace fft_writer
             // 
             // timer1
             // 
-            this.timer1.Interval = 25;
+            this.timer1.Interval = 50;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // Test_l1
@@ -1451,6 +1451,48 @@ namespace fft_writer
             this.sMA100AToolStripMenuItem3.Text = "SMA 100 A";
             this.sMA100AToolStripMenuItem3.Click += new System.EventHandler(this.sMA100AToolStripMenuItem3_Click);
             // 
+            // потериСигналаВКабеляхToolStripMenuItem
+            // 
+            this.потериСигналаВКабеляхToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.сигналToolStripMenuItem,
+            this.помехаToolStripMenuItem});
+            this.потериСигналаВКабеляхToolStripMenuItem.Name = "потериСигналаВКабеляхToolStripMenuItem";
+            this.потериСигналаВКабеляхToolStripMenuItem.Size = new System.Drawing.Size(162, 25);
+            this.потериСигналаВКабеляхToolStripMenuItem.Text = "Потери сигнала в кабелях";
+            // 
+            // сигналToolStripMenuItem
+            // 
+            this.сигналToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripTextBox1});
+            this.сигналToolStripMenuItem.Name = "сигналToolStripMenuItem";
+            this.сигналToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.сигналToolStripMenuItem.Text = "Сигнал";
+            // 
+            // toolStripTextBox1
+            // 
+            this.toolStripTextBox1.Name = "toolStripTextBox1";
+            this.toolStripTextBox1.Size = new System.Drawing.Size(100, 23);
+            this.toolStripTextBox1.Text = "15";
+            this.toolStripTextBox1.TextBoxTextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.toolStripTextBox1.ToolTipText = "Потери сигнала в Дб";
+            this.toolStripTextBox1.Click += new System.EventHandler(this.toolStripTextBox1_Click);
+            // 
+            // помехаToolStripMenuItem
+            // 
+            this.помехаToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripTextBox2});
+            this.помехаToolStripMenuItem.Name = "помехаToolStripMenuItem";
+            this.помехаToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.помехаToolStripMenuItem.Text = "Помеха";
+            // 
+            // toolStripTextBox2
+            // 
+            this.toolStripTextBox2.Name = "toolStripTextBox2";
+            this.toolStripTextBox2.Size = new System.Drawing.Size(100, 23);
+            this.toolStripTextBox2.Text = "15";
+            this.toolStripTextBox2.TextBoxTextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.toolStripTextBox2.ToolTipText = "Потери сигнала в Дб";
+            // 
             // label52
             // 
             this.label52.AutoSize = true;
@@ -1808,48 +1850,6 @@ namespace fft_writer
             this.button15.Text = "TEST8";
             this.button15.UseVisualStyleBackColor = true;
             this.button15.Click += new System.EventHandler(this.button15_Click);
-            // 
-            // потериСигналаВКабеляхToolStripMenuItem
-            // 
-            this.потериСигналаВКабеляхToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.сигналToolStripMenuItem,
-            this.помехаToolStripMenuItem});
-            this.потериСигналаВКабеляхToolStripMenuItem.Name = "потериСигналаВКабеляхToolStripMenuItem";
-            this.потериСигналаВКабеляхToolStripMenuItem.Size = new System.Drawing.Size(162, 25);
-            this.потериСигналаВКабеляхToolStripMenuItem.Text = "Потери сигнала в кабелях";
-            // 
-            // сигналToolStripMenuItem
-            // 
-            this.сигналToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripTextBox1});
-            this.сигналToolStripMenuItem.Name = "сигналToolStripMenuItem";
-            this.сигналToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.сигналToolStripMenuItem.Text = "Сигнал";
-            // 
-            // помехаToolStripMenuItem
-            // 
-            this.помехаToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripTextBox2});
-            this.помехаToolStripMenuItem.Name = "помехаToolStripMenuItem";
-            this.помехаToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.помехаToolStripMenuItem.Text = "Помеха";
-            // 
-            // toolStripTextBox1
-            // 
-            this.toolStripTextBox1.Name = "toolStripTextBox1";
-            this.toolStripTextBox1.Size = new System.Drawing.Size(100, 23);
-            this.toolStripTextBox1.Text = "15";
-            this.toolStripTextBox1.TextBoxTextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.toolStripTextBox1.ToolTipText = "Потери сигнала в Дб";
-            this.toolStripTextBox1.Click += new System.EventHandler(this.toolStripTextBox1_Click);
-            // 
-            // toolStripTextBox2
-            // 
-            this.toolStripTextBox2.Name = "toolStripTextBox2";
-            this.toolStripTextBox2.Size = new System.Drawing.Size(100, 23);
-            this.toolStripTextBox2.Text = "15";
-            this.toolStripTextBox2.TextBoxTextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.toolStripTextBox2.ToolTipText = "Потери сигнала в Дб";
             // 
             // MainForm
             // 

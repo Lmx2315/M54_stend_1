@@ -93,6 +93,7 @@ namespace fft_writer
         double LEVEL_TEST_SIGNAL = 0;//измеренный уровень входного тестового сигнала в ДБм, применяется при тесте на подавление помехи за полосой (сначала измеряем уровень помехи в полосе сигнала и запоминаем его, затем помещаем помеху за полосу и сравниваем)
         double LVL_Pin_DBm=0;//входная измеренная мощность сигнала (для контроля коэфф. передачи и коэфф. шума)
         int CORRECT_FREQ = -1_000_000; //поправочная частота связаная с гетеродином -1_000_000
+        double Koeff_usileniya_median=0;
 
         Plot fig1 = new Plot(15,"I Input", "Sample", "Вольт","","","","","");
 	     Plot fig2 = new Plot(15,"Q Input", "Sample", "Вольт","","","","","");
@@ -109,6 +110,7 @@ namespace fft_writer
         bool FLAG_CALIBR_CH=false;
         bool FLAG_SYNC_GEN_SIGN_POMEH=false;
         int  _FREQ_DELTA = 0; //разница между частотой сигнального генератора и помехового
+        bool FLAG_TEST2 = false; //флаг того что запущен тест 2 (проверка при наличии помехи в полосе сигнала)
         bool FLAG_TEST3 = false; //флаг того что запущен тест 3 (проверка подавления помехи поставленной за полосой)
         bool FLAG_TEST5 = false; /*флаг что запущен тест 5 (проверка основных параметров при воздействии помехи за полосой )*/
         private void MainForm_FormClosing(Object sender, FormClosingEventArgs e)
@@ -423,27 +425,42 @@ namespace fft_writer
             //-------------------------
             var poteri_sig   = Convert.ToDouble(toolStripTextBox1.Text);
             var poteri_pomeh = Convert.ToDouble(toolStripTextBox2.Text);
-            if (checkBox2.Checked)
+            if ((checkBox2.Checked)&&(FLAG_TEST2))
             {
-                var z1 = Math.Pow(Lvl_pom, 2);
-                var z2 = Math.Pow(Level_out, 2);
-                var z3 = Math.Pow(z1+z2,0.5);//считаем геометрическую сумму
-                var z4 = Math.Pow(z3, 2) / 50*1000;//переводим в мВт
-                var Lvl = Math.Round((10 * Math.Log10(z4)), 2);
-                var a = Math.Pow(10,  (Convert.ToDouble(textBox1.Text)        - poteri_pomeh) / 10);      //это милливаты
-                var b = Math.Pow(10, ((Convert.ToDouble(textBox_level_gen.Text)-poteri_sig) / 10));
-                var c = a + b;
-                var d = Math.Round((Math.Log10(c) * 10),2);
-                   Ku = Lvl - d;
-                textBox_Ku.Text = Convert.ToString(Ku);
-         //     textBox_Ku.BackColor = Color.Blue;
-                textBox_Level_in.Text = d.ToString();        
+                try 
+                {
+                    var z1 = Math.Pow(Lvl_pom, 2);
+                    var z2 = Math.Pow(Level_out, 2);
+                    var z3 = Math.Pow(z1 + z2, 0.5);//считаем геометрическую сумму
+                    var z4 = Math.Pow(z3, 2) / 50 * 1000;//переводим в мВт
+                    var Lvl = Math.Round((10 * Math.Log10(z4)), 2);
+                    var a = Math.Pow(10, (Convert.ToDouble(textBox1.Text) - poteri_pomeh) / 10);      //это милливаты
+                    var b = Math.Pow(10, ((Convert.ToDouble(textBox_level_gen.Text) - poteri_sig) / 10));
+                    var c = a + b;
+                    var d = Math.Round((Math.Log10(c) * 10), 2);
+                    Ku = Lvl - d;
+                    textBox_Ku.Text = Convert.ToString(Ku);
+                    //     textBox_Ku.BackColor = Color.Blue;
+                    textBox_Level_in.Text = d.ToString();
+
+                } catch
+                { }
+
 
             } else
             {
+          
                 textBox_Ku.Text = Convert.ToString(Ku);
          //     textBox_Ku.BackColor = Color.White;
-                textBox_Level_in.Text = (Convert.ToDouble(textBox_level_gen.Text) - poteri_sig).ToString();
+                try
+                {
+                    textBox_Level_in.Text = (Convert.ToDouble(textBox_level_gen.Text) - poteri_sig).ToString();
+                } catch
+                {
+
+                }
+
+                
             }
             
         }
@@ -518,7 +535,8 @@ namespace fft_writer
             t.SetToolTip(Btn_start, "Включает приём данных для отображения спектра, от приёмного модуля по сети ethernet");
             t.SetToolTip(my_port_box, "Номер приёмного порта сети ethernet, если производится запуск двух копий программы (8888 и 8889) для одновременного отображения двух каналов");
             t.SetToolTip(textBox_sch, "Число принятых программой пакетов в интервале обработки");    
-	        t.SetToolTip(button9,  "тест №2 проверка динамического диапазона и неравномерности АЧХ, при воздействии помехи в полосе обработки");
+	        t.SetToolTip(button9,  "тест №2(A) проверка динамического диапазона и неравномерности АЧХ, при воздействии помехи в полосе обработки");
+            t.SetToolTip(button16, "тест №2(Б) проверка коэффициента усиления, при воздействии помехи в полосе обработки");
             t.SetToolTip(button8,  "тест №1 проверка динамического диапазона и неравномерности АЧХ");
             t.SetToolTip(button10, "тест №3 проверка уровня подавления сигнала помехи в диапазоне 395 - 419,5 МГц");
             t.SetToolTip(button11, "тест №4 проверка уровня подавления сигнала помехи в диапазоне 450,5 - 475 МГц");
@@ -1393,7 +1411,7 @@ namespace fft_writer
         Struct_buff VAR_IH_data;
         Struct_buff VAR_IH_data_obzor;
 
-        
+        bool FLAG_TIMER3 = true;
         private void timer3_Tick(object sender, EventArgs e)
         {
             
@@ -1412,7 +1430,19 @@ namespace fft_writer
                 //тут происходят измерения! и сразу запись в стринг
             text = Convert.ToString(freq_last) + ";" + Convert.ToString(Math.Round(H_a, 2)) + ";" + Convert.ToString(Math.Round(H_b, 2)) + ";" + Convert.ToString(Math.Round(H_delta, 2));
             Console1.Text = Console1.Text + "\r\n" + text;
-                
+
+                    if (FLAG_TIMER3)
+                    {
+                        Koeff_usileniya_median = Convert.ToDouble(textBox_Ku.Text);
+                        FLAG_TIMER3 = false;
+                    }
+                    else
+                    {
+                        Koeff_usileniya_median = (Koeff_usileniya_median + Convert.ToDouble(textBox_Ku.Text)) / 2;
+                        Koeff_usileniya_median = Math.Round(Koeff_usileniya_median, 2);
+                        textBox5.Text = Koeff_usileniya_median.ToString();
+                    }           
+
                 if (radioButton1.Checked)
                     {
                         if (Convert.ToDouble(textBox_din_diapazone.Text) < Din_DIAP_min) Din_DIAP_min = Convert.ToDouble(textBox_din_diapazone.Text);
@@ -1478,6 +1508,8 @@ namespace fft_writer
                 freq_current = freq_stop;
               //  progressBar1.Value = 100;
                 timer3.Enabled = false;
+                FLAG_TIMER3 = true;
+                Koeff_usileniya_median = 0;//сбрасываем переменную среднего коэффициента усиления
                 flag_progress = 0;
                 FLAG_filtr = 1;
                 ACH_error(freq_setup);//в режиме калибровки
@@ -1494,6 +1526,7 @@ namespace fft_writer
             }
             catch
             {
+                FLAG_TIMER3 = true;
                 timer3.Enabled=false;
                 MessageBox.Show("Что то не то с IP/порт адресами!");
             }
@@ -1519,9 +1552,10 @@ namespace fft_writer
         private int ATT_SEND ()
         {
             int error=0;
-            string command1 = "  ~0 freq:";
+            string command1 = "  ~0 upr_at";
             string command2 = "  ~0 upr_at";
-            string chanal = "";
+            string ch1 = "";
+            string ch2 = "";
 
             if (serialPort1.IsOpen == false) serialPort1.PortName = textBox_com_port.Text;
             if (btn_com_open.Text == "send")
@@ -1529,8 +1563,10 @@ namespace fft_writer
                 try
                 {
                     var z = 63 - (Convert.ToDouble(textBox_att_m54.Text) * 2);
-                    if (channal_box.Text == "1") chanal = "1"; else chanal = "2";
-                    command2 = command2 + chanal + ":" + Convert.ToString(z) + ";  ";
+              //    if (channal_box.Text == "1") chanal = "1"; else chanal = "2";
+
+                    command2 = command2 + "2" + ":" + Convert.ToString(z) + ";  ";
+                    command1 = command1 + "1" + ":" + Convert.ToString(z) + ";  ";
 
                     if (serialPort1.IsOpen == false)
                     {
@@ -1538,6 +1574,7 @@ namespace fft_writer
                     }
                     btn_com_open.ForeColor = Color.Green;
                     serialPort1.Write(command2);
+                    serialPort1.Write(command1);
                     // здесь может быть код еще...
                 }
                 catch (Exception ex)
@@ -2411,7 +2448,7 @@ namespace fft_writer
             radioButton1.Checked = true;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ1";
             FLAG_TEST3 = false;
-            textBox_att_m54.Text = "31,5";
+            textBox_att_m54.Text = "30";
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
             textBox_freq_start.Text = "429500000";
@@ -2446,7 +2483,8 @@ namespace fft_writer
             radioButton1.Checked = true;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ2";
             FLAG_TEST3 = false;
-            textBox_att_m54.Text = "31,5";
+            FLAG_TEST2 = true;
+            textBox_att_m54.Text = "30";
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
 	        textBox_freq_start.Text="429500000";
@@ -2487,6 +2525,7 @@ namespace fft_writer
             FLAG_TEST3 = true;
             btn_cal_ch_Click(null, null);
             radioButton2.Checked = true;
+            FLAG_TEST2 = false;
         }
 
         private void button11_Click(object sender, EventArgs e)
@@ -2511,6 +2550,7 @@ namespace fft_writer
             FLAG_TEST3 = true;
             btn_cal_ch_Click(null, null);
             radioButton2.Checked = true;
+            FLAG_TEST2 = false;
         }
 
         private void button12_Click(object sender, EventArgs e)
@@ -2535,6 +2575,7 @@ namespace fft_writer
             FLAG_TEST3 = false;
             FLAG_TEST5 = true;
             btn_cal_ch_Click(null, null);
+            FLAG_TEST2 = false;
         }
 
         private void button13_Click(object sender, EventArgs e)
@@ -2559,6 +2600,7 @@ namespace fft_writer
             FLAG_TEST3 = false;
             FLAG_TEST5 = true;
             btn_cal_ch_Click(null, null);
+            FLAG_TEST2 = false;
         }
 
         private void button14_Click(object sender, EventArgs e)
@@ -2584,6 +2626,7 @@ namespace fft_writer
             checkBox_sync.Checked = false;
             checkBox2.Checked = true;
             checkBox3.Checked = true;
+            FLAG_TEST2 = false;
         }
 
         private void button15_Click(object sender, EventArgs e)
@@ -2609,6 +2652,7 @@ namespace fft_writer
             checkBox_sync.Checked = false;
             checkBox2.Checked = true;
             checkBox3.Checked = true;
+            FLAG_TEST2 = false;
         }
 
         private void textBox_level_gen_TextChanged(object sender, EventArgs e)
@@ -2625,6 +2669,31 @@ namespace fft_writer
         private void toolStripTextBox1_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void button16_Click(object sender, EventArgs e)
+        {
+            radioButton1.Checked = true;
+            label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ2(Б)";
+            FLAG_TEST3 = false;
+            FLAG_TEST2 = true;
+            textBox_att_m54.Text = "13";
+            ATT_SEND();
+            textBox_freq_gen.Text = "435000000";
+            textBox_freq_start.Text = "429500000";
+            textBox_freq_step.Text = "250000";
+            textBox_freq_stop.Text = "440500000";
+            textBox_freq_delay.Text = "2000";
+            textBox_level_gen.Text = "10";
+            textBox1.Text = "0";
+            textBox2.Text = (Convert.ToInt32(textBox_freq_gen.Text) + 3000000).ToString();
+            textBox_freq_m54.Text = textBox_freq_gen.Text;
+            btn_com_open_Click(null, null);
+            button7_Click(null, null);
+            btn_telnet_gen_Click(null, null);
+            checkBox_sync.Checked = true;
+            checkBox2.Checked = true;
+            checkBox3.Checked = true;
         }
 
         private void CAL_CH_st ()

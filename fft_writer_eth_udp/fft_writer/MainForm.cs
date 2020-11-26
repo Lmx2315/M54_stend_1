@@ -107,6 +107,7 @@ namespace fft_writer
         IZM_Generator GEN_SIGN  = null;
         IZM_Generator GEN_POMEH = null;
 
+        string NAME_BLOCK;//тут храним номер блока в виде "160001"
         bool FLAG_CALIBR_CH=false;
         bool FLAG_SYNC_GEN_SIGN_POMEH=false;
         int  _FREQ_DELTA = 0; //разница между частотой сигнального генератора и помехового
@@ -762,8 +763,8 @@ namespace fft_writer
                     double[] fh_i = new double[N_temp * 2];
                     double[] fh_q = new double[N_temp * 2];
 
-                    Array.Copy(H_i, fh_i, N_correct);
-                    Array.Copy(H_q, fh_q, N_correct);
+                    Array.Copy(H_i, fh_i, N_correct);//H_i  - ИХ корректирующего фильтра (действительная часть)
+                    Array.Copy(H_q, fh_q, N_correct);//H_i  - ИХ корректирующего фильтра (мнимая часть)
 
                     double[] fx_i = new double[N_temp * 2];
                     double[] fx_q = new double[N_temp * 2];
@@ -1428,7 +1429,7 @@ namespace fft_writer
                if (freq_last>0)
             {
                 //тут происходят измерения! и сразу запись в стринг
-            text = Convert.ToString(freq_last) + ";" + Convert.ToString(Math.Round(H_a, 2)) + ";" + Convert.ToString(Math.Round(H_b, 2)) + ";" + Convert.ToString(Math.Round(H_delta, 2));
+            text = Convert.ToString(freq_last) + ";" + Convert.ToString(Math.Round(H_a+90, 2)) + ";" + Convert.ToString(Math.Round(H_b, 2)) + ";" + Convert.ToString(Math.Round(H_delta, 2));
             Console1.Text = Console1.Text + "\r\n" + text;
 
                     if (FLAG_TIMER3)
@@ -1988,9 +1989,23 @@ namespace fft_writer
 
         private void channal_box_TextChanged(object sender, EventArgs e)
         {
+            string z;
             if (channal_box.Text != "1" && channal_box.Text != "2") channal_box.Text = "1";
             if (channal_box.Text == "1") ATT("2", "31,5");else //
             if (channal_box.Text == "2") ATT("1", "31,5");
+
+            /*
+            if (channal_box.Text == "1")
+            {
+                z = NAME_BLOCK + "_1.txt";//160008_1.txt - файл с формой АЧХ канала
+                IH_load_name(z);//загружаю характеристику для номера 160008
+            }
+            if (channal_box.Text == "1")
+            {
+                z = NAME_BLOCK + "_2.txt";
+                IH_load_name("x_0008_2.txt");
+            }
+            */
         }
 
         private void button_AM_Click(object sender, EventArgs e)
@@ -2212,6 +2227,9 @@ namespace fft_writer
         private void button6_Click(object sender, EventArgs e)
         {
             N_sch_timer1 = 100;
+            if (channal_box.Text == "1") ATT("2", "31,5");
+            else //
+            if (channal_box.Text == "2") ATT("1", "31,5");
         }
 
         private void mXGToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2454,7 +2472,7 @@ namespace fft_writer
             textBox_freq_start.Text = "429500000";
             textBox_freq_step.Text = "250000";
             textBox_freq_stop.Text = "440500000";
-            textBox_freq_delay.Text = "2000";
+            textBox_freq_delay.Text = "500";
             textBox_level_gen.Text = "25";
             textBox2.Text = (Convert.ToInt32(textBox_freq_gen.Text) + 3000000).ToString();
             textBox_freq_m54.Text = textBox_freq_gen.Text;
@@ -2490,7 +2508,7 @@ namespace fft_writer
 	        textBox_freq_start.Text="429500000";
             textBox_freq_step.Text ="250000";
             textBox_freq_stop.Text ="440500000";
-            textBox_freq_delay.Text="2000";
+            textBox_freq_delay.Text="500";
 	        textBox_level_gen.Text ="25";
             textBox1.Text="10";
             textBox2.Text = (Convert.ToInt32(textBox_freq_gen.Text) + 3000000).ToString();
@@ -2515,7 +2533,7 @@ namespace fft_writer
             textBox_freq_start.Text = "395000000";
             textBox_freq_step.Text  = "500000";
             textBox_freq_stop.Text  = "419500000";
-            textBox_freq_delay.Text = "2000";
+            textBox_freq_delay.Text = "500";
             textBox_level_gen.Text  = "25";
             textBox_freq_m54.Text = textBox_freq_gen.Text;
             checkBox_sync.Checked = false;
@@ -2540,7 +2558,7 @@ namespace fft_writer
             textBox_freq_start.Text = "450500000";
             textBox_freq_step.Text = "500000";
             textBox_freq_stop.Text = "475000000";
-            textBox_freq_delay.Text = "2000";
+            textBox_freq_delay.Text = "500";
             textBox_level_gen.Text = "25";
             textBox_freq_m54.Text = textBox_freq_gen.Text;
             checkBox_sync.Checked = false;
@@ -2564,7 +2582,7 @@ namespace fft_writer
             textBox_freq_start.Text = "395000000";
             textBox_freq_step.Text = "500000";
             textBox_freq_stop.Text = "419500000";
-            textBox_freq_delay.Text = "2000";
+            textBox_freq_delay.Text = "500";
             textBox_level_gen.Text = "25";
             textBox1.Text         = "10";/*уровень сигнала генератора помехи*/
             textBox_freq_m54.Text = textBox_freq_gen.Text;
@@ -2589,7 +2607,7 @@ namespace fft_writer
             textBox_freq_start.Text = "450500000";
             textBox_freq_step.Text = "500000";
             textBox_freq_stop.Text = "475000000";
-            textBox_freq_delay.Text = "2000";
+            textBox_freq_delay.Text = "500";
             textBox_level_gen.Text = "25";
             textBox1.Text = "10";/*уровень сигнала генератора помехи*/
             textBox_freq_m54.Text = textBox_freq_gen.Text;
@@ -2615,7 +2633,7 @@ namespace fft_writer
             textBox_freq_start.Text = "429500000";
             textBox_freq_step.Text = "500000";
             textBox_freq_stop.Text = "440500000";
-            textBox_freq_delay.Text = "2000";
+            textBox_freq_delay.Text = "500";
             textBox_level_gen.Text = "25";
             textBox1.Text = "10";
             textBox2.Text = "419500000";//генератор помехи
@@ -2639,9 +2657,9 @@ namespace fft_writer
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
             textBox_freq_start.Text = "432500000";
-            textBox_freq_step.Text = "500000";
+            textBox_freq_step.Text = "250000";
             textBox_freq_stop.Text = "439500000";
-            textBox_freq_delay.Text = "2000";
+            textBox_freq_delay.Text = "500";
             textBox_level_gen.Text = "25";
             textBox1.Text = "10";
             textBox2.Text = "450500000";//генератор помехи
@@ -2839,6 +2857,7 @@ namespace fft_writer
                     Kih_load();
                     ACH_error(1);
                     btn_load_ach.ForeColor = Color.Green;
+                    textBox_error_ach.Text = "0";
                 }
                 catch
                 {
@@ -2866,6 +2885,30 @@ namespace fft_writer
                 catch
                 {
 
+                }
+            }
+        }
+
+        void IH_load_name(string ch)
+        {           
+
+            string path = ch;//@"x.txt"
+            StreamReader sr = new StreamReader(path);
+
+            if (sr != null)
+            {
+                try
+                {
+                    VAR_IH_data.z = System.IO.File.ReadAllText(path);
+                    VAR_IH_data.lenght = sch_line(VAR_IH_data.z) - 2;
+                    FLAG_IH_load = true;
+                    Kih_load();
+                    ACH_error(1);
+                    btn_load_ach.ForeColor = Color.Green;
+                }
+                catch
+                {
+                    Console.WriteLine("чёто не так с загрузкой файла!");
                 }
             }
         }

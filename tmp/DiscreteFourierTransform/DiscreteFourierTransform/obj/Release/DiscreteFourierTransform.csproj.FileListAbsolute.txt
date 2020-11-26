@@ -1,4 +1,0 @@
-E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DiscreteFourierTransform\bin\Release\DiscreteFourierTransform.dll
-E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DiscreteFourierTransform\bin\Release\DiscreteFourierTransform.pdb
-E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DiscreteFourierTransform\obj\Release\DiscreteFourierTransform.dll
-E:\K.Widza, koncepcje, badania\Badania\Codeproject - Fourier Transform in Digital Signal Processing\DiscreteFourierTransform\DiscreteFourierTransform\obj\Release\DiscreteFourierTransform.pdb

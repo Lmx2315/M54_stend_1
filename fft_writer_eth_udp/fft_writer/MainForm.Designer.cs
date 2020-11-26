@@ -880,7 +880,7 @@ namespace fft_writer
             // btn_corr_spectr
             // 
             this.btn_corr_spectr.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btn_corr_spectr.Location = new System.Drawing.Point(1788, 197);
+            this.btn_corr_spectr.Location = new System.Drawing.Point(902, 709);
             this.btn_corr_spectr.Margin = new System.Windows.Forms.Padding(4);
             this.btn_corr_spectr.Name = "btn_corr_spectr";
             this.btn_corr_spectr.Size = new System.Drawing.Size(100, 35);
@@ -893,7 +893,7 @@ namespace fft_writer
             // label28
             // 
             this.label28.AutoSize = true;
-            this.label28.Location = new System.Drawing.Point(1782, 178);
+            this.label28.Location = new System.Drawing.Point(896, 690);
             this.label28.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label28.Name = "label28";
             this.label28.Size = new System.Drawing.Size(107, 16);
@@ -924,7 +924,7 @@ namespace fft_writer
             // 
             // btn_calibrovka
             // 
-            this.btn_calibrovka.Location = new System.Drawing.Point(1755, 28);
+            this.btn_calibrovka.Location = new System.Drawing.Point(882, 658);
             this.btn_calibrovka.Margin = new System.Windows.Forms.Padding(4);
             this.btn_calibrovka.Name = "btn_calibrovka";
             this.btn_calibrovka.Size = new System.Drawing.Size(133, 28);
@@ -936,27 +936,25 @@ namespace fft_writer
             // 
             // btn_load_ach
             // 
-            this.btn_load_ach.Location = new System.Drawing.Point(1755, 64);
+            this.btn_load_ach.Location = new System.Drawing.Point(1044, 529);
             this.btn_load_ach.Margin = new System.Windows.Forms.Padding(4);
             this.btn_load_ach.Name = "btn_load_ach";
             this.btn_load_ach.Size = new System.Drawing.Size(100, 28);
             this.btn_load_ach.TabIndex = 68;
             this.btn_load_ach.Text = "load кор ИХ";
             this.btn_load_ach.UseVisualStyleBackColor = true;
-            this.btn_load_ach.Visible = false;
             this.btn_load_ach.Click += new System.EventHandler(this.btn_load_ach_Click);
             // 
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(1863, 69);
+            this.checkBox1.Location = new System.Drawing.Point(948, 533);
             this.checkBox1.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(88, 20);
             this.checkBox1.TabIndex = 69;
             this.checkBox1.Text = "показать";
             this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.Visible = false;
             this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // label_test

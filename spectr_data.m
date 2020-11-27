@@ -1,7 +1,7 @@
 clear all
 close all
 
-%pkg load signal;%раскомментировать для OCTAVE,закомментировать для MATLAB
+pkg load signal;%раскомментировать для OCTAVE,закомментировать для MATLAB
 
 N=4096;
 fs=6250000;

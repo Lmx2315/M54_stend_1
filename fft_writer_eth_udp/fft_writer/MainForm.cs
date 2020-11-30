@@ -1442,6 +1442,7 @@ namespace fft_writer
                         Koeff_usileniya_median = (Koeff_usileniya_median + Convert.ToDouble(textBox_Ku.Text)) / 2;
                         Koeff_usileniya_median = Math.Round(Koeff_usileniya_median, 2);
                         textBox5.Text = Koeff_usileniya_median.ToString();
+                        textBox6.Text = (Convert.ToDouble(textBox5.Text) + Convert.ToDouble(textBox_att_m54.Text)).ToString();
                     }           
 
                 if (radioButton1.Checked)

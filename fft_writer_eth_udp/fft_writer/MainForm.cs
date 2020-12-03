@@ -2581,7 +2581,7 @@ namespace fft_writer
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
             textBox_freq_start.Text = "395000000";
-            textBox_freq_step.Text = "500000";
+            textBox_freq_step.Text = "450000";
             textBox_freq_stop.Text = "419500000";
             textBox_freq_delay.Text = "500";
             textBox_level_gen.Text = "25";
@@ -2590,6 +2590,7 @@ namespace fft_writer
             checkBox_sync.Checked = false;
             btn_com_open_Click(null, null);
             btn_telnet_gen_Click(null, null);
+            button7_Click(null, null);
             //запускаем калибровку
             FLAG_TEST3 = false;
             FLAG_TEST5 = true;
@@ -2606,7 +2607,7 @@ namespace fft_writer
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
             textBox_freq_start.Text = "450500000";
-            textBox_freq_step.Text = "500000";
+            textBox_freq_step.Text = "450000";
             textBox_freq_stop.Text = "475000000";
             textBox_freq_delay.Text = "500";
             textBox_level_gen.Text = "25";
@@ -2615,6 +2616,7 @@ namespace fft_writer
             checkBox_sync.Checked = false;
             btn_com_open_Click(null, null);
             btn_telnet_gen_Click(null, null);
+            button7_Click(null, null);
             //запускаем калибровку
             FLAG_TEST3 = false;
             FLAG_TEST5 = true;

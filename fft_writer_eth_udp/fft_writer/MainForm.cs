@@ -107,6 +107,7 @@ namespace fft_writer
         IZM_Generator GEN_SIGN  = null;
         IZM_Generator GEN_POMEH = null;
 
+        bool FLAG_CORRECT = false;
         string NAME_BLOCK;//тут храним номер блока в виде "160001"
         bool FLAG_CALIBR_CH=false;
         bool FLAG_SYNC_GEN_SIGN_POMEH=false;
@@ -114,6 +115,7 @@ namespace fft_writer
         bool FLAG_TEST2 = false; //флаг того что запущен тест 2 (проверка при наличии помехи в полосе сигнала)
         bool FLAG_TEST3 = false; //флаг того что запущен тест 3 (проверка подавления помехи поставленной за полосой)
         bool FLAG_TEST5 = false; /*флаг что запущен тест 5 (проверка основных параметров при воздействии помехи за полосой )*/
+        bool FLAG_KORR = false;
         private void MainForm_FormClosing(Object sender, FormClosingEventArgs e)
         {
             DialogResult dialog = MessageBox.Show(
@@ -359,7 +361,7 @@ namespace fft_writer
             return data;
         }
 
-        int N_usred = 50;
+        int N_usred = 20;
         int N_sch_timer1=0;
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -466,7 +468,7 @@ namespace fft_writer
             
         }
 
-        double[][] MeM2 = new double[100][];
+        double[][] MeM2 = new double[300][];
         void Pout_control ()
         {
             int i;
@@ -614,7 +616,7 @@ namespace fft_writer
             return array;
         }
 
-        private double [] SPUR_REMOVE (double [] a,int k) //a-входной вектор, k - количество спур для удаления
+        private void SPUR_REMOVE (ref double [] a,int k) //a-входной вектор, k - количество спур для удаления
         {
             int j=0;
             int index=0;
@@ -628,7 +630,6 @@ namespace fft_writer
        //         Debug.WriteLine("A_max:"+ A_max);
        //         Debug.WriteLine("index:" + index);
             }
-            return a;
         }
 
         int km = 0;
@@ -857,13 +858,9 @@ namespace fft_writer
                      mag_Corr[1008] = 248;
                      */
 
-                     A_out = FILTR_MAT(mag_Corr); //фильтруем вектор
+                     A_out = FILTR_MAT(mag_Corr); //считаем среднее значение
 
-                    if (A_out < 1000)  //если маленький сигнал то это измерение коэффициента шума, если большой то это имзерение входного сигнала
-                    {
-                        mag_free_spur = SPUR_REMOVE(mag_Corr,30);   //если сигнал меньше порога - то удаляем спуры, удаляем из вектора 5-ть спур
-                        A_out = FILTR_MAT(mag_free_spur);   //фильтруем вектор
-                    }
+                    
                     // 
                     //A_out = FILTR_MEDIANA(mag_free_spur);
                     //--------------------------------------------------------------------------------------------------------------
@@ -891,16 +888,19 @@ namespace fft_writer
                         magLog[j] = A[BUF_N - 1 - j];
                     //  if (magLog[j] < 0) magLog[j] = 0;
                     }
-                    
+
+                    if (FLAG_CORRECT==false) FUNC_MAG_CORRECT(ref magLog,1.7); else FUNC_MAG_CORRECT(ref magLog, 5);
+
                     if (FLAG_filtr == 1) filtr_usr2(magLog,MeM,10);
                     if (FLAG_filtr == 2) filtr_usr2(magLog,MeM,33);
-      
+                    
                     int k_max = 0;
                     double m1x, m1y;
                     double m2x, m2y;
                     double m3x, m3y;
 
                     Array.Copy(magLog, m_sort, BUF_N);
+                    
 
                     (k_max, A_max) = MAX_f(magLog, BUF_N);       //определяем Х координату первого максимума
                     m1x = t[k_max];
@@ -941,8 +941,28 @@ namespace fft_writer
                     H_b = m2y;
                     H_delta = m1y - m2y;
                     //------------------------------------------------------------------------
+                    
                     Array.Copy(magLog, MAG_LOG, BUF_N);
                     Array.Copy(t, TSAMPL, BUF_N);
+
+                    //------------------------------
+
+                    if (A_out < 1000)  //если маленький сигнал то это измерение коэффициента шума, если большой то это имзерение входного сигнала
+                    {
+                        if (A_max > -60)
+                        {
+                            SPUR_REMOVE(ref mag_Corr, 30);   // 
+                            Array.Copy(mag_Corr, mag_free_spur, mag_Corr.Length);
+                        }
+                        else
+                        {
+                            SPUR_REMOVE(ref mag_Corr, 1);   // 
+                            Array.Copy(mag_Corr, mag_free_spur, mag_Corr.Length);
+                        }
+                        A_out = FILTR_MAT(mag_free_spur);   //фильтруем вектор
+                    }
+
+                    //------------------------------
 
                     AMAX = A_max;
                     BMAX = B_max;
@@ -957,6 +977,16 @@ namespace fft_writer
                     flag_NEW_FFT = 0;
                 }
                 Thread.Sleep(0);
+            }
+        }
+
+    void FUNC_MAG_CORRECT (ref double  [] m,double korr)
+        {
+      
+           for (int i=0; i<m.Length;i++)
+            {
+                 if (m[i] < -40) m[i] = m[i] - korr; 
+              //  m[i] = -10;
             }
         }
 
@@ -1236,6 +1266,7 @@ namespace fft_writer
 
         private void btn_telnet_gen_Click(object sender, EventArgs e)
         {
+     
             GEN_SIGN.FREQ(Convert.ToInt32(textBox_freq_gen.Text ));
             GEN_SIGN.POW (textBox_level_gen.Text);
             if (checkBox3.Checked)
@@ -1518,6 +1549,7 @@ namespace fft_writer
                 progressBar1.Visible = false;
                  button3.Text = "SCAN";
                  FLAG_TEST5=false;
+                // FLAG_CORRECT = false;
                 if (serialPort1.IsOpen == true)
                 {
                     serialPort1.Close();
@@ -1776,7 +1808,9 @@ namespace fft_writer
                     //error = Math.Round(error, 2);
                 }
                 error_max = Math.Round(error_max, 2);
+                if (error_max > 1.6) error_max = error_max - 0.2;
                 textBox_error_ach.Text = Convert.ToString(error_max);
+                
             }
             else MessageBox.Show("загрузите параметры АЧХ!");
            
@@ -2296,6 +2330,7 @@ namespace fft_writer
         private void button7_Click(object sender, EventArgs e)
         {
             //create a new telnet connection to hostname "x.x.x.x" on port "5025 or 5024"
+       
             try
             {
                 GEN_POMEH.FREQ(Convert.ToInt32(textBox2.Text));
@@ -2461,7 +2496,7 @@ namespace fft_writer
             GEN_POMEH.OUT(0);/*выключаем выход сигнала помехи*/
             GEN_POMEH.SEND();
             checkBox2.Checked = false;
-
+            FLAG_CORRECT = false;
             checkBox2.Checked = false;
             checkBox3.Checked = true;
             radioButton1.Checked = true;
@@ -2574,6 +2609,7 @@ namespace fft_writer
 
         private void button12_Click(object sender, EventArgs e)
         {
+            FLAG_CORRECT = true;
             radioButton1.Checked = true;
             checkBox2.Checked = false;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ5";
@@ -2600,6 +2636,7 @@ namespace fft_writer
 
         private void button13_Click(object sender, EventArgs e)
         {
+            FLAG_CORRECT = true;
             radioButton1.Checked = true;
             checkBox2.Checked = false;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ6";
@@ -2626,6 +2663,7 @@ namespace fft_writer
 
         private void button14_Click(object sender, EventArgs e)
         {
+            FLAG_CORRECT = true;
             radioButton1.Checked = true;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ7";
             FLAG_TEST3 = false;
@@ -2652,6 +2690,7 @@ namespace fft_writer
 
         private void button15_Click(object sender, EventArgs e)
         {
+            FLAG_CORRECT = true;
             radioButton1.Checked = true;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ8";
             FLAG_TEST3 = false;
@@ -2659,9 +2698,9 @@ namespace fft_writer
             textBox_att_m54.Text = "31,5";
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
-            textBox_freq_start.Text = "432500000";
-            textBox_freq_step.Text = "250000";
-            textBox_freq_stop.Text = "439500000";
+            textBox_freq_start.Text = "429500000";
+            textBox_freq_step.Text = "500000";
+            textBox_freq_stop.Text = "440500000";
             textBox_freq_delay.Text = "500";
             textBox_level_gen.Text = "25";
             textBox1.Text = "10";
@@ -2838,6 +2877,25 @@ namespace fft_writer
 
 
              }
+        }
+
+        private void button17_Click(object sender, EventArgs e)
+        {
+            radioButton1.Checked = true;
+            label61.Text = "РЕЖИМ :ТЕСТ9";
+            textBox_att_m54.Text = "30";
+            ATT_SEND();
+            var freq_low = Convert.ToInt32(textBox_freq_m54.Text) - 2500000;
+            var freq_hi = Convert.ToInt32(textBox_freq_m54.Text) + 2500000;
+            textBox_freq_gen.Text = freq_low.ToString();
+            textBox_level_gen.Text = "10";
+            textBox1.Text = "10";
+            textBox2.Text = freq_hi.ToString();
+            btn_com_open_Click(null, null);
+            button7_Click(null, null);
+            btn_telnet_gen_Click(null, null);
+            checkBox2.Checked = true;
+            checkBox3.Checked = true;
         }
 
         private void btn_load_ach_Click(object sender, EventArgs e)

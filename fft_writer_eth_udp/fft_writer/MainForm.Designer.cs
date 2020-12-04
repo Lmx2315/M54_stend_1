@@ -217,6 +217,7 @@ namespace fft_writer
             this.label64 = new System.Windows.Forms.Label();
             this.label65 = new System.Windows.Forms.Label();
             this.textBox6 = new System.Windows.Forms.TextBox();
+            this.button17 = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -531,7 +532,7 @@ namespace fft_writer
             this.textBox_ip_generator.Name = "textBox_ip_generator";
             this.textBox_ip_generator.Size = new System.Drawing.Size(99, 22);
             this.textBox_ip_generator.TabIndex = 29;
-            this.textBox_ip_generator.Text = "192.168.10.3";
+            this.textBox_ip_generator.Text = "192.168.10.4";
             this.textBox_ip_generator.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.textBox_ip_generator.TextChanged += new System.EventHandler(this.textBox_ip_generator_TextChanged);
             // 
@@ -1617,7 +1618,7 @@ namespace fft_writer
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(99, 22);
             this.textBox3.TabIndex = 117;
-            this.textBox3.Text = "192.168.10.4";
+            this.textBox3.Text = "192.168.10.2";
             this.textBox3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
             // 
@@ -1929,11 +1930,23 @@ namespace fft_writer
             this.textBox6.Text = "0";
             this.textBox6.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
+            // button17
+            // 
+            this.button17.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.button17.Location = new System.Drawing.Point(16, 752);
+            this.button17.Name = "button17";
+            this.button17.Size = new System.Drawing.Size(100, 32);
+            this.button17.TabIndex = 153;
+            this.button17.Text = "TEST9";
+            this.button17.UseVisualStyleBackColor = true;
+            this.button17.Click += new System.EventHandler(this.button17_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1218, 862);
+            this.Controls.Add(this.button17);
             this.Controls.Add(this.label64);
             this.Controls.Add(this.label65);
             this.Controls.Add(this.textBox6);
@@ -2250,5 +2263,6 @@ namespace fft_writer
         private System.Windows.Forms.Label label64;
         private System.Windows.Forms.Label label65;
         private System.Windows.Forms.TextBox textBox6;
+        private System.Windows.Forms.Button button17;
     }
 }

@@ -29,6 +29,7 @@ using MinimalisticTelnet;
 using System.Linq;
 using System.Security.Policy;
 using Accord;
+using System.Xml.Serialization;
 //using DiscreteFourierTransform;
 //using FFTLibrary;
 
@@ -50,6 +51,20 @@ namespace fft_writer
 			Debug.WriteLine("Debug Information-Product Starting ");
 			Debug.WriteLine("------------------------ ");            
         }
+        public struct Config
+        {
+            public string Koeff_measure0;//
+            public string Koeff_measure1;//
+            public string N_filtr_usr0;  //коэффициент усреднения
+            public string N_filtr_usr1;
+            public string SPUR0_REMOVE_N;//удаление спур при измерении коэфф. шума
+            public string SPUR1_REMOVE_N;
+            public string FLAG_filtr;  //сглаживающий фильтр по умолчанию
+            public string CORRECT_FREQ;//поправка на частоту цифрового гетеродина в поделке
+            public string N_usredneniy_noise;//количество измерений шума
+        }
+
+        Config cfg = new Config();
         //----------ETH------------
         UdpClient _server      = null;
         IPEndPoint _client     = null;
@@ -93,9 +108,16 @@ namespace fft_writer
         double LEVEL_TEST_SIGNAL = 0;//измеренный уровень входного тестового сигнала в ДБм, применяется при тесте на подавление помехи за полосой (сначала измеряем уровень помехи в полосе сигнала и запоминаем его, затем помещаем помеху за полосу и сравниваем)
         double LVL_Pin_DBm=0;//входная измеренная мощность сигнала (для контроля коэфф. передачи и коэфф. шума)
         int CORRECT_FREQ = -1_000_000; //поправочная частота связаная с гетеродином -1_000_000
+        double Koeff_measure0 = 1.7;
+        double Koeff_measure1 = 5.0;
+        int N_filtr_usr0 = 10;
+        int N_filtr_usr1 = 33;
+        int SPUR0_REMOVE_N = 30;
+        int SPUR1_REMOVE_N = 1;
         double Koeff_usileniya_median=0;
+        int N_usredneniy_noise=100;
 
-        Plot fig1 = new Plot(15,"I Input", "Sample", "Вольт","","","","","");
+         Plot fig1 = new Plot(15,"I Input", "Sample", "Вольт","","","","","");
 	     Plot fig2 = new Plot(15,"Q Input", "Sample", "Вольт","","","","","");
 		 Plot fig3 = new Plot(15,"FFT (dBm)", "кГц", "Mag (dBm)","","","","","");
 
@@ -489,6 +511,7 @@ namespace fft_writer
 
         void MainFormLoad(object sender, EventArgs e)
 		{
+            CFG_load();//загружаем предустановки
             IH_load();//загружаем реальную АЧХ для блока из неё быдут высчитаны поправочные коэффициенты
             
             BUF_N =Convert.ToInt16(text_N_fft.Text);
@@ -548,7 +571,8 @@ namespace fft_writer
             t.SetToolTip(button14, "тест №7 проверка динамического диапазона и неравномерности АЧХ, при наличии сигнала помехи за диапазоном приёма <419.5 МГц");
             t.SetToolTip(button15, "тест №8 проверка динамического диапазона и неравномерности АЧХ, при наличии сигнала помехи за диапазоном приёма >450.5 МГц");
             t.SetToolTip(textBox_Ku, "Для измерение коэффициента услиления изделия, при наличии сложного сигнала в полосе пропускания - необходимо провести калибровку!");
-        
+            t.SetToolTip(button17, "тест №9 демонстрация полосы прокускания, на экране показываются две моночастоты с краёв спектра обработки, между ними 5 МГц");
+
             /*
             t.SetToolTip(button_AM,"Генератор сигнала должен быть SMA 100A!");
             t.SetToolTip(button_CHIRP, "Генератор сигнала должен быть SMA 100A!");
@@ -616,20 +640,25 @@ namespace fft_writer
             return array;
         }
 
-        private void SPUR_REMOVE (ref double [] a,int k) //a-входной вектор, k - количество спур для удаления
+        private int [] SPUR_REMOVE (double [] a,int k) //a-входной вектор, k - количество спур для удаления
         {
             int j=0;
+            int l = 0;
             int index=0;
             double A_max=0;
+            int[] idx = new int[k];
        //     Debug.WriteLine("----------");
             for (j=0;j<k;j++)
             {
                 A_max=a.Max();                      //ищем максимум в массиве
                 index = Array.IndexOf(a, A_max);    //определяем индекс найденого максимума
                 a[index] = 0;                       //обнуляем максимум
-       //         Debug.WriteLine("A_max:"+ A_max);
-       //         Debug.WriteLine("index:" + index);
+                idx[l]= index;                      //запоминаем индекс
+                l++;
+                //         Debug.WriteLine("A_max:"+ A_max);
+                //         Debug.WriteLine("index:" + index);
             }
+            return idx;
         }
 
         int km = 0;
@@ -793,10 +822,34 @@ namespace fft_writer
                       if (N_temp == 128)  ZxResult[i] = Complex.Divide(ZxResult[i], 2.72);//
                     }
 
+                    //---------Для коэфф шума-----------
+                    int[] idx = new int[SPUR0_REMOVE_N];//тут храним список удаляемых спурр
+
+                    if (N_sch_timer1>0) //проверяем что идёт интервал измерения шума
+                        {
+                            // Convert the complex result to a scalar magnitude 
+                            double[] magAn = DSP.ConvertComplex.ToMagnitude(ZxResult);//высчитываем массив модулей (длинну векторов) комплексных отсчётов входного массива
+                            double[] mag_Corrn = DSP.Math.Divide(magAn, 9.33);           //приводим показометр к такому же значению, как на спектре                    
+               
+                            idx=SPUR_REMOVE(mag_Corrn, SPUR0_REMOVE_N);   // ищем список индексов спур
+                        }
+
+                    //----------------------------------
+
                     for (i = 0; i < (N_complex * 2); i++)
                     {
                         fx_i[i] = ZxResult[i].Real;
                         fx_q[i] = ZxResult[i].Imaginary;
+
+                        //действует только на интервале измерения шума!!!
+                        if (N_sch_timer1 > 0)//для измерения шума
+                            {
+                                if (idx.Contains(i)) //обнуляем индексы спур
+                                {
+                                    fx_i[i] = 0;
+                                    fx_q[i] = 0;
+                                }
+                            }
                     }
 
                     fft_h.FFT(-1, k + 1, fx_i, fx_q);//высчитываем обратное  БПФ 
@@ -842,27 +895,10 @@ namespace fft_writer
                     Array.Copy(PinResult, CorrResult, PinResult.Length);
 
                     // Convert the complex result to a scalar magnitude 
-                    double[] magA          = DSP.ConvertComplex.ToMagnitude(CorrResult);//высчитываем массив модулей (длинну векторов) комплексных отсчётов входного массива
-                    double[] mag_Corr      = DSP.Math.Divide(magA    , 9.33);           //приводим показометр к такомуже значению как на спектре                    
-                    double[] mag_free_spur = new double[mag_Corr.Length];
-                     /* тут мы делаем тестовый вектор для проверки спуроудаления
-                     Array.Clear(mag_Corr, 0, mag_Corr.Length);
-                     mag_Corr[1000] = 256;
-                     mag_Corr[1001] = 255;
-                     mag_Corr[1002] = 254;
-                     mag_Corr[1003] = 253;
-                     mag_Corr[1004] = 252;
-                     mag_Corr[1005] = 251;
-                     mag_Corr[1006] = 250;
-                     mag_Corr[1007] = 249;
-                     mag_Corr[1008] = 248;
-                     */
+                    double[] magA = DSP.ConvertComplex.ToMagnitude(CorrResult);//высчитываем массив модулей (длинну векторов) комплексных отсчётов входного массива
+                    double[] mag_Corr = DSP.Math.Divide(magA, 9.33);           //приводим показометр к такому же значению, как на спектре 
+                    A_out = FILTR_MEDIANA(mag_Corr);
 
-                     A_out = FILTR_MAT(mag_Corr); //считаем среднее значение
-
-                    
-                    // 
-                    //A_out = FILTR_MEDIANA(mag_free_spur);
                     //--------------------------------------------------------------------------------------------------------------
                     //Accord.Math.FourierTransform.FFT(cpxResult, Accord.Math.FourierTransform.Direction.Forward); //этот метод статический
                     //mag = DSP.Math.Multiply(mag, 1);
@@ -889,18 +925,17 @@ namespace fft_writer
                     //  if (magLog[j] < 0) magLog[j] = 0;
                     }
 
-                    if (FLAG_CORRECT==false) FUNC_MAG_CORRECT(ref magLog,1.7); else FUNC_MAG_CORRECT(ref magLog, 5);
+                    if (FLAG_CORRECT==false) FUNC_MAG_CORRECT(ref magLog, Koeff_measure0); else FUNC_MAG_CORRECT(ref magLog, Koeff_measure1);
 
-                    if (FLAG_filtr == 1) filtr_usr2(magLog,MeM,10);
-                    if (FLAG_filtr == 2) filtr_usr2(magLog,MeM,33);
+                    if (FLAG_filtr == 1) filtr_usr2(magLog,MeM, N_filtr_usr0);
+                    if (FLAG_filtr == 2) filtr_usr2(magLog,MeM, N_filtr_usr1);
                     
                     int k_max = 0;
                     double m1x, m1y;
                     double m2x, m2y;
                     double m3x, m3y;
 
-                    Array.Copy(magLog, m_sort, BUF_N);
-                    
+                    Array.Copy(magLog, m_sort, BUF_N);                    
 
                     (k_max, A_max) = MAX_f(magLog, BUF_N);       //определяем Х координату первого максимума
                     m1x = t[k_max];
@@ -944,25 +979,7 @@ namespace fft_writer
                     
                     Array.Copy(magLog, MAG_LOG, BUF_N);
                     Array.Copy(t, TSAMPL, BUF_N);
-
-                    //------------------------------
-
-                    if (A_out < 1000)  //если маленький сигнал то это измерение коэффициента шума, если большой то это имзерение входного сигнала
-                    {
-                        if (A_max > -60)
-                        {
-                            SPUR_REMOVE(ref mag_Corr, 30);   // 
-                            Array.Copy(mag_Corr, mag_free_spur, mag_Corr.Length);
-                        }
-                        else
-                        {
-                            SPUR_REMOVE(ref mag_Corr, 1);   // 
-                            Array.Copy(mag_Corr, mag_free_spur, mag_Corr.Length);
-                        }
-                        A_out = FILTR_MAT(mag_free_spur);   //фильтруем вектор
-                    }
-
-                    //------------------------------
+                       
 
                     AMAX = A_max;
                     BMAX = B_max;
@@ -2261,7 +2278,7 @@ namespace fft_writer
 
         private void button6_Click(object sender, EventArgs e)
         {
-            N_sch_timer1 = 100;
+            N_sch_timer1 = N_usredneniy_noise;
             if (channal_box.Text == "1") ATT("2", "31,5");
             else //
             if (channal_box.Text == "2") ATT("1", "31,5");
@@ -2880,7 +2897,8 @@ namespace fft_writer
         }
 
         private void button17_Click(object sender, EventArgs e)
-        {
+        {            
+            FLAG_CORRECT = false;            
             radioButton1.Checked = true;
             label61.Text = "РЕЖИМ :ТЕСТ9";
             textBox_att_m54.Text = "30";
@@ -3102,5 +3120,54 @@ namespace fft_writer
         {
 
         }
+
+
+        private bool CFG_load()
+        {
+            bool error = false;
+            string path = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase;
+            path = System.IO.Path.GetDirectoryName(path);
+
+            // получаем выбранный файл
+            string filename = "cfg.dat";
+           try
+            {
+                XmlSerializer xmlSerialaizer = new XmlSerializer(typeof(Config));
+                FileStream fr = new FileStream(filename, FileMode.Open);
+
+                // преобразуем строку в байты
+                //byte[] array = new byte[fr.Length];
+                // считываем данные
+                //fr.Read(array, 0, array.Length);
+                // декодируем байты в строку
+                //string textFromFile = System.Text.Encoding.Default.GetString(array);
+                //Console.WriteLine($"Текст из файла: {textFromFile}");
+
+                cfg = (Config)xmlSerialaizer.Deserialize(fr);
+      
+                fr.Close();                
+                
+                FLAG_filtr     = Convert.ToInt32(cfg.FLAG_filtr);
+                CORRECT_FREQ   = Convert.ToInt32(cfg.CORRECT_FREQ);
+                Koeff_measure0 = Convert.ToDouble(cfg.Koeff_measure0);
+                Koeff_measure1 = Convert.ToDouble(cfg.Koeff_measure1);
+                N_filtr_usr0   = Convert.ToInt32(cfg.N_filtr_usr0);
+                N_filtr_usr1   = Convert.ToInt32(cfg.N_filtr_usr1);
+                SPUR0_REMOVE_N = Convert.ToInt32(cfg.SPUR0_REMOVE_N);
+                SPUR1_REMOVE_N = Convert.ToInt32(cfg.SPUR1_REMOVE_N);
+                N_usredneniy_noise= Convert.ToInt32(cfg.N_usredneniy_noise);
+                Console.WriteLine("Успешно загружен cfg.dat!");
+                label_cfg.Visible = false;
+
+            }
+            catch
+            {
+                label_cfg.Visible = true;
+                Console.WriteLine("Что-то не то с cfg.dat!");
+            }
+
+            return error;
+        }
+
     }
 }

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+  <Config>
+    <Koeff_measure0>1,7</Koeff_measure0>
+    <Koeff_measure1>5,0</Koeff_measure1>
+    <N_filtr_usr0>10</N_filtr_usr0>
+    <N_filtr_usr1>33</N_filtr_usr1>
+    <SPUR0_REMOVE_N>10</SPUR0_REMOVE_N>
+    <SPUR1_REMOVE_N>1</SPUR1_REMOVE_N>
+    <FLAG_filtr>1</FLAG_filtr>
+    <CORRECT_FREQ>-1000000</CORRECT_FREQ>
+    <N_usredneniy_noise>50</N_usredneniy_noise>
+  </Config>

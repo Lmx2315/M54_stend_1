@@ -55,6 +55,8 @@ namespace fft_writer
         {
             public string Koeff_measure0;//
             public string Koeff_measure1;//
+            public string Koeff_measure2;//
+            public string Koeff_measure3;//
             public string N_filtr_usr0;  //коэффициент усреднения
             public string N_filtr_usr1;
             public string SPUR0_REMOVE_N;//удаление спур при измерении коэфф. шума
@@ -108,8 +110,10 @@ namespace fft_writer
         double LEVEL_TEST_SIGNAL = 0;//измеренный уровень входного тестового сигнала в ДБм, применяется при тесте на подавление помехи за полосой (сначала измеряем уровень помехи в полосе сигнала и запоминаем его, затем помещаем помеху за полосу и сравниваем)
         double LVL_Pin_DBm=0;//входная измеренная мощность сигнала (для контроля коэфф. передачи и коэфф. шума)
         int CORRECT_FREQ = -1_000_000; //поправочная частота связаная с гетеродином -1_000_000
-        double Koeff_measure0 = 1.7;
+        double Koeff_measure0 = 1.0;
         double Koeff_measure1 = 5.0;
+        double Koeff_measure2 = 5.0;
+        double Koeff_measure3 = 5.0;
         int N_filtr_usr0 = 10;
         int N_filtr_usr1 = 33;
         int SPUR0_REMOVE_N = 30;
@@ -129,7 +133,7 @@ namespace fft_writer
         IZM_Generator GEN_SIGN  = null;
         IZM_Generator GEN_POMEH = null;
 
-        bool FLAG_CORRECT = false;
+        int FLAG_CORRECT = 0;
         string NAME_BLOCK;//тут храним номер блока в виде "160001"
         bool FLAG_CALIBR_CH=false;
         bool FLAG_SYNC_GEN_SIGN_POMEH=false;
@@ -385,7 +389,7 @@ namespace fft_writer
 
         int N_usred = 20;
         int N_sch_timer1=0;
-
+   
         private void timer1_Tick(object sender, EventArgs e)
         {
             double[] z = new double[1];
@@ -403,11 +407,15 @@ namespace fft_writer
             if (N_sch_timer1 > 0)
             {
                 N_sch_timer1--;
-                filtr_usr_rst(z, MeM2, N_usred,false);
+                filtr_usr_rst(z, MeM2, N_usred,false);//
                 var y = 1_000_000 * Math.Pow(10, (z[0] / 10));//чтобы получить нВт
-                var x = Math.Round(y, 2);
+                var x = Math.Round(y, 2);                
                 textBox_Pin.Text = Convert.ToString(x); //выводим усреднённое значение входной мощности сигнала
-            } else filtr_usr_rst(z, MeM2, N_usred, true);
+            } else
+            {
+                 filtr_usr_rst(z, MeM2, N_usred, true);
+            }
+                
 
                 textBox_sch.Text = Convert.ToString(sch_packet);
                 sch_packet = 0;
@@ -925,7 +933,11 @@ namespace fft_writer
                     //  if (magLog[j] < 0) magLog[j] = 0;
                     }
 
-                    if (FLAG_CORRECT==false) FUNC_MAG_CORRECT(ref magLog, Koeff_measure0); else FUNC_MAG_CORRECT(ref magLog, Koeff_measure1);
+                    if (FLAG_CORRECT<1) FUNC_MAG_CORRECT(ref magLog, Koeff_measure0); 
+                    else
+                    if (FLAG_CORRECT < 3) FUNC_MAG_CORRECT(ref magLog, Koeff_measure1);
+                    else
+                    if (FLAG_CORRECT == 3) FUNC_MAG_CORRECT(ref magLog, Koeff_measure3);
 
                     if (FLAG_filtr == 1) filtr_usr2(magLog,MeM, N_filtr_usr0);
                     if (FLAG_filtr == 2) filtr_usr2(magLog,MeM, N_filtr_usr1);
@@ -1022,8 +1034,10 @@ namespace fft_writer
             return z;    //возвращаем среднее значение
         }
 
+        double MEM_ZNACH = 0;
         void DISPLAY () //выводит измерения на панель
         {
+            double DATA_out = 0;
             int Nbuf = BUF_N;// размер БПФ
             double[] TSAMPL_tmp = new double[Nbuf];
             double[] MAG_LOG_tmp = new double[Nbuf];
@@ -1032,7 +1046,13 @@ namespace fft_writer
             {
                 double a = Math.Round(M1Y - M2Y,1);
                 double b = Math.Round(M1Y - M3Y,1);
-                double c = Math.Round(LEVEL_TEST_SIGNAL - M1Y); // отношение к уровню входного сигнала
+                double c = Math.Round(LEVEL_TEST_SIGNAL - M1Y); // отношение к уровню входного сигнала                
+
+                if (MEM_ZNACH > a) DATA_out = MEM_ZNACH;
+                else               DATA_out = a;
+
+                MEM_ZNACH = a;
+                
                 //Start a Stopwatch
                 //Stopwatch stopwatch = new Stopwatch();
                 //stopwatch.Start();
@@ -1088,6 +1108,32 @@ namespace fft_writer
                 }
                 for (j = 0; j < data.Length; j++) o[j] = o[j] / k;
 
+                Array.Copy(o, data, data.Length);
+            }
+            else
+            {
+                for (j = 0; j < data.Length; j++)
+                {
+                    for (i = 0; i < k; i++) a[i][j] = 0;
+                }
+            }
+        }
+
+        void filtr_max_rst(double[] data, double[][] a, int k, bool rst)//входные данные, входной зубчатый массив памяти (в нулевом массиве текущий массив данных )и глубина усреднения
+        {
+            int i;
+            int j;
+            double[] o = new double[data.Length];
+
+            if (rst == false)
+            {
+                for (j = 0; j < data.Length; j++)
+                {
+                    for (i = 0; i < k; i++) if (i < (k - 1)) a[k - i - 1][j] = a[k - i - 2][j]; else a[k - i - 1][j] = data[j];
+
+                    for (i = 0; i < k; i++) if (a[i][j]> o[j]) o[j] = a[i][j];
+                }
+         
                 Array.Copy(o, data, data.Length);
             }
             else
@@ -1563,11 +1609,14 @@ namespace fft_writer
                 flag_progress = 0;
                 FLAG_filtr = 1;
                 ACH_error(freq_setup);//в режиме калибровки
-                progressBar1.Visible = false;
+                //--------------------------
+                 checkBox2.Checked = false;
+                    FLAG_CORRECT = 0;
+                //--------------------------
+                    progressBar1.Visible = false;
                  button3.Text = "SCAN";
                  FLAG_TEST5=false;
-                // FLAG_CORRECT = false;
-                if (serialPort1.IsOpen == true)
+               if (serialPort1.IsOpen == true)
                 {
                     serialPort1.Close();
                 }
@@ -2279,9 +2328,21 @@ namespace fft_writer
         private void button6_Click(object sender, EventArgs e)
         {
             N_sch_timer1 = N_usredneniy_noise;
-            if (channal_box.Text == "1") ATT("2", "31,5");
+            if (channal_box.Text == "1")
+            {
+                ATT("2", "31,5");
+            //    ATT("2", "31,5");
+            //    ATT("2", "31,5");
+                ATT("2", "31,5");
+            }
             else //
-            if (channal_box.Text == "2") ATT("1", "31,5");
+            if (channal_box.Text == "2")
+            {
+                ATT("1", "31,5");
+            //    ATT("1", "31,5");
+            //    ATT("1", "31,5");
+                ATT("1", "31,5");
+            }
         }
 
         private void mXGToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2412,6 +2473,10 @@ namespace fft_writer
         {
             try
             {
+                int freq = Convert.ToInt32(textBox2.Text);
+                if ((freq > 443000000) || (freq < 427000000)) FLAG_CORRECT = 3;
+                else FLAG_CORRECT = 0;
+
                 if (checkBox2.Checked)
                 {
                     GEN_POMEH.OUT(1);
@@ -2513,13 +2578,13 @@ namespace fft_writer
             GEN_POMEH.OUT(0);/*выключаем выход сигнала помехи*/
             GEN_POMEH.SEND();
             checkBox2.Checked = false;
-            FLAG_CORRECT = false;
+            FLAG_CORRECT = 1;
             checkBox2.Checked = false;
             checkBox3.Checked = true;
             radioButton1.Checked = true;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ1";
             FLAG_TEST3 = false;
-            textBox_att_m54.Text = "30";
+            textBox_att_m54.Text = "31,5";
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
             textBox_freq_start.Text = "429500000";
@@ -2551,11 +2616,12 @@ namespace fft_writer
 
         private void button9_Click(object sender, EventArgs e)
         {
+            FLAG_CORRECT = 1;
             radioButton1.Checked = true;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ2";
             FLAG_TEST3 = false;
             FLAG_TEST2 = true;
-            textBox_att_m54.Text = "30";
+            textBox_att_m54.Text = "31,5";
             ATT_SEND();
             textBox_freq_gen.Text = "435000000";
 	        textBox_freq_start.Text="429500000";
@@ -2576,6 +2642,7 @@ namespace fft_writer
 
         private void button10_Click(object sender, EventArgs e)
         {
+            FLAG_CORRECT = 0;
             GEN_POMEH.OUT(0);/*выключаем выход сигнала помехи*/
             GEN_POMEH.SEND();
             checkBox2.Checked = false;
@@ -2601,6 +2668,7 @@ namespace fft_writer
 
         private void button11_Click(object sender, EventArgs e)
         {
+            FLAG_CORRECT = 0;
             GEN_POMEH.OUT(0);/*выключаем выход сигнала помехи*/
             GEN_POMEH.SEND();
             checkBox2.Checked = false;
@@ -2626,7 +2694,7 @@ namespace fft_writer
 
         private void button12_Click(object sender, EventArgs e)
         {
-            FLAG_CORRECT = true;
+            FLAG_CORRECT = 1;
             radioButton1.Checked = true;
             checkBox2.Checked = false;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ5";
@@ -2653,7 +2721,7 @@ namespace fft_writer
 
         private void button13_Click(object sender, EventArgs e)
         {
-            FLAG_CORRECT = true;
+            FLAG_CORRECT = 1;
             radioButton1.Checked = true;
             checkBox2.Checked = false;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ6";
@@ -2680,7 +2748,7 @@ namespace fft_writer
 
         private void button14_Click(object sender, EventArgs e)
         {
-            FLAG_CORRECT = true;
+            FLAG_CORRECT = 2;
             radioButton1.Checked = true;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ7";
             FLAG_TEST3 = false;
@@ -2707,7 +2775,7 @@ namespace fft_writer
 
         private void button15_Click(object sender, EventArgs e)
         {
-            FLAG_CORRECT = true;
+            FLAG_CORRECT = 3;
             radioButton1.Checked = true;
             label61.Text = "РЕЖИМ СКАНИРОВАНИЯ:ТЕСТ8";
             FLAG_TEST3 = false;
@@ -2898,10 +2966,10 @@ namespace fft_writer
 
         private void button17_Click(object sender, EventArgs e)
         {            
-            FLAG_CORRECT = false;            
+            FLAG_CORRECT = 0;            
             radioButton1.Checked = true;
             label61.Text = "РЕЖИМ :ТЕСТ9";
-            textBox_att_m54.Text = "30";
+            textBox_att_m54.Text = "31,5";
             ATT_SEND();
             var freq_low = Convert.ToInt32(textBox_freq_m54.Text) - 2500000;
             var freq_hi = Convert.ToInt32(textBox_freq_m54.Text) + 2500000;
@@ -2943,6 +3011,13 @@ namespace fft_writer
 
                 }                
             }            
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            int freq = Convert.ToInt32(textBox2.Text);
+     //     if ((freq> 443000000)||(freq < 427000000)) FLAG_CORRECT = 3;
+     //     if  (freq > 443000000)                     FLAG_CORRECT = 3;  
         }
 
         void IH_load ()
@@ -3151,6 +3226,8 @@ namespace fft_writer
                 CORRECT_FREQ   = Convert.ToInt32(cfg.CORRECT_FREQ);
                 Koeff_measure0 = Convert.ToDouble(cfg.Koeff_measure0);
                 Koeff_measure1 = Convert.ToDouble(cfg.Koeff_measure1);
+                Koeff_measure2 = Convert.ToDouble(cfg.Koeff_measure2);
+                Koeff_measure3 = Convert.ToDouble(cfg.Koeff_measure3);
                 N_filtr_usr0   = Convert.ToInt32(cfg.N_filtr_usr0);
                 N_filtr_usr1   = Convert.ToInt32(cfg.N_filtr_usr1);
                 SPUR0_REMOVE_N = Convert.ToInt32(cfg.SPUR0_REMOVE_N);

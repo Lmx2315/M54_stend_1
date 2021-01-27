@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
   <Config>
-    <Koeff_measure0>0,6</Koeff_measure0>
+    <Koeff_measure0>0,5</Koeff_measure0>
     <Koeff_measure1>1,5</Koeff_measure1>
     <Koeff_measure2>1,8</Koeff_measure2>
-    <Koeff_measure3>7,5</Koeff_measure3>
+    <Koeff_measure3>6,8</Koeff_measure3>
     <N_filtr_usr0>10</N_filtr_usr0>
     <N_filtr_usr1>33</N_filtr_usr1>
     <SPUR0_REMOVE_N>10</SPUR0_REMOVE_N>

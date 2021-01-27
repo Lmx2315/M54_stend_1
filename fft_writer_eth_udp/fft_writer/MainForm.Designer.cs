@@ -533,7 +533,7 @@ namespace fft_writer
             this.textBox_ip_generator.Name = "textBox_ip_generator";
             this.textBox_ip_generator.Size = new System.Drawing.Size(99, 22);
             this.textBox_ip_generator.TabIndex = 29;
-            this.textBox_ip_generator.Text = "192.168.10.5";
+            this.textBox_ip_generator.Text = "192.168.10.3";
             this.textBox_ip_generator.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.textBox_ip_generator.TextChanged += new System.EventHandler(this.textBox_ip_generator_TextChanged);
             // 
@@ -1589,6 +1589,7 @@ namespace fft_writer
             this.textBox2.TabIndex = 120;
             this.textBox2.Text = "435000000";
             this.textBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
             // button7
             // 
@@ -1619,7 +1620,7 @@ namespace fft_writer
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(99, 22);
             this.textBox3.TabIndex = 117;
-            this.textBox3.Text = "192.168.10.3";
+            this.textBox3.Text = "192.168.10.2";
             this.textBox3.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
             // 

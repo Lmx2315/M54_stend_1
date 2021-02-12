@@ -1611,7 +1611,7 @@ namespace fft_writer
                 ACH_error(freq_setup);//в режиме калибровки
                 //--------------------------
                  checkBox2.Checked = false;
-                    FLAG_CORRECT = 0;
+                //   FLAG_CORRECT = 0;
                 //--------------------------
                     progressBar1.Visible = false;
                  button3.Text = "SCAN";

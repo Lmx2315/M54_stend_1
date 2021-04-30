@@ -2935,7 +2935,7 @@ namespace fft_writer
                     {
                         if (delta_new>delta_old) 
                         {
-                            ATT=ATT+0.5;
+                            if (ATT<31) ATT=ATT+0.5;
                             textBox_att_m54.Text=ATT.ToString();
                             error=ATT_SEND (); 
                         } 
